@@ -77,7 +77,7 @@ const EditArea: React.FC<EditAreaProps> = ({
         </div>
       </div>
 
-      <div className="relative w-full h-fit rounded-lg overflow-hidden bg-white py-2">
+      <div className="relative w-full h-fit rounded-lg bg-white py-2">
         {editingImage && (
           <img
             src={editingImage.url}
@@ -105,7 +105,7 @@ const EditArea: React.FC<EditAreaProps> = ({
           <PrintedImageElement
             key={img.id}
             imgEl={img}
-            handleRemovePrintedImage={handleRemovePrintedImage}
+            onRemovePrintedImage={handleRemovePrintedImage}
             onUpdateSelectedElementId={setSelectedElementId}
             selectedElementId={selectedElementId}
           />

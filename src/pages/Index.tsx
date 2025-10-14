@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import TshirtGallery from '@/components/ProductGallery'
 import EditArea from '@/components/EditArea'
 import ActionBar from '@/components/ActionBar'
@@ -9,6 +9,8 @@ import TextEditor from '@/components/TextEditor'
 import StickerPicker from '@/components/StickerPicker'
 import { useToast } from '@/hooks/use-toast'
 import { IPrintedImage, IProductImage, IStickerElement, ITextElement } from '@/utils/types'
+import { eventEmitter } from '@/utils/events'
+import { EInternalEvents } from '@/utils/enums'
 
 const Index = () => {
   const { toast } = useToast()
@@ -125,6 +127,16 @@ const Index = () => {
     }
     setStickerElements([...stickerElements, newSticker])
   }
+
+  const initClickOnPageEvent = () => {
+    document.addEventListener('click', (e) => {
+      eventEmitter.emit(EInternalEvents.CLICK_ON_PAGE, e.target as HTMLElement | null)
+    })
+  }
+
+  useEffect(() => {
+    initClickOnPageEvent()
+  }, [])
 
   return (
     <div className="min-h-screen bg-superlight-pink-cl flex flex-col max-w-md mx-auto">

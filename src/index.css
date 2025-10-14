@@ -7,6 +7,7 @@
   --vcn-light-pink-cl: #ffdfe4;
   --vcn-pink-cl: #fe6e87;
   --vcn-pink-hover-cl: #ffb6c1;
+  --vcn-dark-pink-cl: #ad1844;
 }
 
 @layer base {
@@ -129,4 +130,9 @@
 /* Smooth transitions for interactive elements */
 .touch-target {
   @apply transition-all duration-200 active:scale-95;
+}
+
+.STYLE-adjusting-element {
+  pointer-events: none;
+  opacity: 0;
 }

@@ -22,6 +22,9 @@ export default {
         'superlight-pink-cl': {
           DEFAULT: 'var(--vcn-superlight-pink-cl)',
         },
+        'dark-pink-cl': {
+          DEFAULT: 'var(--vcn-dark-pink-cl)',
+        },
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {
