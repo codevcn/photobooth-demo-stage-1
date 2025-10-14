@@ -2,6 +2,20 @@ import { EInternalEvents } from './enums'
 
 interface IInternalEvents {
   [EInternalEvents.CLICK_ON_PAGE]: (target: HTMLElement | null) => void
+  [EInternalEvents.SUBMIT_PRINTED_IMAGE_ELE_PROPS]: (
+    elementId: string | null,
+    scale?: number,
+    angle?: number,
+    posX?: number,
+    posY?: number
+  ) => void
+  [EInternalEvents.SUBMIT_TEXT_ELE_PROPS]: (
+    elementId: string | null,
+    fontSize?: number,
+    angle?: number,
+    posX?: number,
+    posY?: number
+  ) => void
 }
 
 class EventEmitter<IEvents extends IInternalEvents> {

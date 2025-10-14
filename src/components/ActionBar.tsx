@@ -13,7 +13,7 @@ const ActionBar: React.FC<ActionBarProps> = ({ cartCount, onDone }) => {
         onClick={onDone}
         className="flex-1 bg-pink-cl active:bg-pink-hover-cl text-white font-bold py-2 px-4 rounded-xl shadow-lg touch-target flex items-center justify-center gap-2 text-lg"
       >
-        <Check size={24} />
+        <Check size={24} strokeWidth={3} />
         <span>Xong</span>
       </button>
 

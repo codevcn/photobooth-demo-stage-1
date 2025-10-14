@@ -90,7 +90,7 @@ export const PrintedImagesModal = ({
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border">
-          <h2 className="text-lg font-semibold">Chọn ảnh chụp tại photobooth</h2>
+          <h2 className="text-lg font-semibold">Chọn ảnh bạn đã chụp</h2>
           <button
             onClick={onClose}
             className="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center transition-colors"

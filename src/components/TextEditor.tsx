@@ -17,6 +17,13 @@ const TextEditor: React.FC<TextEditorProps> = ({ onAddText, onClose }) => {
     }
   }
 
+  const catchEnterKey = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      handleAdd()
+    }
+  }
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-end z-50 animate-pop-in">
       <div className="bg-white w-full rounded-t-3xl p-6 shadow-2xl">
@@ -32,6 +39,7 @@ const TextEditor: React.FC<TextEditorProps> = ({ onAddText, onClose }) => {
             type="text"
             value={text}
             onChange={(e) => setText(e.target.value)}
+            onKeyDown={catchEnterKey}
             placeholder="Nhập chữ tại đây..."
             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-lg"
             autoFocus

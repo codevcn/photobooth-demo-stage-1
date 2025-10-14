@@ -150,9 +150,9 @@ const Index = () => {
       </div>
 
       {/* Edit Area */}
-      <div className="flex-1 px-2 pb-6 pt-4">
+      <div className="flex-1 px-2 pb-4 pt-4">
         <EditArea
-          editingImage={activeImage}
+          editingProduct={activeImage}
           color={selectedColor}
           textElements={textElements}
           stickerElements={stickerElements}
