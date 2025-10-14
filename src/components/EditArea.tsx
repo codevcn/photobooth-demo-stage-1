@@ -31,6 +31,7 @@ const EditArea: React.FC<EditAreaProps> = ({
 }) => {
   const [showPrintedImagesModal, setShowPrintedImagesModal] = useState<boolean>(false)
   const editAreaRef = useRef<HTMLDivElement>(null)
+  const [selectedElementId, setSelectedElementId] = useState<string | null>(null)
 
   const handleRemoveText = (id: string) => {
     onUpdateText(textElements.filter((el) => el.id !== id))
@@ -102,10 +103,11 @@ const EditArea: React.FC<EditAreaProps> = ({
         {/* Printed Image Elements */}
         {printedImageElements.map((img) => (
           <PrintedImageElement
-            editAreaRef={editAreaRef}
             key={img.id}
             imgEl={img}
             handleRemovePrintedImage={handleRemovePrintedImage}
+            onUpdateSelectedElementId={setSelectedElementId}
+            selectedElementId={selectedElementId}
           />
         ))}
       </div>

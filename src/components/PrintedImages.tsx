@@ -4,34 +4,56 @@ import { X } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 
 interface ImageProps {
-  imgURL: string
-  imgId: string
+  img: IPrintedImage
   index: number
   imgsContainerRef: React.RefObject<HTMLDivElement>
+  onAddImage: (printedImg: IPrintedImage) => void
 }
 
-const Image = ({ imgURL, index, imgsContainerRef, imgId }: ImageProps) => {
+const Image = ({ img, index, imgsContainerRef, onAddImage }: ImageProps) => {
+  const { url, id } = img
+
+  const handleAddImage = (e: React.MouseEvent<HTMLDivElement>) => {
+    const target = e.currentTarget
+    const imgInfo = target.getAttribute('data-img-info')
+    if (!imgInfo) return
+    const { naturalWidth, naturalHeight } = JSON.parse(imgInfo)
+    onAddImage({ ...img, width: naturalWidth, height: naturalHeight })
+  }
+
   useEffect(() => {
     getNaturalSizeOfImage(
-      imgURL,
+      url,
       (width, height) => {
-        const imgEle = imgsContainerRef.current?.querySelector<HTMLImageElement>(
-          `.NAME-image-box[data-img-box-id='${imgId}'] img`
+        const imgBox = imgsContainerRef.current?.querySelector<HTMLDivElement>(
+          `.NAME-image-box[data-img-box-id='${id}']`
         )
-        if (imgEle) {
-          imgEle.style.cssText = `width: ${width}px; height: ${height}px;`
+        if (imgBox) {
+          imgBox.setAttribute(
+            'data-img-info',
+            JSON.stringify({ naturalWidth: width, naturalHeight: height })
+          )
+          const imgEle = imgBox.querySelector<HTMLImageElement>('img')
+          if (imgEle) {
+            imgEle.style.cssText = `width: ${width}px; aspect-ratio: ${width} / ${height};`
+          }
         }
       },
       (err) => {}
     )
-  }, [imgURL])
+  }, [url])
 
   return (
-    <div data-img-box-id={imgId} className="NAME-image-box cursor-pointer">
+    <div
+      onClick={handleAddImage}
+      className="NAME-image-box cursor-pointer relative w-fit h-fit rounded-xl overflow-hidden border-2 border-border active:border-primary hover:border-primary transition-colors group"
+      data-img-info=""
+      data-img-box-id={id}
+    >
       <img
-        src={imgURL || '/placeholder.svg'}
+        src={url || '/placeholder.svg'}
         alt={`Printed Image ${index + 1}`}
-        className="w-0 h-0 max-h-[100px] group-hover:scale-105 transition-transform duration-200"
+        className="max-w-full group-hover:scale-105 transition-transform duration-200"
       />
     </div>
   )
@@ -58,7 +80,7 @@ export const PrintedImagesModal = ({
         opacity: show ? 1 : 0,
         pointerEvents: show ? 'auto' : 'none',
       }}
-      className="fixed inset-0 z-50 bg-black/80 flex items-end sm:items-center justify-center"
+      className="fixed inset-0 z-[999] bg-black/80 flex items-end sm:items-center justify-center"
     >
       <div
         style={{
@@ -82,18 +104,13 @@ export const PrintedImagesModal = ({
         <div className="flex-1 overflow-y-auto p-3">
           <div className="grid grid-cols-2 gap-2" ref={imgsContainerRef}>
             {printedImages.map((img, index) => (
-              <div
+              <Image
                 key={img.id}
-                onClick={() => onAddImage(img)}
-                className="relative w-fit h-fit rounded-xl overflow-hidden border-2 border-border active:border-primary hover:border-primary transition-colors group"
-              >
-                <Image
-                  imgURL={img.url}
-                  index={index}
-                  imgsContainerRef={imgsContainerRef}
-                  imgId={img.id}
-                />
-              </div>
+                img={img}
+                index={index}
+                imgsContainerRef={imgsContainerRef}
+                onAddImage={onAddImage}
+              />
             ))}
           </div>
         </div>
