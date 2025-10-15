@@ -21,16 +21,15 @@ export const useHtmlToCanvas = (): TUseHtmlToCanvasReturn => {
     sessionId: string,
     onSaved: (imageUrl: string) => void
   ) => {
-    if (!editorRef.current) return
-
-    html2canvas(editorRef.current, {
-      backgroundColor: null,
-      scale: 2, // Tăng chất lượng
-      useCORS: true, // Cho phép load ảnh cross-origin
-      logging: false,
-    })
-      .then((canvas) => {
-        queueMicrotask(() => {
+    queueMicrotask(() => {
+      if (!editorRef.current) return
+      html2canvas(editorRef.current, {
+        backgroundColor: null,
+        scale: 2, // Tăng chất lượng
+        useCORS: true, // Cho phép load ảnh cross-origin
+        logging: false,
+      })
+        .then((canvas) => {
           canvas.toBlob((blob) => {
             if (blob) {
               const url = URL.createObjectURL(blob)
@@ -39,10 +38,10 @@ export const useHtmlToCanvas = (): TUseHtmlToCanvasReturn => {
             }
           }, 'image/png')
         })
-      })
-      .catch(() => {
-        toast.error('Failed to save image. Please try again.')
-      })
+        .catch(() => {
+          toast.error('Failed to save image. Please try again.')
+        })
+    })
   }
 
   return {

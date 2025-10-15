@@ -182,3 +182,28 @@ export const getColorByPaymentMethod = (method: TPaymentType): string => {
 }
 
 export const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+/**
+ * Kiểm tra xem chuỗi có phải là số điện thoại Việt Nam hợp lệ không.
+ * Hỗ trợ các dạng:
+ * - 0912345678
+ * - 84912345678
+ * - +84912345678
+ */
+export function isValidPhoneNumber(phone: string): boolean {
+  if (!phone) return false
+
+  const regex = /^(?:\+84|84|0)(3|5|7|8|9)\d{8}$/
+  return regex.test(phone.trim())
+}
+
+/**
+ * Kiểm tra xem chuỗi có phải là địa chỉ email hợp lệ không.
+ * Hỗ trợ các định dạng phổ biến: user@example.com
+ */
+export function isValidEmail(email: string): boolean {
+  if (!email) return false
+
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return regex.test(email.trim())
+}
