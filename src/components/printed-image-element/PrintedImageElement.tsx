@@ -10,8 +10,6 @@ import { useRotateElement } from '@/hooks/use-rotate-element'
 const maxZoom: number = 2
 const minZoom: number = 0.3
 
-type TTimerObject = { timer: NodeJS.Timeout | undefined }
-
 type TElementProperties = { scale: number; angle: number }
 
 interface PrintedImageElementProps {
@@ -36,67 +34,10 @@ export const PrintedImageElement = ({
     initialRotation: 0,
     sensitivity: 0.5,
   })
-  const rotateTimerObjectRef = useRef<TTimerObject>({ timer: undefined })
 
   const pickElement = () => {
+    eventEmitter.emit(EInternalEvents.PICK_ELEMENT, rootRef.current, 'printed-image')
     onUpdateSelectedElementId(id)
-  }
-
-  const fillMenuInputs = (rootElement?: HTMLElement) => {
-    const { angle, scale } = propertiesRef.current
-    let root = rootElement || null
-    if (!root) {
-      root = rootRef.current
-      if (root) {
-        const menuBoard = root.querySelector<HTMLElement>('.NAME-menu-board')
-        if (menuBoard) {
-          const angleInput = menuBoard.querySelector<HTMLInputElement>('.NAME-form-angle input')
-          if (angleInput) {
-            angleInput.value = `${angle}`
-          }
-          const scaleInput = menuBoard.querySelector<HTMLInputElement>('.NAME-form-scale input')
-          if (scaleInput) {
-            scaleInput.value = `${scale}`
-          }
-        }
-      }
-    }
-  }
-
-  const hideShowUsefulButtons = (rootElement: HTMLElement, hide: boolean) => {
-    queueMicrotask(() => {
-      if (isSelected) {
-        if (hide) {
-          rootElement
-            .querySelector<HTMLDivElement>('.NAME-menu-board')
-            ?.classList.add('STYLE-adjusting-element')
-          rootElement
-            .querySelector<HTMLDivElement>('.NAME-remove-box')
-            ?.classList.add('STYLE-adjusting-element')
-          rootElement
-            .querySelector<HTMLButtonElement>('.NAME-menu-trigger-box')
-            ?.classList.add('STYLE-adjusting-element')
-        } else {
-          rootElement
-            .querySelector<HTMLDivElement>('.NAME-menu-board')
-            ?.classList.remove('STYLE-adjusting-element')
-          rootElement
-            .querySelector<HTMLDivElement>('.NAME-remove-box')
-            ?.classList.remove('STYLE-adjusting-element')
-          rootElement
-            .querySelector<HTMLButtonElement>('.NAME-menu-trigger-box')
-            ?.classList.remove('STYLE-adjusting-element')
-        }
-      }
-    })
-  }
-
-  const onPinchAdjust = (rootElement: HTMLElement) => {
-    hideShowUsefulButtons(rootElement, true)
-  }
-
-  const onEndPinchAdjust = (rootElement: HTMLElement) => {
-    hideShowUsefulButtons(rootElement, false)
   }
 
   const adjustElementForPinch = (scale: number, angle: number, last: boolean) => {
@@ -106,11 +47,6 @@ export const PrintedImageElement = ({
       if (elementMainBox) {
         elementMainBox.style.transform = `scale(${scale}) rotate(${angle}deg)`
         propertiesRef.current = { scale, angle }
-        fillMenuInputs(root)
-      }
-      onPinchAdjust(root)
-      if (last) {
-        onEndPinchAdjust(root)
       }
     }
   }
@@ -123,35 +59,6 @@ export const PrintedImageElement = ({
       eventOptions: { passive: false },
     }
   )
-
-  const hideShowMenu = (show: boolean, board: HTMLElement, trigger: HTMLElement) => {
-    if (show) {
-      board.classList.remove('hidden')
-      board.dataset.show = 'true'
-      trigger.style.display = 'none'
-    } else {
-      board.classList.add('hidden')
-      board.dataset.show = 'false'
-      trigger.style.display = 'block'
-    }
-  }
-
-  const handleShowHideMenu = (forceHide?: boolean) => {
-    const root = rootRef.current
-    if (!root) return
-    const board = root.querySelector<HTMLDivElement>('.NAME-menu-board')
-    if (board) {
-      const trigger = root.querySelector<HTMLButtonElement>('.NAME-menu-trigger')
-      if (trigger) {
-        const show = board.dataset.show === 'true'
-        if (forceHide) {
-          hideShowMenu(false, board, trigger)
-        } else {
-          hideShowMenu(!show, board, trigger)
-        }
-      }
-    }
-  }
 
   const onEditElementProperties = (
     scale?: number,
@@ -177,16 +84,6 @@ export const PrintedImageElement = ({
         if (posY || posY === 0) {
           root.style.top = `${posY}px`
         }
-        fillMenuInputs(root)
-      }
-    }
-  }
-
-  const listenClickOnPageEvent = (target: HTMLElement | null) => {
-    if (target) {
-      if (!target.closest('.NAME-root-element') && !target.closest('.NAME-menu-section')) {
-        onUpdateSelectedElementId(null)
-        handleShowHideMenu(true)
       }
     }
   }
@@ -194,21 +91,11 @@ export const PrintedImageElement = ({
   const rotateElementByButton = () => {
     const rootElement = rootRef.current
     if (rootElement) {
-      hideShowUsefulButtons(rootElement, true)
       const elementMainBox = rootElement.querySelector<HTMLDivElement>(`.NAME-element-main-box`)
       if (elementMainBox) {
         elementMainBox.style.transform = `scale(${propertiesRef.current.scale}) rotate(${rotation}deg)`
         propertiesRef.current.angle = rotation
-        fillMenuInputs()
       }
-      const timerObject = rotateTimerObjectRef.current
-      const { timer } = timerObject
-      if (timer) {
-        clearTimeout(timer)
-      }
-      timerObject.timer = setTimeout(() => {
-        hideShowUsefulButtons(rootElement, false)
-      }, 500)
     }
   }
 
@@ -229,13 +116,11 @@ export const PrintedImageElement = ({
   }, [rotation])
 
   useEffect(() => {
-    eventEmitter.on(EInternalEvents.CLICK_ON_PAGE, listenClickOnPageEvent)
     eventEmitter.on(
       EInternalEvents.SUBMIT_PRINTED_IMAGE_ELE_PROPS,
       listenSubmitPrintedImageEleProps
     )
     return () => {
-      eventEmitter.off(EInternalEvents.CLICK_ON_PAGE, listenClickOnPageEvent)
       eventEmitter.off(
         EInternalEvents.SUBMIT_PRINTED_IMAGE_ELE_PROPS,
         listenSubmitPrintedImageEleProps
@@ -291,7 +176,7 @@ export const PrintedImageElement = ({
           onClick={() => onRemoveElement(id)}
           className="bg-red-600 text-white rounded-full p-1 active:scale-90 transition"
         >
-          <X size={12} color="currentColor" />
+          <X size={12} color="currentColor" strokeWidth={3} />
         </button>
       </div>
     </div>

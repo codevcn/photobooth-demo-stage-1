@@ -1,18 +1,27 @@
-import { useRef, useState } from 'react'
-import { IProductImage, ITextElement, IStickerElement, IPrintedImage } from '@/utils/types'
-import { TextElement } from './TextElement'
-import { StickerElement } from './StickerElement'
-import { PrintedImagesModal } from './PrintedImages'
+import { useEffect, useRef, useState } from 'react'
+import {
+  IProductImage,
+  ITextElement,
+  IStickerElement,
+  IPrintedImage,
+  TElementType,
+} from '@/utils/types'
+import { TextElement } from './text-element/TextElement'
+import { StickerElement } from './sticker-element/StickerElement'
+import { PrintedImagesModal } from './printed-image-element/PrintedImages'
 import { Image } from 'lucide-react'
-import { PrintedImageElement } from './PrintedImageElement'
+import { PrintedImageElement } from './printed-image-element/PrintedImageElement'
 import { usePinch } from '@use-gesture/react'
 import { PrintedImageElementMenu } from './printed-image-element/menu'
 import { TextElementMenu } from './text-element/menu'
+import { StickerElementMenu } from './sticker-element/menu'
+import { eventEmitter } from '@/utils/events'
+import { EInternalEvents } from '@/utils/enums'
 
 const maxZoom: number = 1
 const minZoom: number = 0.3
 
-type TSelectingType = 'text' | 'sticker' | 'printed-image' | null
+type TSelectingType = TElementType | null
 
 interface EditAreaProps {
   editingProduct?: IProductImage
@@ -51,7 +60,7 @@ const EditArea: React.FC<EditAreaProps> = ({
   }
 
   const handleAddImage = (newImage: IPrintedImage) => {
-    onUpdatePrintedImages([...printedImageElements, newImage])
+    onUpdatePrintedImages([newImage])
     setShowPrintedImagesModal(false)
   }
 
@@ -86,6 +95,26 @@ const EditArea: React.FC<EditAreaProps> = ({
     setSelectedElementId(id)
     setSelectingType(type)
   }
+
+  const listenClickOnPageEvent = (target: HTMLElement | null) => {
+    if (target) {
+      if (
+        !target.closest('.NAME-root-element') &&
+        !target.closest('.NAME-menu-section') &&
+        !target.closest('.NAME-text-font-picker')
+      ) {
+        setSelectedElementId(null)
+        setSelectingType(null)
+      }
+    }
+  }
+
+  useEffect(() => {
+    eventEmitter.on(EInternalEvents.CLICK_ON_PAGE, listenClickOnPageEvent)
+    return () => {
+      eventEmitter.off(EInternalEvents.CLICK_ON_PAGE, listenClickOnPageEvent)
+    }
+  }, [])
 
   return (
     <div className="rounded-2xl relative" ref={editAreaRef}>
@@ -135,8 +164,10 @@ const EditArea: React.FC<EditAreaProps> = ({
         {stickerElements.map((sticker) => (
           <StickerElement
             key={sticker.id}
-            sticker={sticker}
-            handleRemoveSticker={handleRemoveSticker}
+            element={sticker}
+            onRemoveElement={handleRemoveSticker}
+            onUpdateSelectedElementId={(id) => handleUpdateSelectedElementId(id, 'sticker')}
+            selectedElementId={selectedElementId}
           />
         ))}
 
@@ -153,11 +184,11 @@ const EditArea: React.FC<EditAreaProps> = ({
       </div>
 
       {selectedElementId && (
-        <div className="bg-white rounded p-2 mt-2">
+        <div className="bg-white rounded p-2 mt-3">
           {selectingType === 'text' ? (
-            <TextElementMenu elementId={selectedElementId} />
+            <TextElementMenu elementId={selectedElementId} textElements={textElements} />
           ) : selectingType === 'sticker' ? (
-            <div></div>
+            <StickerElementMenu elementId={selectedElementId} />
           ) : selectingType === 'printed-image' ? (
             <PrintedImageElementMenu elementId={selectedElementId} />
           ) : (

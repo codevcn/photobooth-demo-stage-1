@@ -1,17 +1,167 @@
+import useGoogleFont from '@/hooks/use-load-font'
+import { GlobalContext } from '@/pages/sharings'
 import { EInternalEvents } from '@/utils/enums'
 import { eventEmitter } from '@/utils/events'
-import { RefreshCw, Move, Check, ALargeSmall } from 'lucide-react'
+import { PageLayoutHelper } from '@/utils/helpers'
+import { ITextElement } from '@/utils/types'
+import { RefreshCw, Move, Check, ALargeSmall, Palette, TypeOutline, X, Pencil } from 'lucide-react'
+import { useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { HexColorPicker } from 'react-colorful'
+import { createPortal } from 'react-dom'
 
 type TPropertyType = 'font-size' | 'angle' | 'posXY'
 
-interface PrintedImageMenuProps {
+interface TextFontPickerProps {
+  show: boolean
+  onHideShow: (show: boolean) => void
   elementId: string
 }
 
-export const TextElementMenu = ({ elementId }: PrintedImageMenuProps) => {
-  const validateInputsPositiveNumber = (inputs: HTMLInputElement[]): (number | undefined)[] => {
+// Danh sách các font có sẵn từ fonts.css
+const localFonts = [
+  'Amatic SC',
+  'Bitcount',
+  'Bungee Outline',
+  'Bungee Spice',
+  'Creepster',
+  'Emilys Candy',
+  'Honk',
+  'Jersey 25 Charted',
+  'Nosifer',
+]
+
+const TextFontPicker = ({ show, onHideShow, elementId }: TextFontPickerProps) => {
+  const debounceRef = useRef<NodeJS.Timeout | null>(null)
+  const { loadFont } = useGoogleFont()
+  const [searchKeyword, setSearchKeyword] = useState<string>('')
+  const [loadedGoogleFonts, setLoadedGoogleFonts] = useState<string[]>([])
+  const { pickedElementRoot, elementType } = useContext(GlobalContext)
+
+  const searchFont = (keyword: string) => {
+    if (!keyword) return
+    if (!loadedGoogleFonts.includes(keyword)) {
+      loadFont(keyword, undefined, () => {
+        setLoadedGoogleFonts((prev) => [...prev, keyword])
+      })
+    }
+  }
+
+  const onSearchFont = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current)
+    }
+    debounceRef.current = setTimeout(() => {
+      setSearchKeyword(value)
+      searchFont(value.trim())
+    }, 300)
+  }
+
+  const handleSelectFont = (fontFamily: string) => {
+    if (pickedElementRoot && elementType === 'text') {
+      const textElement = pickedElementRoot.querySelector<HTMLElement>('.NAME-element-main-box')
+      if (textElement) {
+        textElement.style.fontFamily = `'${fontFamily}', sans-serif`
+      }
+    }
+    onHideShow(false)
+  }
+
+  const filteredFonts = useMemo(
+    () => localFonts.filter((font) => font.toLowerCase().includes(searchKeyword.toLowerCase())),
+    [localFonts, searchKeyword]
+  )
+
+  const filteredGoogleFonts = useMemo(
+    () =>
+      loadedGoogleFonts.filter((font) => font.toLowerCase().includes(searchKeyword.toLowerCase())),
+    [loadedGoogleFonts, searchKeyword]
+  )
+
+  if (!show) return null
+
+  return (
+    <div className="NAME-text-font-picker fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-pink-100 rounded-lg p-4 max-w-md w-full mx-4 max-h-[80vh] flex flex-col">
+        {/* Header với input search và nút đóng */}
+        <div className="flex items-center gap-2 mb-2">
+          <input
+            type="text"
+            onChange={onSearchFont}
+            placeholder="Tìm font chữ..."
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:border-pink-500"
+          />
+          <button
+            onClick={() => onHideShow(false)}
+            className="text-gray-500 hover:text-gray-700 text-xl font-bold w-8 h-8 flex items-center justify-center"
+          >
+            <X size={20} strokeWidth={3} />
+          </button>
+        </div>
+
+        {/* Tiêu đề */}
+        <div className="text-center mb-4">
+          <h3 className="text-base font-bold text-gray-800 mb-2">Các font chữ có sẵn</h3>
+          <hr className="border-gray-400" />
+        </div>
+
+        {/* Danh sách font */}
+        <div className="flex-1 overflow-y-auto space-y-3">
+          {/* Google Fonts được load */}
+          {filteredGoogleFonts.map((fontFamily) => (
+            <div
+              key={`google-${fontFamily}`}
+              onClick={() => handleSelectFont(fontFamily)}
+              className="cursor-pointer hover:bg-pink-200 p-3 rounded-lg transition-colors"
+            >
+              <div className="text-sm text-gray-600 mb-1">{fontFamily}</div>
+              <div className="text-xl text-black" style={{ fontFamily }}>
+                Hello I am a new font!!!
+              </div>
+            </div>
+          ))}
+
+          {filteredFonts.map((fontFamily) => (
+            <div
+              key={fontFamily}
+              onClick={() => handleSelectFont(fontFamily)}
+              className="cursor-pointer hover:bg-pink-200 p-3 rounded-lg transition-colors"
+            >
+              <div className="text-sm text-gray-600 mb-1">{fontFamily}</div>
+              <div className="text-xl text-black" style={{ fontFamily }}>
+                Hello I am a new font!!!
+              </div>
+            </div>
+          ))}
+
+          {filteredFonts.length === 0 && filteredGoogleFonts.length === 0 && searchKeyword && (
+            <div className="text-center py-8 text-gray-500">Không tìm thấy font nào</div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+interface PrintedImageMenuProps {
+  elementId: string
+  textElements: ITextElement[]
+}
+
+export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuProps) => {
+  const [showColorPicker, setShowColorPicker] = useState<boolean>(false)
+  const { pickedElementRoot, elementType } = useContext(GlobalContext)
+  const [showTextFontPicker, setShowTextFontPicker] = useState<boolean>(false)
+  const menuSectionRef = useRef<HTMLDivElement | null>(null)
+  const contentTimerRef = useRef<NodeJS.Timeout | null>(null)
+
+  const validateInputsPositiveNumber = (
+    inputs: HTMLInputElement[],
+    type: TPropertyType
+  ): (number | undefined)[] => {
     const values = inputs.map((input) => input.value.trim())
-    const numberRegex = /^\d+(\.\d+)?$/
+    // Allow negative numbers if type is 'angle'
+    const numberRegex = type === 'angle' ? /^-?\d+(\.\d+)?$/ : /^\d+(\.\d+)?$/
     const validValues = values.map((value) =>
       numberRegex.test(value) ? parseFloat(value) : undefined
     )
@@ -35,7 +185,7 @@ export const TextElementMenu = ({ elementId }: PrintedImageMenuProps) => {
   }
 
   const submit = (inputs: HTMLInputElement[], type: TPropertyType) => {
-    const values = validateInputsPositiveNumber(inputs)
+    const values = validateInputsPositiveNumber(inputs, type)
     if (values && values.length > 0) {
       switch (type) {
         case 'font-size':
@@ -75,9 +225,83 @@ export const TextElementMenu = ({ elementId }: PrintedImageMenuProps) => {
     )
   }
 
+  const listenClickOnPage = (target: HTMLElement | null) => {
+    if (showColorPicker && target) {
+      if (!target.closest('.NAME-color-picker')) {
+        setShowColorPicker(false)
+      }
+      if (!target.closest('.NAME-text-font-picker')) {
+        setShowTextFontPicker(false)
+      }
+    }
+  }
+
+  const handleAdjustColorOnElement = (color: string) => {
+    if (pickedElementRoot && elementType === 'text' && color) {
+      const textElement = pickedElementRoot.querySelector<HTMLElement>('.NAME-element-main-box')
+      if (textElement) {
+        textElement.style.color = color
+      }
+    }
+  }
+
+  const initContentField = () => {
+    const textElement = textElements.find((el) => el.id === elementId)
+    if (textElement) {
+      const contentInput = menuSectionRef.current?.querySelector<HTMLInputElement>(
+        '.NAME-form-content input'
+      )
+      if (contentInput) {
+        contentInput.value = textElement.content
+      }
+    }
+  }
+
+  const onContentFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (contentTimerRef.current) {
+      clearTimeout(contentTimerRef.current)
+    }
+    contentTimerRef.current = setTimeout(() => {
+      const newContent = e.target.value
+      const textElement = textElements.find((el) => el.id === elementId)
+      if (textElement) {
+        const displayedText = pickedElementRoot?.querySelector<HTMLElement>(
+          '.NAME-element-main-box .NAME-displayed-text-content'
+        )
+        if (displayedText) {
+          displayedText.innerText = newContent
+        }
+      }
+    }, 300)
+  }
+
+  const getAllFormFieldValues = () => {}
+
+  useEffect(() => {
+    eventEmitter.on(EInternalEvents.CLICK_ON_PAGE, listenClickOnPage)
+    initContentField()
+    return () => {
+      eventEmitter.off(EInternalEvents.CLICK_ON_PAGE, listenClickOnPage)
+    }
+  }, [])
+
   return (
-    <div className="NAME-menu-section grid grid-cols-2 gap-1">
-      <div className="NAME-form-group NAME-form-fontSize flex items-center bg-pink-cl rounded px-1 py-1 shadow mb-1 w-full">
+    <div ref={menuSectionRef} className="NAME-menu-section grid grid-cols-2 gap-2">
+      <div className="NAME-form-group NAME-form-content col-span-2 flex items-center bg-pink-cl rounded px-1 py-1 shadow w-full">
+        <div className="min-w-[22px]">
+          <Pencil size={20} className="text-white" strokeWidth={3} />
+        </div>
+        <div className="flex gap-1 mx-1 w-full">
+          <input
+            type="text"
+            placeholder="Nhập nội dung..."
+            onKeyDown={(e) => catchEnter(e, 'font-size')}
+            onChange={onContentFieldChange}
+            className="border rounded px-1 py-0.5 text-base outline-none w-full"
+          />
+        </div>
+      </div>
+      <div className="NAME-form-group NAME-form-fontSize flex items-center bg-pink-cl rounded px-1 py-1 shadow w-full">
         <div className="min-w-[22px]">
           <ALargeSmall size={20} className="text-white" strokeWidth={3} />
         </div>
@@ -90,7 +314,7 @@ export const TextElementMenu = ({ elementId }: PrintedImageMenuProps) => {
           />
         </div>
       </div>
-      <div className="NAME-form-group NAME-form-angle flex items-center bg-pink-cl rounded px-1 py-1 shadow mb-1 w-full">
+      <div className="NAME-form-group NAME-form-angle flex items-center bg-pink-cl rounded px-1 py-1 shadow w-full">
         <div className="min-w-[22px]">
           <RefreshCw size={20} className="text-white" strokeWidth={3} />
         </div>
@@ -122,13 +346,59 @@ export const TextElementMenu = ({ elementId }: PrintedImageMenuProps) => {
           />
         </div>
       </div>
+      <div className="NAME-form-group NAME-form-color flex items-stretch justify-center relative gap-1 rounded">
+        <div
+          onClick={() => setShowColorPicker((pre) => !pre)}
+          className="flex items-center justify-center cursor-pointer gap-1 active:scale-90 hover:scale-95 transition bg-pink-cl rounded shadow px-1 py-1 w-full"
+        >
+          <div className="min-w-[22px] text-white font-bold">
+            <span>Chọn màu chữ</span>
+          </div>
+          <div className="flex gap-1 mx-1">
+            <div>
+              <Palette size={20} className="text-white" strokeWidth={3} />
+            </div>
+          </div>
+        </div>
+        <div
+          className={`${
+            showColorPicker ? 'block' : 'hidden'
+          } NAME-color-picker bottom-[calc(100%+4px)] right-0 absolute z-10`}
+        >
+          <HexColorPicker onChange={handleAdjustColorOnElement} />
+        </div>
+      </div>
+      <div className="NAME-form-group NAME-form-font flex items-stretch justify-center gap-1 relative rounded w-full">
+        <div
+          onClick={() => setShowTextFontPicker((pre) => !pre)}
+          className="flex items-center justify-center cursor-pointer gap-1 active:scale-90 hover:scale-95 transition bg-pink-cl rounded shadow px-1 py-1 w-full"
+        >
+          <div className="min-w-[22px] text-white font-bold">
+            <span>Chọn font chữ</span>
+          </div>
+          <div className="flex gap-1 mx-1">
+            <div>
+              <TypeOutline size={20} className="text-white" strokeWidth={3} />
+            </div>
+          </div>
+        </div>
+        {createPortal(
+          <TextFontPicker
+            show={showTextFontPicker}
+            onHideShow={setShowTextFontPicker}
+            elementId={elementId}
+          />,
+          document.body
+        )}
+      </div>
       <div className="NAME-form-group NAME-form-position flex items-center bg-pink-cl rounded px-1 py-1 shadow w-full">
         <button
+          type="button"
           onClick={handleClickCheck}
-          className="group flex items-center justify-center font-bold w-full gap-1 text-white active:bg-white active:text-green-600 rounded p-1"
+          className="group flex items-center justify-center font-bold w-full gap-1 text-white active:bg-white active:text-pink-cl rounded p-1"
         >
           <span>OK</span>
-          <Check size={20} className="text-white group-active:text-green-600" strokeWidth={3} />
+          <Check size={20} className="text-white group-active:text-pink-cl" strokeWidth={3} />
         </button>
       </div>
     </div>

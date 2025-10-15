@@ -9,9 +9,13 @@ interface PrintedImageMenuProps {
 }
 
 export const PrintedImageElementMenu = ({ elementId }: PrintedImageMenuProps) => {
-  const validateInputsPositiveNumber = (inputs: HTMLInputElement[]): (number | undefined)[] => {
+  const validateInputsPositiveNumber = (
+    inputs: HTMLInputElement[],
+    type: TPropertyType
+  ): (number | undefined)[] => {
     const values = inputs.map((input) => input.value.trim())
-    const numberRegex = /^\d+(\.\d+)?$/
+    // Allow negative numbers if type is 'angle'
+    const numberRegex = type === 'angle' ? /^-?\d+(\.\d+)?$/ : /^\d+(\.\d+)?$/
     const validValues = values.map((value) =>
       numberRegex.test(value) ? parseFloat(value) : undefined
     )
@@ -30,7 +34,7 @@ export const PrintedImageElementMenu = ({ elementId }: PrintedImageMenuProps) =>
   }
 
   const submit = (inputs: HTMLInputElement[], type: TPropertyType) => {
-    const values = validateInputsPositiveNumber(inputs)
+    const values = validateInputsPositiveNumber(inputs, type)
     if (values && values.length > 0) {
       switch (type) {
         case 'scale':

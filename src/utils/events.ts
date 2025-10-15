@@ -1,4 +1,5 @@
 import { EInternalEvents } from './enums'
+import { TElementType } from './types'
 
 interface IInternalEvents {
   [EInternalEvents.CLICK_ON_PAGE]: (target: HTMLElement | null) => void
@@ -16,6 +17,7 @@ interface IInternalEvents {
     posX?: number,
     posY?: number
   ) => void
+  [EInternalEvents.PICK_ELEMENT]: (element: HTMLElement | null, elementType: TElementType) => void
 }
 
 class EventEmitter<IEvents extends IInternalEvents> {

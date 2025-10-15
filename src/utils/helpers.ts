@@ -1,3 +1,5 @@
+import { TDetectCollisionWithViewportEdgesResult, TMenuState } from './types'
+
 export const getNaturalSizeOfImage = (
   imgURL: string,
   onLoaded: (naturalWidth: number, naturalHeight: number) => void,
@@ -9,4 +11,51 @@ export const getNaturalSizeOfImage = (
   }
   img.onerror = onError
   img.src = imgURL
+}
+
+export class LocalStorageHelper {
+  static menuStateName = 'menu-state'
+
+  static saveMenuState(state: TMenuState) {
+    localStorage.setItem(LocalStorageHelper.menuStateName, JSON.stringify(state))
+  }
+
+  static getMenuState(): TMenuState | null {
+    const stateStr = localStorage.getItem(LocalStorageHelper.menuStateName)
+    if (stateStr) {
+      return JSON.parse(stateStr)
+    }
+    return null
+  }
+}
+
+export class PageLayoutHelper {
+  static detectCollisionWithViewportEdges(
+    target: HTMLElement,
+    margin: number
+  ): TDetectCollisionWithViewportEdgesResult {
+    const targetRect = target.getBoundingClientRect()
+    const viewportWidth = window.innerWidth
+    const viewportHeight = window.innerHeight
+    const result: TDetectCollisionWithViewportEdgesResult = {
+      collidedEdge: null,
+    }
+    if (targetRect.left < 0) {
+      target.style.left = `${margin}px`
+      result.collidedEdge = 'left'
+    }
+    if (targetRect.right > viewportWidth) {
+      target.style.left = `${viewportWidth - targetRect.width - margin}px`
+      result.collidedEdge = 'right'
+    }
+    if (targetRect.top < 0) {
+      target.style.top = `${margin}px`
+      result.collidedEdge = 'top'
+    }
+    if (targetRect.bottom > viewportHeight) {
+      target.style.top = `${viewportHeight - targetRect.height - margin}px`
+      result.collidedEdge = 'bottom'
+    }
+    return result
+  }
 }

@@ -26,8 +26,8 @@ const TextEditor: React.FC<TextEditorProps> = ({ onAddText, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-end z-50 animate-pop-in">
-      <div className="bg-white w-full rounded-t-3xl p-6 shadow-2xl">
-        <div className="flex items-center justify-between mb-6">
+      <div className="bg-white w-full rounded-t-3xl p-4 shadow-2xl">
+        <div className="flex items-center justify-between mb-2">
           <h3 className="text-xl font-bold text-gray-800">Thêm chữ</h3>
           <button onClick={onClose} className="p-2 active:bg-gray-100 rounded-full touch-target">
             <X size={24} />

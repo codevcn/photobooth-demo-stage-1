@@ -24,7 +24,7 @@ const BottomMenu: React.FC<BottomMenuProps> = ({
   ]
 
   return (
-    <div className="grid grid-cols-4 gap-2 p-4">
+    <div className="grid grid-cols-4 gap-2 px-4 py-2">
       {menuItems.map((item, index) => (
         <button
           key={index}
