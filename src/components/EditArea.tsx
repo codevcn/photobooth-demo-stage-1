@@ -32,7 +32,8 @@ interface EditAreaProps {
   onUpdateStickers: (elements: IStickerElement[]) => void
   printedImages: IPrintedImage[]
   printedImageElements: IPrintedImage[]
-  onUpdatePrintedImages: (elements: IPrintedImage[]) => void
+  onAddPrintedImages: (elements: IPrintedImage[]) => void
+  onRemovePrintedImages: (ids: string[]) => void
   htmlToCanvasEditorRef: React.RefObject<HTMLDivElement>
 }
 
@@ -45,7 +46,8 @@ const EditArea: React.FC<EditAreaProps> = ({
   printedImageElements,
   onUpdateText,
   onUpdateStickers,
-  onUpdatePrintedImages,
+  onAddPrintedImages,
+  onRemovePrintedImages,
   htmlToCanvasEditorRef,
 }) => {
   const [showPrintedImagesModal, setShowPrintedImagesModal] = useState<boolean>(false)
@@ -62,12 +64,12 @@ const EditArea: React.FC<EditAreaProps> = ({
   }
 
   const handleAddImage = (newImage: IPrintedImage) => {
-    onUpdatePrintedImages([newImage])
+    onAddPrintedImages([newImage])
     setShowPrintedImagesModal(false)
   }
 
   const handleRemovePrintedImage = (id: string) => {
-    onUpdatePrintedImages(printedImageElements.filter((el) => el.id !== id))
+    onRemovePrintedImages([id])
   }
 
   const handleOpenPrintedImagesModal = () => {

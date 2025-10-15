@@ -1,3 +1,4 @@
+import { formatNumberWithCommas } from '@/utils/helpers'
 import { IProductImage } from '@/utils/types'
 import { useEffect, useRef, useState } from 'react'
 
@@ -19,10 +20,6 @@ const ProductImage: React.FC<ProductImageProps> = ({ image, imgsContainerRef }) 
       />
     </div>
   )
-}
-
-function formatNumberWithCommas(num: number): string {
-  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 }
 
 interface ProductDetailsProps {

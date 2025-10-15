@@ -49,10 +49,10 @@ const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
   return <GlobalContext.Provider value={providerState}>{children}</GlobalContext.Provider>
 }
 
-const Index = () => {
+const EditPage = () => {
+  const [sessionId] = useState<string>('12331-5465464-1321311-hththt')
   // Gallery images
   const [galleryImages] = useState<IProductImage[][]>(productImages)
-
   // Printed images
   const [printedImages] = useState<IPrintedImage[]>([
     {
@@ -107,10 +107,8 @@ const Index = () => {
 
   const { editorRef, handleSaveHtmlAsImage } = useHtmlToCanvas()
 
-  const [activeProduct, peerProducts] = useMemo<
-    [IProductImage | undefined, IProductImage[]]
-  >(() => {
-    let activeProduct: IProductImage | undefined
+  const [activeProduct, peerProducts] = useMemo<[IProductImage, IProductImage[]]>(() => {
+    let activeProduct: IProductImage
     const products = galleryImages.find((imgs) => {
       for (const img of imgs) {
         if (img.id === activeImageId) {
@@ -120,7 +118,7 @@ const Index = () => {
       }
       return false
     })
-    return [activeProduct, products || []]
+    return [activeProduct!, products || []]
   }, [galleryImages, activeImageId])
 
   const handleSetActiveImageId = (imgId: string) => {
@@ -152,15 +150,25 @@ const Index = () => {
     }
   }
 
+  const handleRemoveELement = (type: TElementType, ids: string[]) => {
+    if (type === 'text') {
+      setTextElements((pre) => pre.filter(({ id }) => !ids.includes(id)))
+    } else if (type === 'sticker') {
+      setStickerElements((pre) => pre.filter(({ id }) => !ids.includes(id)))
+    } else if (type === 'printed-image') {
+      setPrintedImageElements((pre) => pre.filter(({ id }) => !ids.includes(id)))
+    }
+  }
+
   const handleAddToCart = () => {
-    handleSaveHtmlAsImage(activeImageId).then(() => {
-      toast.success('Đã thêm vào giỏ hàng')
-    })
-    setCartCount((pre) => pre + 1)
-    // // Reset editing elements
-    // setTextElements([])
-    // setStickerElements([])
-    // setPrintedImageElements([])
+    handleSaveHtmlAsImage(
+      { id: activeImageId, color: activeProduct.color, size: selectedSize },
+      sessionId,
+      () => {
+        toast.success('Đã thêm vào giỏ hàng')
+        setCartCount(LocalStorageHelper.countSavedMockupImages())
+      }
+    )
   }
 
   const handleAddText = (text: string) => {
@@ -237,7 +245,8 @@ const Index = () => {
               onUpdateText={setTextElements}
               onUpdateStickers={setStickerElements}
               printedImages={printedImages}
-              onUpdatePrintedImages={(ele) => handleAddElement('printed-image', ele)}
+              onAddPrintedImages={(ele) => handleAddElement('printed-image', ele)}
+              onRemovePrintedImages={(ids) => handleRemoveELement('printed-image', ids)}
               printedImageElements={printedImageElements}
               htmlToCanvasEditorRef={editorRef}
             />
@@ -306,4 +315,4 @@ const Index = () => {
   )
 }
 
-export default Index
+export default EditPage

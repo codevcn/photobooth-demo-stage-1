@@ -67,12 +67,22 @@ export type TDetectCollisionWithViewportEdgesResult = {
   collidedEdge: 'left' | 'right' | 'top' | 'bottom' | null
 }
 
-export type TMockupImageData = {
+export type TProductInCart = {
+  id: string
+  color: {
+    title: string
+    value: string
+  }
+  size: TProductSize
+}
+
+export type TSavedMockupData = {
   sessionId: string
-  productInfo: {
-    id: string
-    mockups: {
+  productsInfo: (TProductInCart & {
+    mockupDataURLs: {
       [key: string]: string
     }
-  }
+  })[]
 }
+
+export type TPaymentType = 'momo' | 'zalo' | 'cod'
