@@ -15,6 +15,7 @@ export const productImages: IProductImage[][] = [
       stock: 120,
       priceInVND: 250000,
       priceAfterDiscount: 200000,
+      category: 'shirt',
     },
     {
       id: 'gallery-shirt-2',
@@ -29,6 +30,7 @@ export const productImages: IProductImage[][] = [
       stock: 80,
       priceInVND: 270000,
       priceAfterDiscount: 216000,
+      category: 'shirt',
     },
     {
       id: 'gallery-shirt-3',
@@ -43,6 +45,7 @@ export const productImages: IProductImage[][] = [
       stock: 60,
       priceInVND: 260000,
       priceAfterDiscount: 208000,
+      category: 'shirt',
     },
     {
       id: 'gallery-shirt-4',
@@ -57,6 +60,7 @@ export const productImages: IProductImage[][] = [
       stock: 45,
       priceInVND: 255000,
       priceAfterDiscount: 204000,
+      category: 'shirt',
     },
     {
       id: 'gallery-shirt-5',
@@ -71,6 +75,7 @@ export const productImages: IProductImage[][] = [
       stock: 30,
       priceInVND: 240000,
       // Không giảm giá (20% sản phẩm không có field này)
+      category: 'shirt',
     },
   ],
   [
@@ -87,6 +92,7 @@ export const productImages: IProductImage[][] = [
       stock: 150,
       priceInVND: 120000,
       priceAfterDiscount: 96000,
+      category: 'cup',
     },
     {
       id: 'gallery-cup-2',
@@ -101,6 +107,7 @@ export const productImages: IProductImage[][] = [
       stock: 90,
       priceInVND: 110000,
       priceAfterDiscount: 88000,
+      category: 'cup',
     },
     {
       id: 'gallery-cup-3',
@@ -115,6 +122,7 @@ export const productImages: IProductImage[][] = [
       stock: 70,
       priceInVND: 115000,
       priceAfterDiscount: 92000,
+      category: 'cup',
     },
     {
       id: 'gallery-cup-4',
@@ -129,6 +137,7 @@ export const productImages: IProductImage[][] = [
       stock: 40,
       priceInVND: 125000,
       // Không giảm giá
+      category: 'cup',
     },
     {
       id: 'gallery-cup-5',
@@ -143,6 +152,7 @@ export const productImages: IProductImage[][] = [
       stock: 20,
       priceInVND: 130000,
       priceAfterDiscount: 104000,
+      category: 'cup',
     },
   ],
   [
@@ -159,6 +169,7 @@ export const productImages: IProductImage[][] = [
       stock: 200,
       priceInVND: 180000,
       priceAfterDiscount: 144000,
+      category: 'hat',
     },
     {
       id: 'gallery-hat-2',
@@ -173,6 +184,7 @@ export const productImages: IProductImage[][] = [
       stock: 100,
       priceInVND: 185000,
       priceAfterDiscount: 148000,
+      category: 'hat',
     },
     {
       id: 'gallery-hat-3',
@@ -187,6 +199,7 @@ export const productImages: IProductImage[][] = [
       stock: 50,
       priceInVND: 190000,
       priceAfterDiscount: 152000,
+      category: 'hat',
     },
     {
       id: 'gallery-hat-4',
@@ -201,6 +214,7 @@ export const productImages: IProductImage[][] = [
       stock: 30,
       priceInVND: 175000,
       // Không giảm giá
+      category: 'hat',
     },
     {
       id: 'gallery-hat-5',
@@ -215,6 +229,7 @@ export const productImages: IProductImage[][] = [
       stock: 10,
       priceInVND: 200000,
       priceAfterDiscount: 160000,
+      category: 'hat',
     },
   ],
   [
@@ -231,6 +246,7 @@ export const productImages: IProductImage[][] = [
       stock: 180,
       priceInVND: 50000,
       priceAfterDiscount: 40000,
+      category: 'keychain',
     },
     {
       id: 'gallery-keychain-2',
@@ -245,6 +261,7 @@ export const productImages: IProductImage[][] = [
       stock: 90,
       priceInVND: 55000,
       priceAfterDiscount: 44000,
+      category: 'keychain',
     },
     {
       id: 'gallery-keychain-3',
@@ -259,6 +276,7 @@ export const productImages: IProductImage[][] = [
       stock: 60,
       priceInVND: 60000,
       priceAfterDiscount: 48000,
+      category: 'keychain',
     },
     {
       id: 'gallery-keychain-4',
@@ -273,6 +291,7 @@ export const productImages: IProductImage[][] = [
       stock: 30,
       priceInVND: 65000,
       // Không giảm giá
+      category: 'keychain',
     },
     {
       id: 'gallery-keychain-5',
@@ -287,6 +306,7 @@ export const productImages: IProductImage[][] = [
       stock: 15,
       priceInVND: 70000,
       priceAfterDiscount: 56000,
+      category: 'keychain',
     },
   ],
 ]

@@ -33,6 +33,7 @@ interface EditAreaProps {
   printedImages: IPrintedImage[]
   printedImageElements: IPrintedImage[]
   onUpdatePrintedImages: (elements: IPrintedImage[]) => void
+  htmlToCanvasEditorRef: React.RefObject<HTMLDivElement>
 }
 
 const EditArea: React.FC<EditAreaProps> = ({
@@ -45,6 +46,7 @@ const EditArea: React.FC<EditAreaProps> = ({
   onUpdateText,
   onUpdateStickers,
   onUpdatePrintedImages,
+  htmlToCanvasEditorRef,
 }) => {
   const [showPrintedImagesModal, setShowPrintedImagesModal] = useState<boolean>(false)
   const editAreaRef = useRef<HTMLDivElement>(null)
@@ -139,7 +141,7 @@ const EditArea: React.FC<EditAreaProps> = ({
         </div>
       </div>
 
-      <div className="relative w-full h-fit rounded-lg bg-white py-2">
+      <div ref={htmlToCanvasEditorRef} className="relative w-full h-fit rounded-lg bg-white py-2">
         {editingProduct && (
           <img
             {...bindForPinch()}

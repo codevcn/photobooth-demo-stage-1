@@ -41,7 +41,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
   const imgsContainerRef = useRef<HTMLDivElement>(null)
   const [pickedIndex, setPickedIndex] = useState<number>(0)
   const [pickedItem, setPickedItem] = useState<IProductImage>(productDetails)
-  const { name, description, priceInVND, priceAfterDiscount } = pickedItem
+  const { name, description, priceInVND, priceAfterDiscount, id: pickedItemId } = pickedItem
 
   const pickItem = (imgId: string) => {
     const index = peerProducts.findIndex(({ id }) => id === imgId)
@@ -111,6 +111,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
               <button
                 key={id}
                 className="thumbnail flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 border-gray-200 transition-all"
+                style={{ outline: id === pickedItemId ? '3px solid var(--vcn-pink-cl)' : 'none' }}
                 onClick={() => pickItem(id)}
               >
                 <img src={url} alt={name} className="w-full h-full object-cover" />
@@ -190,7 +191,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
             <h2 className="text-lg font-semibold text-gray-900 mb-2">Mô tả</h2>
             <p className="text-sm text-gray-700 leading-relaxed">{description}</p>
             {/* <!-- Các tính năng nổi bật --> */}
-            <ul className="mt-3 space-y-2">
+            {/* <ul className="mt-3 space-y-2">
               <li className="flex items-start gap-2 text-sm text-gray-700">
                 <svg
                   className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5"
@@ -205,7 +206,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
-                <span>Chống ồn chủ động (ANC)</span>
+                <span></span>
               </li>
               <li className="flex items-start gap-2 text-sm text-gray-700">
                 <svg
@@ -239,7 +240,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
                 </svg>
                 <span>Đệm tai bằng mút hoạt tính cao cấp</span>
               </li>
-            </ul>
+            </ul> */}
           </div>
         </section>
       </div>

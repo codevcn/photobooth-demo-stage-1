@@ -15,6 +15,7 @@ export interface IProductImage {
   priceInVND: number
   priceAfterDiscount?: number
   stock: number
+  category: 'shirt' | 'hat' | 'cup' | 'keychain'
 }
 
 export interface ITextElement {
@@ -64,4 +65,14 @@ export type TMenuState = Partial<{
 
 export type TDetectCollisionWithViewportEdgesResult = {
   collidedEdge: 'left' | 'right' | 'top' | 'bottom' | null
+}
+
+export type TMockupImageData = {
+  sessionId: string
+  productInfo: {
+    id: string
+    mockups: {
+      [key: string]: string
+    }
+  }
 }

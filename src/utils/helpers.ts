@@ -1,4 +1,4 @@
-import { TDetectCollisionWithViewportEdgesResult, TMenuState } from './types'
+import { TDetectCollisionWithViewportEdgesResult, TMenuState, TMockupImageData } from './types'
 
 export const getNaturalSizeOfImage = (
   imgURL: string,
@@ -15,6 +15,7 @@ export const getNaturalSizeOfImage = (
 
 export class LocalStorageHelper {
   static menuStateName = 'menu-state'
+  static mockupImageName = 'mockup-image'
 
   static saveMenuState(state: TMenuState) {
     localStorage.setItem(LocalStorageHelper.menuStateName, JSON.stringify(state))
@@ -26,6 +27,34 @@ export class LocalStorageHelper {
       return JSON.parse(stateStr)
     }
     return null
+  }
+
+  static saveMockupImageAsBase64(productId: string, imageDataUrl: string) {
+    let existingData = this.getMockupImageAsBase64()
+    if (existingData) {
+      existingData.productInfo.mockups[crypto.randomUUID()] = imageDataUrl
+    } else {
+      existingData = {
+        sessionId: crypto.randomUUID(),
+        productInfo: {
+          id: productId,
+          mockups: {
+            [crypto.randomUUID()]: imageDataUrl,
+          },
+        },
+      }
+    }
+    localStorage.setItem(LocalStorageHelper.mockupImageName, JSON.stringify(existingData))
+  }
+
+  static getMockupImageAsBase64(): TMockupImageData | null {
+    const data = localStorage.getItem(LocalStorageHelper.mockupImageName)
+    return data ? JSON.parse(data) : null
+  }
+
+  static countSavedMockupImages(): number {
+    const data = this.getMockupImageAsBase64()
+    return data ? Object.keys(data.productInfo.mockups).length : 0
   }
 }
 

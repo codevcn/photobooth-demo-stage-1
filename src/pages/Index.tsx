@@ -7,7 +7,6 @@ import ColorPicker from '@/components/product-color/ColorPicker'
 import SizeSelector from '@/components/product-size/SizeSelector'
 import TextEditor from '@/components/text-element/TextEditor'
 import StickerPicker from '@/components/sticker-element/StickerPicker'
-import { useToast } from '@/hooks/use-toast'
 import {
   IPrintedImage,
   IProductImage,
@@ -20,7 +19,10 @@ import { eventEmitter } from '@/utils/events'
 import { EInternalEvents } from '@/utils/enums'
 import { GlobalContext } from './sharings'
 import { productImages } from '@/lib/storage'
-import { swapArrayItems } from '@/utils/helpers'
+import { LocalStorageHelper, swapArrayItems } from '@/utils/helpers'
+import { ToastContainer } from 'react-toastify'
+import { toast } from 'react-toastify'
+import { useHtmlToCanvas } from '@/hooks/use-html-to-canvas'
 
 type TProviderState = {
   pickedElementRoot: HTMLElement | null
@@ -48,8 +50,6 @@ const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
 }
 
 const Index = () => {
-  const { toast } = useToast()
-
   // Gallery images
   const [galleryImages] = useState<IProductImage[][]>(productImages)
 
@@ -105,6 +105,8 @@ const Index = () => {
   const [stickerElements, setStickerElements] = useState<IStickerElement[]>([])
   const [printedImageElements, setPrintedImageElements] = useState<IPrintedImage[]>([])
 
+  const { editorRef, handleSaveHtmlAsImage } = useHtmlToCanvas()
+
   const [activeProduct, peerProducts] = useMemo<
     [IProductImage | undefined, IProductImage[]]
   >(() => {
@@ -121,6 +123,21 @@ const Index = () => {
     return [activeProduct, products || []]
   }, [galleryImages, activeImageId])
 
+  const handleSetActiveImageId = (imgId: string) => {
+    if (imgId !== activeImageId) {
+      setActiveImageId(imgId)
+      const selectedList = productImages.find((c) => {
+        return c.some((p) => p.id === imgId)
+      })
+      if (!selectedList) return
+      swapArrayItems(
+        selectedList,
+        0,
+        selectedList.findIndex(({ id }) => id === imgId)
+      )
+    }
+  }
+
   const handleAddElement = (type: TElementType, printedImageElements: IPrintedImage[]) => {
     if (type === 'printed-image' && printedImageElements.length > 0) {
       setPrintedImageElements((pre) => {
@@ -135,13 +152,11 @@ const Index = () => {
     }
   }
 
-  const handleDone = () => {
-    setCartCount((prev) => prev + 1)
-    toast({
-      title: 'Added to cart! 🎉',
-      description: `${activeProduct?.name} (Size ${selectedSize}) has been added to your cart.`,
-      duration: 2000,
+  const handleAddToCart = () => {
+    handleSaveHtmlAsImage(activeImageId).then(() => {
+      toast.success('Đã thêm vào giỏ hàng')
     })
+    setCartCount((pre) => pre + 1)
     // // Reset editing elements
     // setTextElements([])
     // setStickerElements([])
@@ -176,17 +191,8 @@ const Index = () => {
   const handleSelectColor = (color: string, productId: string) => {
     setSelectedColor(color)
     if (productId !== activeImageId) {
-      setActiveImageId(productId)
+      handleSetActiveImageId(productId)
     }
-    const selectedList = productImages.find((c) => {
-      return c.some((p) => p.id === productId)
-    })
-    if (!selectedList) return
-    swapArrayItems(
-      selectedList,
-      0,
-      selectedList.findIndex(({ id }) => id === productId)
-    )
   }
 
   const initClickOnPageEvent = () => {
@@ -195,8 +201,15 @@ const Index = () => {
     })
   }
 
+  const initCartCount = () => {
+    queueMicrotask(() => {
+      setCartCount(LocalStorageHelper.countSavedMockupImages())
+    })
+  }
+
   useEffect(() => {
     initClickOnPageEvent()
+    initCartCount()
   }, [])
 
   return (
@@ -226,12 +239,13 @@ const Index = () => {
               printedImages={printedImages}
               onUpdatePrintedImages={(ele) => handleAddElement('printed-image', ele)}
               printedImageElements={printedImageElements}
+              htmlToCanvasEditorRef={editorRef}
             />
           </div>
 
           {/* Action Bar */}
           <div className="px-4 pb-3">
-            <ActionBar cartCount={cartCount} onDone={handleDone} />
+            <ActionBar cartCount={cartCount} onAddToCart={handleAddToCart} />
           </div>
 
           {/* Bottom Menu */}
@@ -277,6 +291,16 @@ const Index = () => {
             />
           )}
         </div>
+        <ToastContainer
+          position="top-center"
+          autoClose={2000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          pauseOnHover
+          draggable
+          theme="colored" // "light" | "dark" | "colored"
+        />
       </GlobalProvider>
     )
   )
