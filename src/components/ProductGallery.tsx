@@ -1,24 +1,28 @@
 import { IProductImage } from '@/utils/types'
-import React from 'react'
+import React, { useMemo } from 'react'
 
 interface ProductGalleryProps {
-  images: IProductImage[]
+  galleryImages: IProductImage[][]
   activeImageId: string
   onSelectImage: (id: string) => void
 }
 
 const ProductGallery: React.FC<ProductGalleryProps> = ({
-  images,
+  galleryImages,
   activeImageId,
   onSelectImage,
 }) => {
+  const productsToRender = useMemo(() => {
+    return galleryImages.map((group) => group.find((img) => img.id === activeImageId) || group[0])
+  }, [galleryImages, activeImageId])
+
   return (
     <div>
       <h2 className="text-sm text-center font-semibold text-gray-700 mb-3 px-1">
         Chọn sản phẩm muốn lưu giữ kỷ niệm
       </h2>
       <div className="flex gap-3 overflow-x-auto gallery-scroll p-2">
-        {images.map((image) => {
+        {productsToRender.map((image) => {
           const isActive = image.id === activeImageId
           return (
             <button

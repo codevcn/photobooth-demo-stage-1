@@ -1,12 +1,20 @@
+export type TProductSize = 'S' | 'M' | 'L' | 'XL' | '2XL'
+
+export type TProductColor = {
+  title: string
+  value: string
+}
+
 export interface IProductImage {
   id: string
   url: string
   name: string
-  others: {
-    id: string
-    url: string
-    name: string
-  }[]
+  size: TProductSize[]
+  color: TProductColor
+  description: string
+  priceInVND: number
+  priceAfterDiscount?: number
+  stock: number
 }
 
 export interface ITextElement {

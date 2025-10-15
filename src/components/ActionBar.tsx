@@ -14,7 +14,7 @@ const ActionBar: React.FC<ActionBarProps> = ({ cartCount, onDone }) => {
         className="flex-1 bg-pink-cl active:bg-pink-hover-cl text-white font-bold py-2 px-4 rounded-xl shadow-lg touch-target flex items-center justify-center gap-2 text-lg"
       >
         <Check size={24} strokeWidth={3} />
-        <span>Chỉnh sửa xong</span>
+        <span>Thêm vào giỏ hàng</span>
       </button>
 
       <button className="relative bg-white border-2 border-gray-200 p-2 rounded-xl shadow-md touch-target active:border-pink-cl transition-colors">

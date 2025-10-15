@@ -59,3 +59,18 @@ export class PageLayoutHelper {
     return result
   }
 }
+
+export function swapArrayItems<T>(arr: T[], indexA: number, indexB: number): void {
+  if (
+    indexA < 0 ||
+    indexB < 0 ||
+    indexA >= arr.length ||
+    indexB >= arr.length ||
+    indexA === indexB
+  ) {
+    return
+  }
+  const temp = arr[indexA]
+  arr[indexA] = arr[indexB]
+  arr[indexB] = temp
+}
