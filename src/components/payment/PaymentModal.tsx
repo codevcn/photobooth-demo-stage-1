@@ -71,7 +71,7 @@ export const EndOfPayment: React.FC<EndOfPaymentProps> = ({
   }
 
   const backToEditPage = () => {
-    window.location.href = '/'
+    window.location.href = '/edit'
   }
 
   useEffect(() => {
@@ -133,8 +133,8 @@ export const EndOfPayment: React.FC<EndOfPaymentProps> = ({
             <>
               <div
                 className="my-4 p-6 rounded-md"
-                    style={{ backgroundColor: colorByPaymentMethod }}
-                    onClick={mockPaymentResult}
+                style={{ backgroundColor: colorByPaymentMethod }}
+                onClick={mockPaymentResult}
               >
                 <img src={QRCodeURL} className="w-40 h-40 object-contain" alt="QR code" />
               </div>
@@ -276,7 +276,7 @@ export const PaymentModal = ({ show, paymentInfo, onHideShow }: PaymentModalProp
         )}
 
         {/* Modal Header */}
-        <div className="absolute top-0 left-0 w-full bg-white border-b border-gray-200 px-6 py-2 flex items-center justify-between rounded-t-3xl">
+        <div className="absolute top-0 left-0 w-full z-20 bg-white border-b border-gray-200 px-6 py-2 flex items-center justify-between rounded-t-3xl">
           <h2 className="text-xl font-bold text-gray-900">Hoàn tất thanh toán</h2>
           <button
             onClick={() => onHideShow(false)}

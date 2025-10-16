@@ -136,3 +136,13 @@
   pointer-events: none;
   opacity: 0;
 }
+
+@keyframes pulse-slow {
+    50% {
+      border-color: #ec4899; /* pink-500 */
+      box-shadow: 0 0 10px #ec4899, 0 0 20px #ec4899;
+    }
+  }
+  .animate-pulse-slow {
+    animation: pulse-slow 2s infinite;
+  }

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Minus, Plus, Edit2, Tag, Banknote, X, ArrowBigLeft, ArrowLeft } from 'lucide-react'
+import { Minus, Plus, Tag, Banknote, X, ArrowBigLeft, ArrowLeft } from 'lucide-react'
 import { formatNumberWithCommas, LocalStorageHelper } from '@/utils/helpers'
 import { productImages } from '@/lib/storage'
 import { IProductImage } from '@/utils/types'
@@ -52,10 +52,12 @@ const PaymentPage = () => {
   const navigate = useNavigate()
   const [selectedImage, setSelectedImage] = useState<string>()
 
-  const updateQuantity = (id: string, delta: number) => {
+  const updateQuantity = (idAsImageDataURL: string, delta: number) => {
     setCartItems((items) =>
       items.map((item) =>
-        item.id === id ? { ...item, quantity: Math.max(1, item.quantity + delta) } : item
+        item.mockupData.id === idAsImageDataURL
+          ? { ...item, quantity: Math.max(1, item.quantity + delta) }
+          : item
       )
     )
   }
@@ -109,7 +111,7 @@ const PaymentPage = () => {
   const removeProductFromCart = (idAsImageDataURL: string) => {
     setCartItems((items) =>
       items.filter((item) => {
-        const matching = item.id === idAsImageDataURL
+        const matching = item.mockupData.id === idAsImageDataURL
         if (matching) {
           LocalStorageHelper.removeSavedMockupImage(sessionId, idAsImageDataURL, item.mockupData.id)
           return false
@@ -129,7 +131,7 @@ const PaymentPage = () => {
   }
 
   const backToEditPage = () => {
-    navigate('/')
+    navigate('/edit')
   }
 
   const subtotal = useMemo(() => {
@@ -173,7 +175,7 @@ const PaymentPage = () => {
           {cartItems.map(
             ({ id, mockupData, name, size, color, originalPrice, discountedPrice, quantity }) => (
               <div
-                key={id}
+                key={mockupData.id}
                 className="bg-white rounded-2xl shadow-sm p-4 transition-all duration-200"
               >
                 <div className="flex gap-3">
@@ -185,7 +187,7 @@ const PaymentPage = () => {
                     <img
                       src={mockupData.image}
                       alt={name}
-                      className="w-20 h-20 rounded-xl object-cover"
+                      className="w-[88px] h-20 rounded-xl object-contain"
                     />
                   </div>
 
@@ -233,7 +235,7 @@ const PaymentPage = () => {
                       <div className="flex items-center gap-2">
                         <div className="flex items-center gap-1 bg-gray-100 rounded-full p-1">
                           <button
-                            onClick={() => updateQuantity(id, -1)}
+                            onClick={() => updateQuantity(mockupData.id, -1)}
                             className="w-8 h-8 flex items-center justify-center rounded-full bg-white shadow-sm active:scale-75 transition-transform"
                             aria-label="Giảm số lượng"
                           >
@@ -241,7 +243,7 @@ const PaymentPage = () => {
                           </button>
                           <span className="w-8 text-center font-semibold text-sm">{quantity}</span>
                           <button
-                            onClick={() => updateQuantity(id, 1)}
+                            onClick={() => updateQuantity(mockupData.id, 1)}
                             className="w-8 h-8 flex items-center justify-center rounded-full bg-white shadow-sm active:scale-75 transition-transform"
                             aria-label="Tăng số lượng"
                           >
@@ -250,7 +252,7 @@ const PaymentPage = () => {
                         </div>
                         <div>
                           <button
-                            onClick={() => removeProductFromCart(id)}
+                            onClick={() => removeProductFromCart(mockupData.id)}
                             className="p-1 rounded-full bg-red-600 hover:scale-90 transition"
                           >
                             <X size={22} strokeWidth={3} className="text-white" />
@@ -361,7 +363,7 @@ const PaymentPage = () => {
       </header>
       <div className="flex justify-center w-full pt-4">
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/edit')}
           className="flex justify-center items-center bg-pink-cl rounded-md p-2 active:scale-95 transition text-white font-bold"
         >
           <ArrowBigLeft size={24} color="currentColor" strokeWidth={3} />

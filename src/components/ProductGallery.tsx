@@ -1,4 +1,5 @@
 import { IPrintedImage, IProductImage } from '@/utils/types'
+import { ArrowLeft } from 'lucide-react'
 import React, { useMemo } from 'react'
 
 interface ProductGalleryProps {
@@ -8,6 +9,9 @@ interface ProductGalleryProps {
   printedImages: IPrintedImage[]
 }
 
+const countForTraditional: number = 5
+const countForTrending: number = 2
+
 const ProductGallery: React.FC<ProductGalleryProps> = ({
   galleryImages,
   activeImageId,
@@ -15,7 +19,7 @@ const ProductGallery: React.FC<ProductGalleryProps> = ({
   printedImages,
 }) => {
   const productsToRender = useMemo(() => {
-    return galleryImages.slice(0, 4).map((group) => {
+    return galleryImages.slice(0, countForTraditional).map((group) => {
       return {
         ...(group.find((img) => img.id === activeImageId) || group[0]),
         printedImageUrl: printedImages[0].url || '/placeholder.svg',
@@ -24,12 +28,14 @@ const ProductGallery: React.FC<ProductGalleryProps> = ({
   }, [galleryImages, activeImageId])
 
   const trendingToRender = useMemo(() => {
-    return galleryImages.slice(4, 6).map((group) => {
-      return {
-        ...(group.find((img) => img.id === activeImageId) || group[0]),
-        printedImageUrl: printedImages[0].url || '/placeholder.svg',
-      }
-    })
+    return galleryImages
+      .slice(countForTraditional, countForTraditional + countForTrending)
+      .map((group) => {
+        return {
+          ...(group.find((img) => img.id === activeImageId) || group[0]),
+          printedImageUrl: printedImages[0].url || '/placeholder.svg',
+        }
+      })
   }, [galleryImages, activeImageId])
 
   return (

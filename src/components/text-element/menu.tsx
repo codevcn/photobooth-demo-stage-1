@@ -314,7 +314,7 @@ export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuPro
         <div className="flex gap-1 items-center mx-1">
           <input
             type="text"
-            placeholder="Xoay, VD: 22"
+            placeholder="Độ xoay, VD: 22"
             onKeyDown={(e) => catchEnter(e, 'angle')}
             className="border rounded px-1 py-0.5 text-base outline-none w-full"
           />
@@ -328,13 +328,13 @@ export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuPro
         <div className="flex gap-1 mx-1">
           <input
             type="text"
-            placeholder="Tọa độ X"
+            placeholder="Tọa độ X, VD: 100"
             onKeyDown={(e) => catchEnter(e, 'posXY')}
             className="border rounded px-1 py-0.5 text-base outline-none w-full"
           />
           <input
             type="text"
-            placeholder="Tọa độ Y"
+            placeholder="Tọa độ Y, VD: 100"
             onKeyDown={(e) => catchEnter(e, 'posXY')}
             className="border rounded px-1 py-0.5 text-base outline-none w-full"
           />

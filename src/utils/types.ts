@@ -1,4 +1,4 @@
-export type TProductSize = 'S' | 'M' | 'L' | 'XL' | '2XL'
+export type TProductSize = 'S' | 'M' | 'L' | 'XL' | '2XL' | '3XL'
 
 export type TProductColor = {
   title: string
@@ -15,7 +15,7 @@ export interface IProductImage {
   priceInVND: number
   priceAfterDiscount?: number
   stock: number
-  category: 'shirt' | 'hat' | 'cup' | 'keychain'
+  category: 'shirt' | 'hat' | 'cup' | 'keychain' | 'phonecase' | 'figurine'
 }
 
 export interface ITextElement {

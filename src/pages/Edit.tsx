@@ -18,11 +18,13 @@ import {
 import { eventEmitter } from '@/utils/events'
 import { EInternalEvents } from '@/utils/enums'
 import { GlobalContext } from './sharings'
-import { productImages, trendingProducts } from '@/lib/storage'
+import { productImages } from '@/lib/storage'
 import { LocalStorageHelper, swapArrayItems } from '@/utils/helpers'
 import { ToastContainer } from 'react-toastify'
 import { toast } from 'react-toastify'
 import { useHtmlToCanvas } from '@/hooks/use-html-to-canvas'
+import { ArrowLeft } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 type TProviderState = {
   pickedElementRoot: HTMLElement | null
@@ -52,7 +54,7 @@ const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
 const EditPage = () => {
   const [sessionId] = useState<string>('12331-5465464-1321311-hththt')
   // Gallery images
-  const [galleryImages] = useState<IProductImage[][]>(productImages.concat(trendingProducts))
+  const [galleryImages] = useState<IProductImage[][]>(productImages)
   // Printed images
   const [printedImages] = useState<IPrintedImage[]>([
     {
@@ -82,6 +84,14 @@ const EditPage = () => {
     {
       id: 'printed-4',
       url: '/images/print-img-4.png',
+      height: -1,
+      width: -1,
+      x: 0,
+      y: 0,
+    },
+    {
+      id: 'printed-5',
+      url: '/images/print-img-5.jpg',
       height: -1,
       width: -1,
       x: 0,
@@ -129,6 +139,8 @@ const EditPage = () => {
     })
     return [activeProduct!, products || []]
   }, [galleryImages, activeImageId])
+
+  const navigate = useNavigate()
 
   const handleSetActiveImageId = (imgId: string) => {
     if (imgId !== activeImageId) {
@@ -236,7 +248,13 @@ const EditPage = () => {
       <GlobalProvider>
         <div className="min-h-screen bg-superlight-pink-cl flex flex-col max-w-md mx-auto">
           {/* Gallery Section */}
-          <div className="pt-4 pb-3 px-4 bg-white shadow-sm">
+          <div className="pt-4 pb-3 px-4 bg-white shadow-sm relative">
+            <div
+              onClick={() => navigate('/')}
+              className="absolute top-3 left-2 bg-pink-cl py-0.5 px-2 rounded-lg"
+            >
+              <ArrowLeft size={20} className="text-white" />
+            </div>
             <ProductGallery
               galleryImages={galleryImages}
               activeImageId={activeImageId}
@@ -246,68 +264,70 @@ const EditPage = () => {
           </div>
 
           {/* Edit Area */}
-          <div className="flex-1 px-2 pb-4 pt-4">
-            <EditArea
-              editingProduct={activeProduct}
-              color={selectedColor}
-              textElements={textElements}
-              stickerElements={stickerElements}
-              onUpdateText={setTextElements}
-              onUpdateStickers={setStickerElements}
-              printedImages={printedImages}
-              onAddPrintedImages={(ele) => handleAddElement('printed-image', ele)}
-              onRemovePrintedImages={(ids) => handleRemoveELement('printed-image', ids)}
-              printedImageElements={printedImageElements}
-              htmlToCanvasEditorRef={editorRef}
+          <div className="mt-4">
+            <div className="flex-1 px-2 mb-4">
+              <EditArea
+                editingProduct={activeProduct}
+                color={selectedColor}
+                textElements={textElements}
+                stickerElements={stickerElements}
+                onUpdateText={setTextElements}
+                onUpdateStickers={setStickerElements}
+                printedImages={printedImages}
+                onAddPrintedImages={(ele) => handleAddElement('printed-image', ele)}
+                onRemovePrintedImages={(ids) => handleRemoveELement('printed-image', ids)}
+                printedImageElements={printedImageElements}
+                htmlToCanvasEditorRef={editorRef}
+              />
+            </div>
+
+            {/* Action Bar */}
+            <div className="px-4 pb-3">
+              <ActionBar cartCount={cartCount} onAddToCart={handleAddToCart} />
+            </div>
+
+            {/* Bottom Menu */}
+            <div className="bg-white border-t border-gray-200">
+              <BottomMenu
+                onAddText={() => setShowTextEditor(true)}
+                onAddSticker={() => setShowStickerPicker(true)}
+                onChooseColor={() => setShowColorPicker(true)}
+                onChooseSize={() => setShowSizeSelector(true)}
+                activeProduct={activeProduct}
+                peerProducts={peerProducts}
+              />
+            </div>
+
+            {/* Overlays */}
+            {showColorPicker && (
+              <ColorPicker
+                selectedColor={selectedColor}
+                onSelectColor={handleSelectColor}
+                onClose={() => setShowColorPicker(false)}
+                activeProduct={activeProduct}
+                peerProducts={peerProducts}
+              />
+            )}
+
+            {showSizeSelector && (
+              <SizeSelector
+                selectedSize={selectedSize}
+                onSelectSize={setSelectedSize}
+                onClose={() => setShowSizeSelector(false)}
+                sizes={activeProduct.size}
+              />
+            )}
+
+            {showTextEditor && (
+              <TextEditor onAddText={handleAddText} onClose={() => setShowTextEditor(false)} />
+            )}
+
+            <StickerPicker
+              onAddSticker={handleAddSticker}
+              onClose={() => setShowStickerPicker(false)}
+              show={showStickerPicker}
             />
           </div>
-
-          {/* Action Bar */}
-          <div className="px-4 pb-3">
-            <ActionBar cartCount={cartCount} onAddToCart={handleAddToCart} />
-          </div>
-
-          {/* Bottom Menu */}
-          <div className="bg-white border-t border-gray-200">
-            <BottomMenu
-              onAddText={() => setShowTextEditor(true)}
-              onAddSticker={() => setShowStickerPicker(true)}
-              onChooseColor={() => setShowColorPicker(true)}
-              onChooseSize={() => setShowSizeSelector(true)}
-              activeProduct={activeProduct}
-              peerProducts={peerProducts}
-            />
-          </div>
-
-          {/* Overlays */}
-          {showColorPicker && (
-            <ColorPicker
-              selectedColor={selectedColor}
-              onSelectColor={handleSelectColor}
-              onClose={() => setShowColorPicker(false)}
-              activeProduct={activeProduct}
-              peerProducts={peerProducts}
-            />
-          )}
-
-          {showSizeSelector && (
-            <SizeSelector
-              selectedSize={selectedSize}
-              onSelectSize={setSelectedSize}
-              onClose={() => setShowSizeSelector(false)}
-              sizes={activeProduct.size}
-            />
-          )}
-
-          {showTextEditor && (
-            <TextEditor onAddText={handleAddText} onClose={() => setShowTextEditor(false)} />
-          )}
-
-          <StickerPicker
-            onAddSticker={handleAddSticker}
-            onClose={() => setShowStickerPicker(false)}
-            show={showStickerPicker}
-          />
         </div>
         <ToastContainer
           position="top-center"

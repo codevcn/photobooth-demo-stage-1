@@ -10,21 +10,19 @@ export const PrintedImagesPreview = ({
   onOpenPrintedImagesModal,
   printedImages,
 }: PrintedImagesPreviewProps) => {
-  const slicedImages = useMemo(() => printedImages.slice(0, 2), [printedImages])
+  const slicedImages = useMemo(() => printedImages.slice(0, 1), [printedImages])
 
   return (
     <div
       onClick={onOpenPrintedImagesModal}
-      className="p-2 h-10 border-solid text-pink-cl bg-white active:scale-90 transition relative translate-y-1"
+      className="border-solid text-pink-cl bg-white active:scale-90 transition relative"
     >
       {slicedImages.map((img, index) => (
-        <div key={img.id}>
+        <div key={img.id} className="h-[50px] overflow-hidden border-2 border-pink-cl rounded">
           <img
             src={img.url}
             alt="Printed image"
-            className={`${
-              index === 0 ? '-translate-x-2 -translate-y-2' : ''
-            } h-max w-max max-h-[80px] max-w-[80px] rounded absolute top-0 right-0 origin-right`}
+            className={`h-max w-max max-h-[80px] max-w-[80px] object-cover rounded`}
           />
         </div>
       ))}

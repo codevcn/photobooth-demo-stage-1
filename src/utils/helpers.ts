@@ -207,3 +207,28 @@ export function isValidEmail(email: string): boolean {
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   return regex.test(email.trim())
 }
+
+export const ativateFullScreen = () => {
+  const docElm = document.documentElement
+  if (docElm.requestFullscreen) {
+    docElm.requestFullscreen()
+  } else if ((docElm as any).mozRequestFullScreen) {
+    ;(docElm as any).mozRequestFullScreen()
+  } else if ((docElm as any).webkitRequestFullScreen) {
+    ;(docElm as any).webkitRequestFullScreen()
+  } else if ((docElm as any).msRequestFullscreen) {
+    ;(docElm as any).msRequestFullscreen()
+  }
+}
+
+export const exitFullScreen = () => {
+  if (document.exitFullscreen) {
+    document.exitFullscreen()
+  } else if ((document as any).webkitExitFullscreen) {
+    ;(document as any).webkitExitFullscreen()
+  } else if ((document as any).msExitFullscreen) {
+    ;(document as any).msExitFullscreen()
+  } else if ((document as any).mozCancelFullScreen) {
+    ;(document as any).mozCancelFullScreen()
+  }
+}

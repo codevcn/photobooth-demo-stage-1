@@ -7,6 +7,7 @@ import EditPage from '@/pages/Edit'
 import PaymentPage from './pages/Payment'
 import NotFound from '@/pages/NotFound'
 import { LocalStorageHelper } from './utils/helpers'
+import TimelapsePage from './pages/Timelasp'
 
 const queryClient = new QueryClient()
 
@@ -20,7 +21,8 @@ function App() {
           <Toaster />
           <Sonner />
           <Routes>
-            <Route path="/" element={<EditPage />} />
+            <Route path="/" element={<TimelapsePage />} />
+            <Route path="/edit" element={<EditPage />} />
             <Route path="/payment" element={<PaymentPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

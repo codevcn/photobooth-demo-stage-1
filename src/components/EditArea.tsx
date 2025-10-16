@@ -170,7 +170,7 @@ const EditArea: React.FC<EditAreaProps> = ({
           <h3 className="text-lg font-bold text-gray-800">Khu vực chỉnh sửa</h3>
           <p className="text-xs text-gray-500">Chạm vào các phần tử để di chuyển vị trí</p>
         </div>
-        <div>
+        <div className="h-fit">
           <PrintedImagesPreview
             onOpenPrintedImagesModal={handleOpenPrintedImagesModal}
             printedImages={printedImages}
@@ -184,52 +184,54 @@ const EditArea: React.FC<EditAreaProps> = ({
         </div>
       </div>
 
-      <div
-        ref={htmlToCanvasEditorRef}
-        className="relative w-full h-fit rounded-lg bg-white py-2 overflow-hidden"
-      >
-        {editingProduct && (
-          <img
-            {...bindForPinch()}
-            src={editingProduct.url}
-            alt={editingProduct.name}
-            className="NAME-product-image touch-none w-full h-full object-contain"
-            onClick={handlePickProductImage}
-          />
-        )}
+      <div className="bg-white rounded-lg">
+        <div
+          ref={htmlToCanvasEditorRef}
+          className="relative w-full h-fit bg-transparent py-2 px-2 max-h-[500px] min-[300px] overflow-hidden"
+        >
+          {editingProduct && (
+            <img
+              {...bindForPinch()}
+              src={editingProduct.url}
+              alt={editingProduct.name}
+              className="NAME-product-image touch-none w-full h-full max-h-[calc(500px-8px)] object-contain"
+              onClick={handlePickProductImage}
+            />
+          )}
 
-        {/* Text Elements */}
-        {textElements.map((textEl) => (
-          <TextElement
-            key={textEl.id}
-            element={textEl}
-            onRemoveElement={handleRemoveText}
-            onUpdateSelectedElementId={(id) => handleUpdateSelectedElementId(id, 'text')}
-            selectedElementId={selectedElementId}
-          />
-        ))}
+          {/* Text Elements */}
+          {textElements.map((textEl) => (
+            <TextElement
+              key={textEl.id}
+              element={textEl}
+              onRemoveElement={handleRemoveText}
+              onUpdateSelectedElementId={(id) => handleUpdateSelectedElementId(id, 'text')}
+              selectedElementId={selectedElementId}
+            />
+          ))}
 
-        {/* Sticker Elements */}
-        {stickerElements.map((sticker) => (
-          <StickerElement
-            key={sticker.id}
-            element={sticker}
-            onRemoveElement={handleRemoveSticker}
-            onUpdateSelectedElementId={(id) => handleUpdateSelectedElementId(id, 'sticker')}
-            selectedElementId={selectedElementId}
-          />
-        ))}
+          {/* Sticker Elements */}
+          {stickerElements.map((sticker) => (
+            <StickerElement
+              key={sticker.id}
+              element={sticker}
+              onRemoveElement={handleRemoveSticker}
+              onUpdateSelectedElementId={(id) => handleUpdateSelectedElementId(id, 'sticker')}
+              selectedElementId={selectedElementId}
+            />
+          ))}
 
-        {/* Printed Image Elements */}
-        {printedImageElements.map((img) => (
-          <PrintedImageElement
-            key={img.id}
-            element={img}
-            onRemoveElement={handleRemovePrintedImage}
-            onUpdateSelectedElementId={(id) => handleUpdateSelectedElementId(id, 'printed-image')}
-            selectedElementId={selectedElementId}
-          />
-        ))}
+          {/* Printed Image Elements */}
+          {printedImageElements.map((img) => (
+            <PrintedImageElement
+              key={img.id}
+              element={img}
+              onRemoveElement={handleRemovePrintedImage}
+              onUpdateSelectedElementId={(id) => handleUpdateSelectedElementId(id, 'printed-image')}
+              selectedElementId={selectedElementId}
+            />
+          ))}
+        </div>
       </div>
 
       {selectedElementId && (
