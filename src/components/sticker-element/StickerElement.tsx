@@ -132,9 +132,7 @@ export const StickerElement = ({
         left: position.x,
         top: position.y,
       }}
-      className={`${
-        isSelected ? 'outline-2 outline-dark-pink-cl outline' : ''
-      } NAME-root-element absolute h-fit w-fit`}
+      className={`NAME-root-element absolute h-fit w-fit`}
       onClick={pickElement}
     >
       <div
@@ -143,7 +141,9 @@ export const StickerElement = ({
           width: width === -1 ? 'auto' : width,
           aspectRatio: width === -1 || height === -1 ? 'auto' : `${width} / ${height}`,
         }}
-        className="NAME-element-main-box max-w-[200px] select-none touch-none relative origin-center"
+        className={`${
+          isSelected ? 'outline-2 outline-dark-pink-cl outline' : ''
+        } NAME-element-main-box max-w-[200px] select-none touch-none relative origin-center`}
       >
         <div className="h-full w-full">
           <img
@@ -153,30 +153,30 @@ export const StickerElement = ({
             className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 object-center"
           />
         </div>
-      </div>
-      <div
-        className={`${
-          isSelected ? 'block' : 'hidden'
-        } NAME-rotate-box absolute -top-6 -left-6 z-20`}
-      >
-        <button
-          ref={handleRef}
-          className="cursor-grab active:cursor-grabbing bg-pink-cl text-white rounded-full p-1 active:scale-90 transition"
+        <div
+          className={`${
+            isSelected ? 'block' : 'hidden'
+          } NAME-rotate-box absolute -top-6 -left-6 z-20`}
         >
-          <RotateCw size={12} color="currentColor" />
-        </button>
-      </div>
-      <div
-        className={`${
-          isSelected ? 'block' : 'hidden'
-        } NAME-remove-box absolute -top-6 -right-6 z-20`}
-      >
-        <button
-          onClick={() => onRemoveElement(id)}
-          className="bg-red-600 text-white rounded-full p-1 active:scale-90 transition"
+          <button
+            ref={handleRef}
+            className="cursor-grab active:cursor-grabbing bg-pink-cl text-white rounded-full p-1 active:scale-90 transition"
+          >
+            <RotateCw size={12} color="currentColor" />
+          </button>
+        </div>
+        <div
+          className={`${
+            isSelected ? 'block' : 'hidden'
+          } NAME-remove-box absolute -top-6 -right-6 z-20`}
         >
-          <X size={12} color="currentColor" strokeWidth={3} />
-        </button>
+          <button
+            onClick={() => onRemoveElement(id)}
+            className="bg-red-600 text-white rounded-full p-1 active:scale-90 transition"
+          >
+            <X size={12} color="currentColor" strokeWidth={3} />
+          </button>
+        </div>
       </div>
     </div>
   )

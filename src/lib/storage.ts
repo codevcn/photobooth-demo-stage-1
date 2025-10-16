@@ -80,6 +80,53 @@ export const productImages: IProductImage[][] = [
   ],
   [
     {
+      id: 'gallery-totebag-1',
+      url: '/images/products/totebag-yellow.png',
+      name: 'Classic Tote',
+      size: ['M', 'L'],
+      color: {
+        title: 'Đen',
+        value: '#000000',
+      },
+      description: 'Túi tote đen cổ điển, dễ phối đồ.',
+      stock: 100,
+      priceInVND: 200000,
+      priceAfterDiscount: 160000,
+      category: 'totebag',
+    },
+    {
+      id: 'gallery-totebag-2',
+      url: '/images/products/totebag-gray.png',
+      name: 'Natural Tote',
+      size: ['M', 'L'],
+      color: {
+        title: 'Nâu',
+        value: '#8B4513',
+      },
+      description: 'Túi tote nâu tự nhiên, thân thiện với môi trường.',
+      stock: 80,
+      priceInVND: 180000,
+      priceAfterDiscount: 144000,
+      category: 'totebag',
+    },
+    {
+      id: 'gallery-totebag-3',
+      url: '/images/products/totebag-green.png',
+      name: 'Green Tote',
+      size: ['M', 'L'],
+      color: {
+        title: 'Xanh lá',
+        value: '#008000',
+      },
+      description: 'Túi tote xanh lá tươi mát, dễ thương.',
+      stock: 60,
+      priceInVND: 220000,
+      priceAfterDiscount: 176000,
+      category: 'totebag',
+    },
+  ],
+  [
+    {
       id: 'gallery-cup-1',
       url: '/images/products/cup.png',
       name: 'Navy Blue',
@@ -386,6 +433,7 @@ export const productImages: IProductImage[][] = [
       category: 'phonecase',
     },
   ],
+
   // trending products
   [
     {

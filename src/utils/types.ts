@@ -15,7 +15,7 @@ export interface IProductImage {
   priceInVND: number
   priceAfterDiscount?: number
   stock: number
-  category: 'shirt' | 'hat' | 'cup' | 'keychain' | 'phonecase' | 'figurine'
+  category: 'shirt' | 'hat' | 'cup' | 'keychain' | 'phonecase' | 'figurine' | 'totebag'
 }
 
 export interface ITextElement {

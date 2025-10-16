@@ -10,6 +10,7 @@ import {
 import { TPaymentType } from '@/utils/types'
 import { X, Banknote, Check, TruckElectric, ArrowLeft } from 'lucide-react'
 import { useRef, useState, useEffect } from 'react'
+import { toast } from 'react-toastify'
 
 type TPaymentStatus = {
   status: 'pending' | 'completed' | 'failed'
@@ -62,8 +63,8 @@ export const EndOfPayment: React.FC<EndOfPaymentProps> = ({
     return () => clearInterval(interval)
   }
 
-  const mockPaymentResult = () => {
-    if (Math.random() > 0.5) {
+  const mockPaymentResult = (success: boolean) => {
+    if (success) {
       setPaymentStatus({ status: 'completed' })
     } else {
       setPaymentStatus({ status: 'failed', reason: 'Lỗi kết nối hoặc số dư không đủ' })
@@ -134,11 +135,14 @@ export const EndOfPayment: React.FC<EndOfPaymentProps> = ({
               <div
                 className="my-4 p-6 rounded-md"
                 style={{ backgroundColor: colorByPaymentMethod }}
-                onClick={mockPaymentResult}
+                onClick={() => mockPaymentResult(true)}
               >
                 <img src={QRCodeURL} className="w-40 h-40 object-contain" alt="QR code" />
               </div>
-              <div className="text-base text-black font-bold text-center">
+              <div
+                className="text-base text-black font-bold text-center"
+                onClick={() => mockPaymentResult(false)}
+              >
                 <p className="mb-1">
                   <span>Mã QR hết hạn sau </span>
                   <span className="NAME-countdown">{formatTime(countdownDuration)}</span>
@@ -249,7 +253,10 @@ export const PaymentModal = ({ show, paymentInfo, onHideShow }: PaymentModalProp
   const handleConfirmPayment = () => {
     const form = formRef.current
     if (!form) return
-    if (!validateForm(form)) return
+    if (!validateForm(form)) {
+      toast.error('Vui lòng kiểm tra lại thông tin giao hàng')
+      return
+    }
     setConfirming(true)
     delay(2000)
       .then(() => {

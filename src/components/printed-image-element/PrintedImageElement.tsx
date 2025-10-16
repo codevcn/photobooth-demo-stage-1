@@ -159,7 +159,7 @@ export const PrintedImageElement = ({
       <div
         {...bindForPinch()}
         style={{
-          width: width === -1 ? 'auto' : width,
+          width: width === -1 ? '180px' : width,
           aspectRatio: width === -1 || height === -1 ? 'auto' : `${width} / ${height}`,
         }}
         className={`${

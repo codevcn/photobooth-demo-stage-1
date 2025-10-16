@@ -1,5 +1,4 @@
 import { IPrintedImage, IProductImage } from '@/utils/types'
-import { ArrowLeft } from 'lucide-react'
 import React, { useMemo } from 'react'
 
 interface ProductGalleryProps {
@@ -9,7 +8,7 @@ interface ProductGalleryProps {
   printedImages: IPrintedImage[]
 }
 
-const countForTraditional: number = 5
+const countForTraditional: number = 6
 const countForTrending: number = 2
 
 const ProductGallery: React.FC<ProductGalleryProps> = ({

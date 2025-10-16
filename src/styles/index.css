@@ -137,12 +137,93 @@
   opacity: 0;
 }
 
-@keyframes pulse-slow {
-    50% {
-      border-color: #ec4899; /* pink-500 */
-      box-shadow: 0 0 10px #ec4899, 0 0 20px #ec4899;
-    }
+.NAME-button-container {
+  position: relative;
+  display: block;
+}
+
+.NAME-star {
+  position: absolute;
+  font-size: 20px;
+  animation: blink 1.5s infinite;
+  pointer-events: none;
+  z-index: 99;
+  width: 24px;
+}
+
+.NAME-attractive-button {
+  animation: jump 4s infinite 4s forwards;
+}
+
+.fil0 {
+  fill: #fffdef;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.5);
   }
-  .animate-pulse-slow {
-    animation: pulse-slow 2s infinite;
+  50% {
+    opacity: 1;
+    transform: scale(1);
   }
+}
+
+@keyframes jump {
+  0% {
+    transform: translateY(0);
+  }
+  2% {
+    transform: translateY(-16px);
+  }
+  4% {
+    transform: translateY(0px);
+  }
+  14% {
+    transform: translateY(0);
+  }
+  16% {
+    transform: translateY(-8px);
+  }
+  18% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.NAME-star:nth-child(1) {
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  animation-delay: 0s;
+}
+.NAME-star:nth-child(2) {
+  top: 50%;
+  right: -20px;
+  animation-delay: 0.5s;
+}
+.NAME-star:nth-child(3) {
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  animation-delay: 1s;
+}
+.NAME-star:nth-child(4) {
+  top: 50%;
+  left: -20px;
+  animation-delay: 1.5s;
+}
+.NAME-star:nth-child(5) {
+  top: -20px;
+  left: 75%;
+  animation-delay: 0.5s;
+}
+.NAME-star:nth-child(6) {
+  top: 0;
+  left: 0;
+  animation-delay: 0.5s;
+}

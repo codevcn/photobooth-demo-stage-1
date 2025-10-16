@@ -108,12 +108,12 @@ const PaymentPage = () => {
     }
   }
 
-  const removeProductFromCart = (idAsImageDataURL: string) => {
+  const removeProductFromCart = (idAsImageDataURL: string, productId: string) => {
     setCartItems((items) =>
       items.filter((item) => {
         const matching = item.mockupData.id === idAsImageDataURL
         if (matching) {
-          LocalStorageHelper.removeSavedMockupImage(sessionId, idAsImageDataURL, item.mockupData.id)
+          LocalStorageHelper.removeSavedMockupImage(sessionId, productId, item.mockupData.id)
           return false
         } else {
           return true
@@ -252,7 +252,7 @@ const PaymentPage = () => {
                         </div>
                         <div>
                           <button
-                            onClick={() => removeProductFromCart(mockupData.id)}
+                            onClick={() => removeProductFromCart(mockupData.id, id)}
                             className="p-1 rounded-full bg-red-600 hover:scale-90 transition"
                           >
                             <X size={22} strokeWidth={3} className="text-white" />
