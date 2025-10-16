@@ -171,7 +171,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
           <div className="bg-gray-50 rounded-lg p-4 space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">Người bán</span>
-              <span className="text-sm font-semibold text-gray-900">AudioTech Store</span>
+              <span className="text-sm font-semibold text-gray-900">F-mon Fashion</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">Xuất xứ</span>

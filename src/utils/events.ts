@@ -10,12 +10,24 @@ interface IInternalEvents {
     posX?: number,
     posY?: number
   ) => void
+  [EInternalEvents.SUBMIT_STICKER_ELE_PROPS]: (
+    elementId: string | null,
+    scale?: number,
+    angle?: number,
+    posX?: number,
+    posY?: number
+  ) => void
   [EInternalEvents.SUBMIT_TEXT_ELE_PROPS]: (
     elementId: string | null,
     fontSize?: number,
     angle?: number,
     posX?: number,
     posY?: number
+  ) => void
+  [EInternalEvents.SUBMIT_PRODUCT_IMAGE_ELE_PROPS]: (
+    elementId: string | null,
+    scale?: number,
+    angle?: number
   ) => void
   [EInternalEvents.PICK_ELEMENT]: (element: HTMLElement | null, elementType: TElementType) => void
 }

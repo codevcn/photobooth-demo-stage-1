@@ -4,6 +4,7 @@ import { X } from 'lucide-react'
 interface StickerPickerProps {
   onAddSticker: (emoji: string) => void
   onClose: () => void
+  show: boolean
 }
 
 const stickers = [
@@ -15,14 +16,17 @@ const stickers = [
   { path: '/images/stickers/st-6.png', size: 100 },
 ]
 
-const StickerPicker: React.FC<StickerPickerProps> = ({ onAddSticker, onClose }) => {
+const StickerPicker: React.FC<StickerPickerProps> = ({ onAddSticker, onClose, show }) => {
   const handleSelect = (emoji: string) => {
     onAddSticker(emoji)
     onClose()
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-end z-50 animate-pop-in">
+    <div
+      style={{ display: show ? 'flex' : 'none' }}
+      className="fixed inset-0 bg-black/50 flex items-end z-50 animate-pop-in"
+    >
       <div className="flex flex-col items-center bg-white w-full rounded-t-3xl py-4 shadow-2xl max-h-[70vh]">
         <div className="flex items-center w-full sticky top-0 bg-white mb-2 grow px-6">
           <h3 className="text-xl font-bold text-gray-800 w-full">Thêm nhãn dán</h3>

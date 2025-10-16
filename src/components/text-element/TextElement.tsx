@@ -100,7 +100,7 @@ export const TextElement = ({
     }
   }
 
-  const listenSubmitPrintedImageEleProps = (
+  const listenSubmitEleProps = (
     elementId: string | null,
     fontSize?: number,
     angle?: number,
@@ -117,17 +117,11 @@ export const TextElement = ({
   }, [rotation])
 
   useEffect(() => {
-    eventEmitter.on(
-      EInternalEvents.SUBMIT_PRINTED_IMAGE_ELE_PROPS,
-      listenSubmitPrintedImageEleProps
-    )
+    eventEmitter.on(EInternalEvents.SUBMIT_TEXT_ELE_PROPS, listenSubmitEleProps)
     return () => {
-      eventEmitter.off(
-        EInternalEvents.SUBMIT_PRINTED_IMAGE_ELE_PROPS,
-        listenSubmitPrintedImageEleProps
-      )
+      eventEmitter.off(EInternalEvents.SUBMIT_TEXT_ELE_PROPS, listenSubmitEleProps)
     }
-  }, [])
+  }, [id])
 
   return (
     <div

@@ -17,11 +17,15 @@ import { TextElementMenu } from './text-element/menu'
 import { StickerElementMenu } from './sticker-element/menu'
 import { eventEmitter } from '@/utils/events'
 import { EInternalEvents } from '@/utils/enums'
+import { ProductImageElementMenu } from './product-image/menu'
+import { PrintedImagesPreview } from './PrintedImagesPreview'
 
 const maxZoom: number = 1
 const minZoom: number = 0.3
 
-type TSelectingType = TElementType | null
+type TSelectingType = TElementType | 'product-image' | null
+
+type TElementProperties = { scale: number; angle: number }
 
 interface EditAreaProps {
   editingProduct?: IProductImage
@@ -54,6 +58,7 @@ const EditArea: React.FC<EditAreaProps> = ({
   const editAreaRef = useRef<HTMLDivElement>(null)
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null)
   const [selectingType, setSelectingType] = useState<TSelectingType>(null)
+  const propertiesRef = useRef<TElementProperties>({ scale: 1, angle: 0 })
 
   const handleRemoveText = (id: string) => {
     onUpdateText(textElements.filter((el) => el.id !== id))
@@ -113,6 +118,44 @@ const EditArea: React.FC<EditAreaProps> = ({
     }
   }
 
+  const handlePickProductImage = (e: React.MouseEvent) => {
+    if (editingProduct) {
+      const target = e.target as HTMLElement
+      if (target.classList.contains('NAME-product-image')) {
+        e.stopPropagation()
+        handleUpdateSelectedElementId(editingProduct.id, 'product-image')
+      }
+    }
+  }
+
+  const listenSubmitEleProps = (elementId: string | null, scale?: number, angle?: number) => {
+    if (elementId === selectedElementId && selectingType === 'product-image') {
+      const root = editAreaRef.current
+      if (root) {
+        const productImage = root.querySelector<HTMLDivElement>(`.NAME-product-image`)
+        if (productImage) {
+          if (scale) {
+            productImage.style.transform = `scale(${scale}) rotate(${propertiesRef.current.angle}deg)`
+            propertiesRef.current.scale = scale
+          }
+          if (angle || angle === 0) {
+            productImage.style.transform = `scale(${propertiesRef.current.scale}) rotate(${
+              angle || 0
+            }deg)`
+            propertiesRef.current.angle = angle
+          }
+        }
+      }
+    }
+  }
+
+  useEffect(() => {
+    eventEmitter.on(EInternalEvents.SUBMIT_PRODUCT_IMAGE_ELE_PROPS, listenSubmitEleProps)
+    return () => {
+      eventEmitter.off(EInternalEvents.SUBMIT_PRODUCT_IMAGE_ELE_PROPS, listenSubmitEleProps)
+    }
+  }, [selectedElementId, selectingType])
+
   useEffect(() => {
     eventEmitter.on(EInternalEvents.CLICK_ON_PAGE, listenClickOnPageEvent)
     return () => {
@@ -128,12 +171,10 @@ const EditArea: React.FC<EditAreaProps> = ({
           <p className="text-xs text-gray-500">Chạm vào các phần tử để di chuyển vị trí</p>
         </div>
         <div>
-          <button
-            onClick={handleOpenPrintedImagesModal}
-            className="p-2 border-2 border-pink-cl border-solid text-pink-cl rounded-full bg-white active:scale-90 transition"
-          >
-            <Image size={20} color="currentColor" className="flex" />
-          </button>
+          <PrintedImagesPreview
+            onOpenPrintedImagesModal={handleOpenPrintedImagesModal}
+            printedImages={printedImages}
+          />
           <PrintedImagesModal
             show={showPrintedImagesModal}
             onAddImage={handleAddImage}
@@ -143,13 +184,17 @@ const EditArea: React.FC<EditAreaProps> = ({
         </div>
       </div>
 
-      <div ref={htmlToCanvasEditorRef} className="relative w-full h-fit rounded-lg bg-white py-2">
+      <div
+        ref={htmlToCanvasEditorRef}
+        className="relative w-full h-fit rounded-lg bg-white py-2 overflow-hidden"
+      >
         {editingProduct && (
           <img
             {...bindForPinch()}
             src={editingProduct.url}
             alt={editingProduct.name}
             className="NAME-product-image touch-none w-full h-full object-contain"
+            onClick={handlePickProductImage}
           />
         )}
 
@@ -195,6 +240,8 @@ const EditArea: React.FC<EditAreaProps> = ({
             <StickerElementMenu elementId={selectedElementId} />
           ) : selectingType === 'printed-image' ? (
             <PrintedImageElementMenu elementId={selectedElementId} />
+          ) : selectingType === 'product-image' ? (
+            <ProductImageElementMenu elementId={selectedElementId} />
           ) : (
             <></>
           )}

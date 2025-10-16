@@ -26,7 +26,7 @@ export const PrintedImageElement = ({
   selectedElementId,
 }: PrintedImageElementProps) => {
   const { ref: refForDrag, position } = useDraggable()
-  const { url, height, width, id } = element
+  const { url, height, width, id, x, y } = element
   const isSelected = selectedElementId === id
   const rootRef = useRef<HTMLElement | null>(null)
   const propertiesRef = useRef<TElementProperties>({ scale: 1, angle: 0 })
@@ -99,7 +99,7 @@ export const PrintedImageElement = ({
     }
   }
 
-  const listenSubmitPrintedImageEleProps = (
+  const listenSubmitEleProps = (
     elementId: string | null,
     scale?: number,
     angle?: number,
@@ -111,22 +111,37 @@ export const PrintedImageElement = ({
     }
   }
 
+  const moveElementIntoCenter = () => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const root = rootRef.current
+        if (root) {
+          const parent = root.parentElement
+          if (parent) {
+            const parentRect = parent.getBoundingClientRect()
+            const rootRect = root.getBoundingClientRect()
+            root.style.left = `${(parentRect.width - rootRect.width) / 2}px`
+            root.style.top = `${(parentRect.height - rootRect.height) / 2}px`
+          }
+        }
+      })
+    })
+  }
+
   useEffect(() => {
     rotateElementByButton()
   }, [rotation])
 
   useEffect(() => {
-    eventEmitter.on(
-      EInternalEvents.SUBMIT_PRINTED_IMAGE_ELE_PROPS,
-      listenSubmitPrintedImageEleProps
-    )
-    return () => {
-      eventEmitter.off(
-        EInternalEvents.SUBMIT_PRINTED_IMAGE_ELE_PROPS,
-        listenSubmitPrintedImageEleProps
-      )
-    }
+    moveElementIntoCenter()
   }, [])
+
+  useEffect(() => {
+    eventEmitter.on(EInternalEvents.SUBMIT_PRINTED_IMAGE_ELE_PROPS, listenSubmitEleProps)
+    return () => {
+      eventEmitter.off(EInternalEvents.SUBMIT_PRINTED_IMAGE_ELE_PROPS, listenSubmitEleProps)
+    }
+  }, [id])
 
   return (
     <div
@@ -135,12 +150,10 @@ export const PrintedImageElement = ({
         rootRef.current = node
       }}
       style={{
-        left: position.x,
-        top: position.y,
+        left: position.x || x,
+        top: position.y || y,
       }}
-      className={`${
-        isSelected ? 'outline-2 outline-dark-pink-cl outline' : ''
-      } NAME-root-element absolute h-fit w-fit`}
+      className={`NAME-root-element absolute h-fit w-fit`}
       onClick={pickElement}
     >
       <div
@@ -149,35 +162,37 @@ export const PrintedImageElement = ({
           width: width === -1 ? 'auto' : width,
           aspectRatio: width === -1 || height === -1 ? 'auto' : `${width} / ${height}`,
         }}
-        className="NAME-element-main-box max-w-[200px] select-none touch-none relative origin-center"
+        className={`${
+          isSelected ? 'outline-2 outline-dark-pink-cl outline' : ''
+        } NAME-element-main-box max-w-[200px] select-none touch-none relative origin-center`}
       >
         <div className="h-full w-full">
           <img src={url || '/placeholder.svg'} alt="Overlay" className="h-full w-full" />
         </div>
-      </div>
-      <div
-        className={`${
-          isSelected ? 'block' : 'hidden'
-        } NAME-rotate-box absolute -top-6 -left-6 z-20`}
-      >
-        <button
-          ref={handleRef}
-          className="cursor-grab active:cursor-grabbing bg-pink-cl text-white rounded-full p-1 active:scale-90 transition"
+        <div
+          className={`${
+            isSelected ? 'block' : 'hidden'
+          } NAME-rotate-box absolute -top-6 -left-6 z-20`}
         >
-          <RotateCw size={12} color="currentColor" />
-        </button>
-      </div>
-      <div
-        className={`${
-          isSelected ? 'block' : 'hidden'
-        } NAME-remove-box absolute -top-6 -right-6 z-20`}
-      >
-        <button
-          onClick={() => onRemoveElement(id)}
-          className="bg-red-600 text-white rounded-full p-1 active:scale-90 transition"
+          <button
+            ref={handleRef}
+            className="cursor-grab active:cursor-grabbing bg-pink-cl text-white rounded-full p-1 active:scale-90 transition"
+          >
+            <RotateCw size={12} color="currentColor" />
+          </button>
+        </div>
+        <div
+          className={`${
+            isSelected ? 'block' : 'hidden'
+          } NAME-remove-box absolute -top-6 -right-6 z-20`}
         >
-          <X size={12} color="currentColor" strokeWidth={3} />
-        </button>
+          <button
+            onClick={() => onRemoveElement(id)}
+            className="bg-red-600 text-white rounded-full p-1 active:scale-90 transition"
+          >
+            <X size={12} color="currentColor" strokeWidth={3} />
+          </button>
+        </div>
       </div>
     </div>
   )

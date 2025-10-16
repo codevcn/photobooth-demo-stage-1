@@ -23,14 +23,7 @@ export const StickerElementMenu = ({ elementId }: Sticker) => {
   }
 
   const handleChangeProperties = (scale?: number, angle?: number, posX?: number, posY?: number) => {
-    eventEmitter.emit(
-      EInternalEvents.SUBMIT_PRINTED_IMAGE_ELE_PROPS,
-      elementId,
-      scale,
-      angle,
-      posX,
-      posY
-    )
+    eventEmitter.emit(EInternalEvents.SUBMIT_STICKER_ELE_PROPS, elementId, scale, angle, posX, posY)
   }
 
   const submit = (inputs: HTMLInputElement[], type: TPropertyType) => {
@@ -38,7 +31,7 @@ export const StickerElementMenu = ({ elementId }: Sticker) => {
     if (values && values.length > 0) {
       switch (type) {
         case 'scale':
-          handleChangeProperties(values[0])
+          handleChangeProperties(values[0] ? values[0] / 100 : undefined)
           break
         case 'angle':
           handleChangeProperties(undefined, values[0])
@@ -67,7 +60,7 @@ export const StickerElementMenu = ({ elementId }: Sticker) => {
     const angleInput = menuSection?.querySelector<HTMLInputElement>('.NAME-form-angle input')
     const posXYInputs = menuSection?.querySelectorAll<HTMLInputElement>('.NAME-form-position input')
     handleChangeProperties(
-      scaleInput?.value ? parseFloat(scaleInput.value) : undefined,
+      scaleInput?.value ? parseFloat(scaleInput.value) / 100 : undefined,
       angleInput?.value ? parseFloat(angleInput.value) : undefined,
       posXYInputs && posXYInputs[0]?.value ? parseFloat(posXYInputs[0].value) : undefined,
       posXYInputs && posXYInputs[1]?.value ? parseFloat(posXYInputs[1].value) : undefined
@@ -80,26 +73,28 @@ export const StickerElementMenu = ({ elementId }: Sticker) => {
         <div className="min-w-[22px]">
           <Fullscreen size={20} className="text-white" strokeWidth={3} />
         </div>
-        <div className="flex gap-1 mx-1">
+        <div className="flex gap-1 items-center mx-1">
           <input
             type="text"
-            placeholder="1.15"
+            placeholder="55"
             onKeyDown={(e) => catchEnter(e, 'scale')}
             className="border rounded px-1 py-0.5 text-base outline-none w-full"
           />
+          <span className="text-white text-base font-bold">%</span>
         </div>
       </div>
       <div className="NAME-form-group NAME-form-angle flex items-center bg-pink-cl rounded px-1 py-1 shadow mb-1 w-full">
         <div className="min-w-[22px]">
           <RefreshCw size={20} className="text-white" strokeWidth={3} />
         </div>
-        <div className="flex gap-1 mx-1">
+        <div className="flex gap-1 items-center mx-1">
           <input
             type="text"
             placeholder="22"
             onKeyDown={(e) => catchEnter(e, 'angle')}
             className="border rounded px-1 py-0.5 text-base outline-none w-full"
           />
+          <span className="text-white text-base font-bold">độ</span>
         </div>
       </div>
       <div className="NAME-form-group NAME-form-position flex items-center bg-pink-cl rounded px-1 py-1 shadow w-full">

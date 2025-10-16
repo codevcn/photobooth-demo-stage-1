@@ -99,7 +99,7 @@ export const StickerElement = ({
     }
   }
 
-  const listenSubmitPrintedImageEleProps = (
+  const listenSubmitEleProps = (
     elementId: string | null,
     scale?: number,
     angle?: number,
@@ -116,17 +116,11 @@ export const StickerElement = ({
   }, [rotation])
 
   useEffect(() => {
-    eventEmitter.on(
-      EInternalEvents.SUBMIT_PRINTED_IMAGE_ELE_PROPS,
-      listenSubmitPrintedImageEleProps
-    )
+    eventEmitter.on(EInternalEvents.SUBMIT_STICKER_ELE_PROPS, listenSubmitEleProps)
     return () => {
-      eventEmitter.off(
-        EInternalEvents.SUBMIT_PRINTED_IMAGE_ELE_PROPS,
-        listenSubmitPrintedImageEleProps
-      )
+      eventEmitter.off(EInternalEvents.SUBMIT_STICKER_ELE_PROPS, listenSubmitEleProps)
     }
-  }, [])
+  }, [id])
 
   return (
     <div

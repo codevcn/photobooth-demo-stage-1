@@ -1,14 +1,14 @@
 import { EInternalEvents } from '@/utils/enums'
 import { eventEmitter } from '@/utils/events'
-import { RefreshCw, Move, Check, Fullscreen } from 'lucide-react'
+import { RefreshCw, Check, Fullscreen } from 'lucide-react'
 
 type TPropertyType = 'scale' | 'angle' | 'posXY'
 
-interface PrintedImageMenuProps {
+interface Sticker {
   elementId: string
 }
 
-export const PrintedImageElementMenu = ({ elementId }: PrintedImageMenuProps) => {
+export const ProductImageElementMenu = ({ elementId }: Sticker) => {
   const validateInputsPositiveNumber = (
     inputs: HTMLInputElement[],
     type: TPropertyType
@@ -22,15 +22,8 @@ export const PrintedImageElementMenu = ({ elementId }: PrintedImageMenuProps) =>
     return validValues.length > 0 ? validValues : []
   }
 
-  const handleChangeProperties = (scale?: number, angle?: number, posX?: number, posY?: number) => {
-    eventEmitter.emit(
-      EInternalEvents.SUBMIT_PRINTED_IMAGE_ELE_PROPS,
-      elementId,
-      scale,
-      angle,
-      posX,
-      posY
-    )
+  const handleChangeProperties = (scale?: number, angle?: number) => {
+    eventEmitter.emit(EInternalEvents.SUBMIT_PRODUCT_IMAGE_ELE_PROPS, elementId, scale, angle)
   }
 
   const submit = (inputs: HTMLInputElement[], type: TPropertyType) => {
@@ -43,10 +36,6 @@ export const PrintedImageElementMenu = ({ elementId }: PrintedImageMenuProps) =>
         case 'angle':
           handleChangeProperties(undefined, values[0])
           break
-        case 'posXY':
-          if (values.length >= 2) {
-            handleChangeProperties(undefined, undefined, values[0], values[1])
-          }
       }
     }
   }
@@ -65,12 +54,9 @@ export const PrintedImageElementMenu = ({ elementId }: PrintedImageMenuProps) =>
     const menuSection = e.currentTarget.closest<HTMLElement>('.NAME-menu-section')
     const scaleInput = menuSection?.querySelector<HTMLInputElement>('.NAME-form-scale input')
     const angleInput = menuSection?.querySelector<HTMLInputElement>('.NAME-form-angle input')
-    const posXYInputs = menuSection?.querySelectorAll<HTMLInputElement>('.NAME-form-position input')
     handleChangeProperties(
       scaleInput?.value ? parseFloat(scaleInput.value) / 100 : undefined,
-      angleInput?.value ? parseFloat(angleInput.value) : undefined,
-      posXYInputs && posXYInputs[0]?.value ? parseFloat(posXYInputs[0].value) : undefined,
-      posXYInputs && posXYInputs[1]?.value ? parseFloat(posXYInputs[1].value) : undefined
+      angleInput?.value ? parseFloat(angleInput.value) : undefined
     )
   }
 
@@ -104,26 +90,7 @@ export const PrintedImageElementMenu = ({ elementId }: PrintedImageMenuProps) =>
           <span className="text-white text-base font-bold">độ</span>
         </div>
       </div>
-      <div className="NAME-form-group NAME-form-position flex items-center bg-pink-cl rounded px-1 py-1 shadow w-full">
-        <div className="min-w-[22px]">
-          <Move size={20} className="text-white" strokeWidth={3} />
-        </div>
-        <div className="flex gap-1 mx-1">
-          <input
-            type="text"
-            placeholder="X"
-            onKeyDown={(e) => catchEnter(e, 'posXY')}
-            className="border rounded px-1 py-0.5 text-base outline-none w-full"
-          />
-          <input
-            type="text"
-            placeholder="Y"
-            onKeyDown={(e) => catchEnter(e, 'posXY')}
-            className="border rounded px-1 py-0.5 text-base outline-none w-full"
-          />
-        </div>
-      </div>
-      <div className="NAME-form-group NAME-form-position flex items-center bg-pink-cl rounded px-1 py-1 shadow w-full">
+      <div className="NAME-form-group NAME-form-position flex items-center bg-pink-cl rounded px-1 py-1 shadow w-full col-span-2">
         <button
           onClick={handleClickCheck}
           className="group flex items-center justify-center font-bold w-full gap-1 text-white active:bg-white active:text-green-600 rounded p-1"

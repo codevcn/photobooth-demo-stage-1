@@ -1,10 +1,29 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Minus, Plus, Edit2, Tag, Banknote, X, ArrowBigLeft } from 'lucide-react'
+import { Minus, Plus, Edit2, Tag, Banknote, X, ArrowBigLeft, ArrowLeft } from 'lucide-react'
 import { formatNumberWithCommas, LocalStorageHelper } from '@/utils/helpers'
 import { productImages } from '@/lib/storage'
 import { IProductImage } from '@/utils/types'
-import { PaymentModal } from '@/components/PaymentModal'
+import { PaymentModal } from '@/components/payment/PaymentModal'
 import { useNavigate } from 'react-router-dom'
+import { createPortal } from 'react-dom'
+
+interface IPaymentModalProps {
+  imgSrc?: string
+  onClose: () => void
+}
+
+const ProductImageModal = ({ imgSrc, onClose }: IPaymentModalProps) => {
+  if (!imgSrc) return null
+
+  return (
+    <div className="flex fixed inset-0">
+      <div onClick={onClose} className="absolute w-full h-full bg-black/50 z-10"></div>
+      <div className="relative z-20 flex items-center justify-center m-auto">
+        <img src={imgSrc} alt="Product image" className="max-h-[90vh] max-w-[90vw] object-contai" />
+      </div>
+    </div>
+  )
+}
 
 type TProductItem = {
   id: string
@@ -31,6 +50,7 @@ const PaymentPage = () => {
   const [discountMessage, setDiscountMessage] = useState('')
   const [showModal, setShowModal] = useState(false)
   const navigate = useNavigate()
+  const [selectedImage, setSelectedImage] = useState<string>()
 
   const updateQuantity = (id: string, delta: number) => {
     setCartItems((items) =>
@@ -100,11 +120,27 @@ const PaymentPage = () => {
     )
   }
 
+  const handleShowProductImageModal = (imgSrc: string) => {
+    setSelectedImage(imgSrc)
+  }
+
+  const handleCloseProductImageModal = () => {
+    setSelectedImage(undefined)
+  }
+
+  const backToEditPage = () => {
+    navigate('/')
+  }
+
   const subtotal = useMemo(() => {
     return cartItems.reduce((sum, item) => (sum + (item.discountedPrice || 0)) * item.quantity, 0)
   }, [cartItems])
   const discount = discountApplied ? subtotal * 0.2 : 0
   const total = subtotal - discount
+
+  useEffect(() => {
+    document.body.style.overflow = showModal ? 'hidden' : 'auto'
+  }, [showModal])
 
   useEffect(() => {
     loadCartItems()
@@ -121,9 +157,19 @@ const PaymentPage = () => {
       </header>
 
       {/* Main Content */}
-      <div className="flex flex-col gap-2 max-w-md mx-auto px-2 pt-4 pb-6">
+      <div className="flex flex-col gap-2 max-w-md mx-auto px-2 pt-2 pb-6">
+        <div>
+          <button
+            onClick={backToEditPage}
+            className="flex items-center gap-2 py-1 px-2 text-sm bg-pink-cl rounded-md text-white font-bold active:scale-95 transition"
+          >
+            <ArrowLeft size={20} color="currentColor" />
+            <span>Quay về</span>
+          </button>
+        </div>
+
         {/* Product List */}
-        <section className="flex flex-col gap-2">
+        <section className="flex flex-col gap-2 mt-4">
           {cartItems.map(
             ({ id, mockupData, name, size, color, originalPrice, discountedPrice, quantity }) => (
               <div
@@ -132,7 +178,10 @@ const PaymentPage = () => {
               >
                 <div className="flex gap-3">
                   {/* Product Image */}
-                  <div className="flex-shrink-0">
+                  <div
+                    className="flex-shrink-0"
+                    onClick={() => handleShowProductImageModal(mockupData.image)}
+                  >
                     <img
                       src={mockupData.image}
                       alt={name}
@@ -144,13 +193,13 @@ const PaymentPage = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <h3 className="font-semibold text-gray-900 text-sm leading-tight">{name}</h3>
-                      <button
+                      {/* <button
                         onClick={() => console.log(`Edit product ${id}`)}
                         className="flex-shrink-0 p-1.5 text-gray-400 hover:text-pink-cl transition-colors rounded-lg hover:bg-superlight-pink-cl active:scale-95"
                         aria-label="Chỉnh sửa sản phẩm"
                       >
                         <Edit2 size={16} />
-                      </button>
+                      </button> */}
                     </div>
 
                     <div className="flex items-center gap-2 text-xs text-gray-500 mb-3">
@@ -159,7 +208,7 @@ const PaymentPage = () => {
                     </div>
 
                     {/* Price and Quantity */}
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col gap-3">
                       {discountedPrice ? (
                         <div className="flex flex-col">
                           <span className="text-xs text-gray-400 line-through">
@@ -222,17 +271,17 @@ const PaymentPage = () => {
             <Tag size={18} className="text-pink-cl" />
             <h2 className="font-semibold text-gray-900">Mã giảm giá</h2>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 w-full">
             <input
               type="text"
               value={discountCode}
               onChange={(e) => setDiscountCode(e.target.value)}
               placeholder="Nhập mã khuyến mãi"
-              className="flex-1 h-[40px] px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-cl focus:border-transparent transition-all"
+              className="flex-1 h-[40px] w-[100px] px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-cl focus:border-transparent transition-all"
             />
             <button
               onClick={applyDiscount}
-              className="h-[40px] px-6 bg-pink-cl text-white font-medium rounded-xl active:scale-95 transition shadow-sm"
+              className="h-[40px] px-6 bg-pink-cl text-white font-medium rounded-xl active:scale-95 transition shadow-sm w-max"
             >
               Áp dụng
             </button>
@@ -296,6 +345,11 @@ const PaymentPage = () => {
         }}
         onHideShow={setShowModal}
       />
+
+      {createPortal(
+        <ProductImageModal imgSrc={selectedImage} onClose={handleCloseProductImageModal} />,
+        document.body
+      )}
     </div>
   ) : (
     <div className="max-w-md mx-auto min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 pb-12">
@@ -307,7 +361,7 @@ const PaymentPage = () => {
       </header>
       <div className="flex justify-center w-full pt-4">
         <button
-          onClick={() => navigate("/")}
+          onClick={() => navigate('/')}
           className="flex justify-center items-center bg-pink-cl rounded-md p-2 active:scale-95 transition text-white font-bold"
         >
           <ArrowBigLeft size={24} color="currentColor" strokeWidth={3} />

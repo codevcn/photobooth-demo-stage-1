@@ -174,14 +174,7 @@ export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuPro
     posX?: number,
     posY?: number
   ) => {
-    eventEmitter.emit(
-      EInternalEvents.SUBMIT_PRINTED_IMAGE_ELE_PROPS,
-      elementId,
-      fontSize,
-      angle,
-      posX,
-      posY
-    )
+    eventEmitter.emit(EInternalEvents.SUBMIT_TEXT_ELE_PROPS, elementId, fontSize, angle, posX, posY)
   }
 
   const submit = (inputs: HTMLInputElement[], type: TPropertyType) => {
@@ -318,13 +311,14 @@ export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuPro
         <div className="min-w-[22px]">
           <RefreshCw size={20} className="text-white" strokeWidth={3} />
         </div>
-        <div className="flex gap-1 mx-1">
+        <div className="flex gap-1 items-center mx-1">
           <input
             type="text"
             placeholder="Xoay, VD: 22"
             onKeyDown={(e) => catchEnter(e, 'angle')}
             className="border rounded px-1 py-0.5 text-base outline-none w-full"
           />
+          <span className="text-white text-base font-bold">độ</span>
         </div>
       </div>
       <div className="NAME-form-group NAME-form-position flex items-center bg-pink-cl rounded px-1 py-1 shadow w-full">

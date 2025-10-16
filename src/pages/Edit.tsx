@@ -18,7 +18,7 @@ import {
 import { eventEmitter } from '@/utils/events'
 import { EInternalEvents } from '@/utils/enums'
 import { GlobalContext } from './sharings'
-import { productImages } from '@/lib/storage'
+import { productImages, trendingProducts } from '@/lib/storage'
 import { LocalStorageHelper, swapArrayItems } from '@/utils/helpers'
 import { ToastContainer } from 'react-toastify'
 import { toast } from 'react-toastify'
@@ -52,7 +52,7 @@ const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
 const EditPage = () => {
   const [sessionId] = useState<string>('12331-5465464-1321311-hththt')
   // Gallery images
-  const [galleryImages] = useState<IProductImage[][]>(productImages)
+  const [galleryImages] = useState<IProductImage[][]>(productImages.concat(trendingProducts))
   // Printed images
   const [printedImages] = useState<IPrintedImage[]>([
     {
@@ -103,7 +103,16 @@ const EditPage = () => {
   // Edit elements
   const [textElements, setTextElements] = useState<ITextElement[]>([])
   const [stickerElements, setStickerElements] = useState<IStickerElement[]>([])
-  const [printedImageElements, setPrintedImageElements] = useState<IPrintedImage[]>([])
+  const [printedImageElements, setPrintedImageElements] = useState<IPrintedImage[]>([
+    {
+      id: 'printed-1',
+      url: '/images/print-img-1.png',
+      height: -1,
+      width: -1,
+      x: 0,
+      y: 0,
+    },
+  ])
 
   const { editorRef, handleSaveHtmlAsImage } = useHtmlToCanvas()
 
@@ -232,6 +241,7 @@ const EditPage = () => {
               galleryImages={galleryImages}
               activeImageId={activeImageId}
               onSelectImage={setActiveImageId}
+              printedImages={printedImages}
             />
           </div>
 
@@ -293,12 +303,11 @@ const EditPage = () => {
             <TextEditor onAddText={handleAddText} onClose={() => setShowTextEditor(false)} />
           )}
 
-          {showStickerPicker && (
-            <StickerPicker
-              onAddSticker={handleAddSticker}
-              onClose={() => setShowStickerPicker(false)}
-            />
-          )}
+          <StickerPicker
+            onAddSticker={handleAddSticker}
+            onClose={() => setShowStickerPicker(false)}
+            show={showStickerPicker}
+          />
         </div>
         <ToastContainer
           position="top-center"

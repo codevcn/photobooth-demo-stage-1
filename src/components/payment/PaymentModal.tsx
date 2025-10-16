@@ -63,13 +63,11 @@ export const EndOfPayment: React.FC<EndOfPaymentProps> = ({
   }
 
   const mockPaymentResult = () => {
-    setTimeout(() => {
-      if (Math.random() > 0.5) {
-        setPaymentStatus({ status: 'completed' })
-      } else {
-        setPaymentStatus({ status: 'failed', reason: 'Lỗi kết nối hoặc số dư không đủ' })
-      }
-    }, 8000)
+    if (Math.random() > 0.5) {
+      setPaymentStatus({ status: 'completed' })
+    } else {
+      setPaymentStatus({ status: 'failed', reason: 'Lỗi kết nối hoặc số dư không đủ' })
+    }
   }
 
   const backToEditPage = () => {
@@ -79,10 +77,6 @@ export const EndOfPayment: React.FC<EndOfPaymentProps> = ({
   useEffect(() => {
     return countdownHandler()
   }, [countdownDuration])
-
-  useEffect(() => {
-    mockPaymentResult()
-  }, [])
 
   return (
     <div ref={containerRef} className="flex flex-col items-center justify-center px-6 py-6">
@@ -133,16 +127,14 @@ export const EndOfPayment: React.FC<EndOfPaymentProps> = ({
                     Lý do: <span>{reason}</span>.
                   </p>
                 )}
-                <p className="p-1 rounded-md bg-light-pink-cl mt-1">
-                  Mã giao dịch của bạn là <span className="font-bold">000-XXX-XXX</span>
-                </p>
               </div>
             </div>
           ) : (
             <>
               <div
                 className="my-4 p-6 rounded-md"
-                style={{ backgroundColor: colorByPaymentMethod }}
+                    style={{ backgroundColor: colorByPaymentMethod }}
+                    onClick={mockPaymentResult}
               >
                 <img src={QRCodeURL} className="w-40 h-40 object-contain" alt="QR code" />
               </div>
@@ -226,7 +218,6 @@ export const PaymentModal = ({ show, paymentInfo, onHideShow }: PaymentModalProp
     const province = formData.get('province')?.toString().trim()
     const city = formData.get('city')?.toString().trim()
     const address = formData.get('address')?.toString().trim()
-    console.log('>>> info:', { fullName, phone, email, province, city, address })
     if (!fullName || !phone || !email || !province || !city || !address) {
       setErrors({
         fullName: fullName ? undefined : 'Họ và tên là bắt buộc',
@@ -437,6 +428,22 @@ export const PaymentModal = ({ show, paymentInfo, onHideShow }: PaymentModalProp
                 {errors.address && (
                   <p className="text-red-600 text-sm mt-0.5 pl-1">{errors.address}</p>
                 )}
+              </div>
+
+              <div>
+                <label
+                  htmlFor="message-input"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Lời nhắn (tùy chọn)
+                </label>
+                <textarea
+                  id="message-input"
+                  name="message"
+                  placeholder="Nhập lời nhắn của bạn..."
+                  rows={2}
+                  className="w-full min-h-[44px] px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-cl focus:border-transparent transition-all"
+                ></textarea>
               </div>
             </div>
           </form>
