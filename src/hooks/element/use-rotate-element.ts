@@ -28,7 +28,7 @@ export const useRotateElement = (
 
   // State
   const [rotation, setRotation] = useState(initialRotation)
-  const [isRotating, setIsRotating] = useState(false)
+  const [isRotating, setIsRotating] = useState<boolean>(false)
 
   // Hàm tính góc từ tâm phần tử đến điểm (x, y)
   const getAngleFromCenter = useCallback((clientX: number, clientY: number): number => {

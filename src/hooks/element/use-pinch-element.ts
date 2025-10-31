@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, RefObject } from 'react'
+import { useRef, useEffect, useState } from 'react'
 
 interface PinchZoomOptions {
   minScale?: number
@@ -23,7 +23,7 @@ interface TouchData {
 }
 
 interface UsePinchZoomReturn {
-  ref: RefObject<HTMLDivElement>
+  ref: React.MutableRefObject<HTMLDivElement | null>
   scale: number
   rotation: number
   position: Position
