@@ -1,11 +1,11 @@
-import useDraggable from '@/hooks/use-draggable'
+import { useDragElement } from '@/hooks/element/use-draggable-element'
 import { ITextElement } from '@/utils/types'
 import { X, RotateCw } from 'lucide-react'
 import { usePinch } from '@use-gesture/react'
 import { useEffect, useRef } from 'react'
 import { eventEmitter } from '@/utils/events'
 import { EInternalEvents } from '@/utils/enums'
-import { useRotateElement } from '@/hooks/use-rotate-element'
+import { useRotateElement } from '@/hooks/element/use-rotate-element'
 
 const maxZoom: number = 2
 const minZoom: number = 0.3
@@ -25,7 +25,7 @@ export const TextElement = ({
   onUpdateSelectedElementId,
   selectedElementId,
 }: TextElementProps) => {
-  const { ref: refForDrag, position } = useDraggable()
+  const { ref: refForDrag, position } = useDragElement()
   const { color, fontSize, text, x, y, id } = element
   const isSelected = selectedElementId === id
   const rootRef = useRef<HTMLElement | null>(null)
@@ -43,12 +43,9 @@ export const TextElement = ({
   const adjustElementForPinch = (fontSize: number, angle: number, last: boolean) => {
     const root = rootRef.current
     if (root) {
-      const elementMainBox = root.querySelector<HTMLDivElement>(`.NAME-element-main-box`)
-      if (elementMainBox) {
-        elementMainBox.style.transform = `rotate(${angle}deg)`
-        elementMainBox.style.fontSize = `${fontSize}px`
-        propertiesRef.current = { fontSize, angle }
-      }
+      root.style.transform = `rotate(${angle}deg)`
+      root.style.fontSize = `${fontSize}px`
+      propertiesRef.current = { fontSize, angle }
     }
   }
 
@@ -133,15 +130,15 @@ export const TextElement = ({
         left: position.x,
         top: position.y,
       }}
-      className={`${
-        isSelected ? 'outline-2 outline-dark-pink-cl outline' : ''
-      } NAME-root-element absolute h-fit w-fit`}
+      className={`NAME-root-element absolute h-fit w-fit bg-pink-400/20 touch-none`}
       onClick={pickElement}
     >
       <div
         {...bindForPinch()}
         style={{ fontSize: `${fontSize}px`, color }}
-        className="NAME-element-main-box max-w-[200px] select-none touch-none relative origin-center"
+        className={`${
+          isSelected ? 'outline-2 outline-dark-pink-cl outline' : ''
+        } NAME-element-main-box max-w-[200px] select-none relative origin-center`}
       >
         <div className="h-full w-full">
           <p className="NAME-displayed-text-content font-bold whitespace-nowrap select-none">
@@ -158,7 +155,7 @@ export const TextElement = ({
           ref={handleRef}
           className="cursor-grab active:cursor-grabbing bg-pink-cl text-white rounded-full p-1 active:scale-90 transition"
         >
-          <RotateCw size={12} color="currentColor" />
+          <RotateCw size={14} color="currentColor" />
         </button>
       </div>
       <div
@@ -170,7 +167,7 @@ export const TextElement = ({
           onClick={() => onRemoveElement(id)}
           className="bg-red-600 text-white rounded-full p-1 active:scale-90 transition"
         >
-          <X size={12} color="currentColor" strokeWidth={3} />
+          <X size={14} color="currentColor" strokeWidth={3} />
         </button>
       </div>
     </div>

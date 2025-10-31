@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Minus, Plus, Tag, Banknote, X, ArrowBigLeft, ArrowLeft } from 'lucide-react'
-import { formatNumberWithCommas, LocalStorageHelper } from '@/utils/helpers'
-import { productImages } from '@/lib/storage'
+import { formatNumberWithCommas } from '@/utils/helpers'
+import { productImages } from '@/dev/storage'
 import { IProductImage } from '@/utils/types'
-import { PaymentModal } from '@/components/payment/PaymentModal'
+import { PaymentModal } from '@/pages/payment/PaymentModal'
 import { useNavigate } from 'react-router-dom'
 import { createPortal } from 'react-dom'
+import { LocalStorageHelper } from '@/utils/localstorage'
 
 interface IPaymentModalProps {
   imgSrc?: string
@@ -135,7 +136,10 @@ const PaymentPage = () => {
   }
 
   const subtotal = useMemo(() => {
-    return cartItems.reduce((sum, item) => (sum + (item.discountedPrice || 0)) * item.quantity, 0)
+    return cartItems.reduce(
+      (sum, item) => sum + (item.discountedPrice || item.originalPrice) * item.quantity,
+      0
+    )
   }, [cartItems])
   const discount = discountApplied ? subtotal * 0.2 : 0
   const total = subtotal - discount

@@ -97,22 +97,22 @@ export const useRotateElement = (
     if (!handle) return
 
     // Đăng ký sự kiện
-    handle.addEventListener('mousedown', handleStart as any)
-    handle.addEventListener('touchstart', handleStart as any)
+    handle.addEventListener('mousedown', handleStart)
+    handle.addEventListener('touchstart', handleStart)
 
-    document.addEventListener('mousemove', handleMove as any)
-    document.addEventListener('touchmove', handleMove as any, { passive: false })
+    document.addEventListener('mousemove', handleMove)
+    document.addEventListener('touchmove', handleMove, { passive: false })
 
     document.addEventListener('mouseup', handleEnd)
     document.addEventListener('touchend', handleEnd)
 
     // Cleanup
     return () => {
-      handle.removeEventListener('mousedown', handleStart as any)
-      handle.removeEventListener('touchstart', handleStart as any)
+      handle.removeEventListener('mousedown', handleStart)
+      handle.removeEventListener('touchstart', handleStart)
 
-      document.removeEventListener('mousemove', handleMove as any)
-      document.removeEventListener('touchmove', handleMove as any)
+      document.removeEventListener('mousemove', handleMove)
+      document.removeEventListener('touchmove', handleMove)
 
       document.removeEventListener('mouseup', handleEnd)
       document.removeEventListener('touchend', handleEnd)

@@ -6,18 +6,17 @@ import {
   IPrintedImage,
   TElementType,
 } from '@/utils/types'
-import { TextElement } from './text-element/TextElement'
-import { StickerElement } from './sticker-element/StickerElement'
-import { PrintedImagesModal } from './printed-image-element/PrintedImages'
-import { Image } from 'lucide-react'
-import { PrintedImageElement } from './printed-image-element/PrintedImageElement'
+import { TextElement } from './element/text-element/TextElement'
+import { StickerElement } from './element/sticker-element/StickerElement'
+import { PrintedImagesModal } from './element/printed-image-element/PrintedImages'
+import { PrintedImageElement } from './element/printed-image-element/PrintedImageElement'
 import { usePinch } from '@use-gesture/react'
-import { PrintedImageElementMenu } from './printed-image-element/menu'
-import { TextElementMenu } from './text-element/menu'
-import { StickerElementMenu } from './sticker-element/menu'
+import { PrintedImageElementMenu } from './element/printed-image-element/Menu'
+import { TextElementMenu } from './element/text-element/Menu'
+import { StickerElementMenu } from './element/sticker-element/Menu'
 import { eventEmitter } from '@/utils/events'
 import { EInternalEvents } from '@/utils/enums'
-import { ProductImageElementMenu } from './product-image/menu'
+import { ProductImageElementMenu } from './product/product-image/Menu'
 import { PrintedImagesPreview } from './PrintedImagesPreview'
 
 const maxZoom: number = 1

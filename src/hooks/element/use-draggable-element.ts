@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 
 type TPosition = { x: number; y: number }
 
-export default function useDraggable(initialPosition: TPosition = { x: 100, y: 100 }) {
+export const useDragElement = (initialPosition: TPosition = { x: 100, y: 100 }) => {
   const [position, setPosition] = useState<TPosition>(initialPosition)
   const [dragging, setDragging] = useState<boolean>(false)
   const [offset, setOffset] = useState<TPosition>({ x: 0, y: 0 })

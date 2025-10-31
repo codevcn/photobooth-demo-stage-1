@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import html2canvas from 'html2canvas'
 import { toast } from 'react-toastify'
-import { LocalStorageHelper } from '@/utils/helpers'
+import { LocalStorageHelper } from '@/utils/localstorage'
 import { TProductInCart } from '@/utils/types'
 
 type TUseHtmlToCanvasReturn = {

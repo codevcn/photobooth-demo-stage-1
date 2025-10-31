@@ -1,11 +1,12 @@
-import useDraggable from '@/hooks/use-draggable'
+import { useDragElement } from '@/hooks/element/use-draggable-element'
 import { IStickerElement } from '@/utils/types'
 import { X, RotateCw } from 'lucide-react'
-import { usePinch } from '@use-gesture/react'
+// import { usePinch } from '@use-gesture/react'
 import { useEffect, useRef } from 'react'
 import { eventEmitter } from '@/utils/events'
 import { EInternalEvents } from '@/utils/enums'
-import { useRotateElement } from '@/hooks/use-rotate-element'
+import { useRotateElement } from '@/hooks/element/use-rotate-element'
+import { useZoomElement } from '@/hooks/element/use-zoom-element'
 
 const maxZoom: number = 2
 const minZoom: number = 0.3
@@ -25,8 +26,13 @@ export const StickerElement = ({
   onUpdateSelectedElementId,
   selectedElementId,
 }: StickerElementProps) => {
-  const { ref: refForDrag, position } = useDraggable()
-  const { path, height, width, id, x, y } = element
+  const { ref: refForDrag, position } = useDragElement()
+  const { path, height, width, id } = element
+  const {
+    ref: refForZoom,
+    scale,
+    rotation: angle,
+  } = useZoomElement({ maxScale: maxZoom, minScale: minZoom })
   const isSelected = selectedElementId === id
   const rootRef = useRef<HTMLElement | null>(null)
   const propertiesRef = useRef<TElementProperties>({ scale: 1, angle: 0 })
@@ -40,25 +46,30 @@ export const StickerElement = ({
     onUpdateSelectedElementId(id)
   }
 
-  const adjustElementForPinch = (scale: number, angle: number, last: boolean) => {
+  const adjustElementForPinch = (scale: number, angle: number) => {
     const root = rootRef.current
     if (root) {
-      const elementMainBox = root.querySelector<HTMLDivElement>(`.NAME-element-main-box`)
-      if (elementMainBox) {
-        elementMainBox.style.transform = `scale(${scale}) rotate(${angle}deg)`
-        propertiesRef.current = { scale, angle }
-      }
+      root.style.transform = `scale(${scale}) rotate(${angle}deg)`
+      propertiesRef.current = { scale, angle }
     }
   }
 
-  const bindForPinch = usePinch(
-    ({ offset: [scale, angle], last }) => adjustElementForPinch(scale, angle, last),
-    {
-      scaleBounds: { min: minZoom, max: maxZoom },
-      rubberband: true,
-      eventOptions: { passive: false },
-    }
-  )
+  // const adjustElementForPinch = (scale: number, angle: number, last: boolean) => {
+  //   const root = rootRef.current
+  //   if (root) {
+  //     root.style.transform = `scale(${scale}) rotate(${angle}deg)`
+  //     propertiesRef.current = { scale, angle }
+  //   }
+  // }
+
+  // const bindForPinch = usePinch(
+  //   ({ offset: [scale, angle], last }) => adjustElementForPinch(scale, angle, last),
+  //   {
+  //     scaleBounds: { min: minZoom, max: maxZoom },
+  //     rubberband: true,
+  //     eventOptions: { passive: false },
+  //   }
+  // )
 
   const onEditElementProperties = (
     scale?: number,
@@ -112,6 +123,10 @@ export const StickerElement = ({
   }
 
   useEffect(() => {
+    adjustElementForPinch(scale, angle)
+  }, [scale, angle])
+
+  useEffect(() => {
     rotateElementByButton()
   }, [rotation])
 
@@ -132,18 +147,18 @@ export const StickerElement = ({
         left: position.x,
         top: position.y,
       }}
-      className={`NAME-root-element absolute h-fit w-fit`}
+      className={`NAME-root-element absolute h-fit w-fit touch-none bg-pink-400/20`}
       onClick={pickElement}
     >
       <div
-        {...bindForPinch()}
+        ref={refForZoom}
         style={{
           width: width === -1 ? 'auto' : width,
           aspectRatio: width === -1 || height === -1 ? 'auto' : `${width} / ${height}`,
         }}
         className={`${
           isSelected ? 'outline-2 outline-dark-pink-cl outline' : ''
-        } NAME-element-main-box max-w-[200px] select-none touch-none relative origin-center`}
+        } NAME-element-main-box max-w-[200px] select-none relative origin-center`}
       >
         <div className="h-full w-full">
           <img
@@ -162,7 +177,7 @@ export const StickerElement = ({
             ref={handleRef}
             className="cursor-grab active:cursor-grabbing bg-pink-cl text-white rounded-full p-1 active:scale-90 transition"
           >
-            <RotateCw size={12} color="currentColor" />
+            <RotateCw size={14} color="currentColor" />
           </button>
         </div>
         <div
@@ -174,7 +189,7 @@ export const StickerElement = ({
             onClick={() => onRemoveElement(id)}
             className="bg-red-600 text-white rounded-full p-1 active:scale-90 transition"
           >
-            <X size={12} color="currentColor" strokeWidth={3} />
+            <X size={14} color="currentColor" strokeWidth={3} />
           </button>
         </div>
       </div>

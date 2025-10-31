@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import ProductGallery from '@/components/ProductGallery'
-import EditArea from '@/components/EditArea'
-import ActionBar from '@/components/ActionBar'
-import BottomMenu from '@/components/BottomMenu'
-import ColorPicker from '@/components/product-color/ColorPicker'
-import SizeSelector from '@/components/product-size/SizeSelector'
-import TextEditor from '@/components/text-element/TextEditor'
-import StickerPicker from '@/components/sticker-element/StickerPicker'
+import ProductGallery from './ProductGallery'
+import EditArea from './EditArea'
+import ActionBar from './ActionBar'
+import BottomMenu from './BottomMenu'
+import ColorPicker from './product/product-color/ColorPicker'
+import SizeSelector from './product/product-size/SizeSelector'
+import TextEditor from './element/text-element/TextEditor'
+import StickerPicker from './element/sticker-element/StickerPicker'
 import {
   IPrintedImage,
   IProductImage,
@@ -17,14 +17,15 @@ import {
 } from '@/utils/types'
 import { eventEmitter } from '@/utils/events'
 import { EInternalEvents } from '@/utils/enums'
-import { GlobalContext } from './sharings'
-import { productImages } from '@/lib/storage'
-import { LocalStorageHelper, swapArrayItems } from '@/utils/helpers'
+import { GlobalContext } from '../../context/global-context'
+import { productImages } from '@/dev/storage'
+import { LocalStorageHelper } from '@/utils/localstorage'
 import { ToastContainer } from 'react-toastify'
 import { toast } from 'react-toastify'
 import { useHtmlToCanvas } from '@/hooks/use-html-to-canvas'
 import { ArrowLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { swapArrayItems } from '@/utils/helpers'
 
 type TProviderState = {
   pickedElementRoot: HTMLElement | null

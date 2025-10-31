@@ -1,11 +1,12 @@
-import useDraggable from '@/hooks/use-draggable'
+import { useDragElement } from '@/hooks/element/use-draggable-element'
 import { IPrintedImage } from '@/utils/types'
 import { X, RotateCw } from 'lucide-react'
 import { usePinch } from '@use-gesture/react'
 import { useEffect, useRef } from 'react'
 import { eventEmitter } from '@/utils/events'
 import { EInternalEvents } from '@/utils/enums'
-import { useRotateElement } from '@/hooks/use-rotate-element'
+import { useRotateElement } from '@/hooks/element/use-rotate-element'
+import { useZoomElement } from '@/hooks/element/use-zoom-element'
 
 const maxZoom: number = 2
 const minZoom: number = 0.3
@@ -25,7 +26,8 @@ export const PrintedImageElement = ({
   onUpdateSelectedElementId,
   selectedElementId,
 }: PrintedImageElementProps) => {
-  const { ref: refForDrag, position } = useDraggable()
+  const { ref: refForDrag, position } = useDragElement()
+  const { ref: refForZoom, scale, rotation: angle } = useZoomElement()
   const { url, height, width, id, x, y } = element
   const isSelected = selectedElementId === id
   const rootRef = useRef<HTMLElement | null>(null)
@@ -43,11 +45,8 @@ export const PrintedImageElement = ({
   const adjustElementForPinch = (scale: number, angle: number, last: boolean) => {
     const root = rootRef.current
     if (root) {
-      const elementMainBox = root.querySelector<HTMLDivElement>(`.NAME-element-main-box`)
-      if (elementMainBox) {
-        elementMainBox.style.transform = `scale(${scale}) rotate(${angle}deg)`
-        propertiesRef.current = { scale, angle }
-      }
+      root.style.transform = `scale(${scale}) rotate(${angle}deg)`
+      propertiesRef.current = { scale, angle }
     }
   }
 
@@ -153,7 +152,7 @@ export const PrintedImageElement = ({
         left: position.x || x,
         top: position.y || y,
       }}
-      className={`NAME-root-element absolute h-fit w-fit`}
+      className={`NAME-root-element absolute h-fit w-fit touch-none bg-pink-400/20`}
       onClick={pickElement}
     >
       <div
@@ -164,7 +163,7 @@ export const PrintedImageElement = ({
         }}
         className={`${
           isSelected ? 'outline-2 outline-dark-pink-cl outline' : ''
-        } NAME-element-main-box max-w-[200px] select-none touch-none relative origin-center`}
+        } NAME-element-main-box max-w-[200px] select-none relative origin-center`}
       >
         <div className="h-full w-full">
           <img src={url || '/placeholder.svg'} alt="Overlay" className="h-full w-full" />
@@ -178,7 +177,7 @@ export const PrintedImageElement = ({
             ref={handleRef}
             className="cursor-grab active:cursor-grabbing bg-pink-cl text-white rounded-full p-1 active:scale-90 transition"
           >
-            <RotateCw size={12} color="currentColor" />
+            <RotateCw size={14} color="currentColor" />
           </button>
         </div>
         <div
@@ -190,7 +189,7 @@ export const PrintedImageElement = ({
             onClick={() => onRemoveElement(id)}
             className="bg-red-600 text-white rounded-full p-1 active:scale-90 transition"
           >
-            <X size={12} color="currentColor" strokeWidth={3} />
+            <X size={14} color="currentColor" strokeWidth={3} />
           </button>
         </div>
       </div>
