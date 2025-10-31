@@ -4,8 +4,8 @@ import { X, RotateCw } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { eventEmitter } from '@/utils/events'
 import { EInternalEvents } from '@/utils/enums'
-import { useRotateElement } from '@/hooks/element/use-pinch-element'
-import { usePinchElement } from '@/hooks/element/use-zoom-element'
+import { useRotateElement } from '@/hooks/element/use-rotate-element'
+import { usePinchElement } from '@/hooks/element/use-pinch-element'
 
 const maxZoom: number = 2
 const minZoom: number = 0.3

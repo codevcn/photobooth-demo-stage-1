@@ -1,169 +1,180 @@
-import { useRef, useCallback, useState, useEffect } from 'react'
+import { useRef, useEffect, useState, RefObject } from 'react'
 
-interface UseElementRotationOptions {
-  initialRotation?: number
-  onRotationStart?: () => void // Callback khi bắt đầu xoay
-  onRotationEnd?: () => void // Callback khi kết thúc xoay
+interface PinchZoomOptions {
+  minScale?: number
+  maxScale?: number
+  scaleSensitivity?: number
+  enableRotation?: boolean
+  enablePan?: boolean
 }
 
-interface UseElementRotationReturn {
+interface Position {
+  x: number
+  y: number
+}
+
+interface TouchData {
+  initialDistance: number
+  initialScale: number
+  initialAngle: number
+  initialRotation: number
+  isDragging: boolean
+  lastTouchPos: Position
+}
+
+interface UsePinchZoomReturn {
+  ref: RefObject<HTMLDivElement>
+  scale: number
   rotation: number
-  rotateButtonRef: React.MutableRefObject<HTMLButtonElement | null>
-  containerRef: React.MutableRefObject<HTMLElement | null>
-  resetRotation: () => void
-  isRotating: boolean
+  position: Position
+  reset: () => void
 }
 
-export const useRotateElement = (
-  options: UseElementRotationOptions = {}
-): UseElementRotationReturn => {
-  const { initialRotation = 0, onRotationStart, onRotationEnd } = options
+// Hook để zoom, xoay và di chuyển element bằng touch gestures
+export const usePinchElement = (options: PinchZoomOptions = {}): UsePinchZoomReturn => {
+  const {
+    minScale = 0.5,
+    maxScale = 3,
+    scaleSensitivity = 0.01,
+    enableRotation = true,
+    enablePan = true,
+  } = options
 
-  // Refs
-  const rotateButtonRef = useRef<HTMLButtonElement>(null)
-  const containerRef = useRef<HTMLElement>(null)
-  const isRotatingRef = useRef(false)
-  const startAngleRef = useRef(0)
-  const startRotationRef = useRef(0)
+  const elementRef = useRef<HTMLDivElement>(null)
+  const [scale, setScale] = useState<number>(1)
+  const [rotation, setRotation] = useState<number>(0)
+  const [position, setPosition] = useState<Position>({ x: 0, y: 0 })
 
-  // State
-  const [rotation, setRotation] = useState(initialRotation)
-  const [isRotating, setIsRotating] = useState(false)
+  const touchData = useRef<TouchData>({
+    initialDistance: 0,
+    initialScale: 1,
+    initialAngle: 0,
+    initialRotation: 0,
+    isDragging: false,
+    lastTouchPos: { x: 0, y: 0 },
+  })
 
-  // Hàm tính góc từ tâm phần tử đến điểm (x, y)
-  const getAngleFromCenter = useCallback((clientX: number, clientY: number): number => {
-    if (!containerRef.current) return 0
-
-    const rect = containerRef.current.getBoundingClientRect()
-    const centerX = rect.left + rect.width / 2
-    const centerY = rect.top + rect.height / 2
-
-    // Tính góc từ tâm đến vị trí con trỏ
-    const angle = Math.atan2(clientY - centerY, clientX - centerX)
-
-    // Chuyển sang độ
-    return angle * (180 / Math.PI)
-  }, [])
-
-  // Xử lý khi bắt đầu nhấn vào nút xoay
-  const handleStart = useCallback(
-    (e: MouseEvent | TouchEvent) => {
-      e.preventDefault()
-      e.stopPropagation()
-
-      isRotatingRef.current = true
-      setIsRotating(true)
-
-      // Gọi callback để thông báo đang xoay
-      onRotationStart?.()
-
-      // Lấy vị trí X và Y ban đầu
-      let clientX: number, clientY: number
-      if (e instanceof MouseEvent) {
-        clientX = e.clientX
-        clientY = e.clientY
-      } else {
-        clientX = e.touches[0].clientX
-        clientY = e.touches[0].clientY
-      }
-
-      startAngleRef.current = getAngleFromCenter(clientX, clientY)
-      startRotationRef.current = rotation
-
-      document.body.style.cursor = 'grabbing'
-      document.body.style.userSelect = 'none'
-    },
-    [rotation, getAngleFromCenter, onRotationStart]
-  )
-
-  // Xử lý khi di chuyển
-  const handleMove = useCallback(
-    (e: MouseEvent | TouchEvent) => {
-      if (!isRotatingRef.current) return
-
-      e.preventDefault()
-      e.stopPropagation()
-
-      // Lấy vị trí X và Y hiện tại
-      let currentX: number, currentY: number
-      if (e instanceof MouseEvent) {
-        currentX = e.clientX
-        currentY = e.clientY
-      } else {
-        currentX = e.touches[0].clientX
-        currentY = e.touches[0].clientY
-      }
-
-      // Tính góc hiện tại
-      const currentAngle = getAngleFromCenter(currentX, currentY)
-
-      // Tính độ chênh lệch góc
-      let angleDelta = currentAngle - startAngleRef.current
-
-      // Xử lý trường hợp góc vượt qua -180/180 độ
-      if (angleDelta > 180) angleDelta -= 360
-      if (angleDelta < -180) angleDelta += 360
-
-      // Cập nhật góc xoay mới
-      const newRotation = startRotationRef.current + angleDelta
-      setRotation(newRotation)
-    },
-    [getAngleFromCenter]
-  )
-
-  // Xử lý khi thả chuột/tay
-  const handleEnd = useCallback(() => {
-    isRotatingRef.current = false
-    setIsRotating(false)
-    document.body.style.cursor = 'default'
-    document.body.style.userSelect = 'auto'
-
-    // Gọi callback để thông báo kết thúc xoay
-    onRotationEnd?.()
-  }, [onRotationEnd])
-
-  // Reset góc xoay
-  const resetRotation = useCallback(() => {
-    setRotation(initialRotation)
-  }, [initialRotation])
-
-  // Effect để đăng ký/hủy sự kiện
   useEffect(() => {
-    const button = rotateButtonRef.current
-    if (!button) return
+    const element = elementRef.current
+    if (!element) return
 
-    // Đăng ký sự kiện chỉ trên nút xoay
-    button.addEventListener('mousedown', handleStart)
-    button.addEventListener('touchstart', handleStart, { passive: false })
-
-    // Sự kiện move và end trên document để xử lý khi kéo ra ngoài
-    document.body.addEventListener('mousemove', handleMove)
-    document.body.addEventListener('touchmove', handleMove, { passive: false })
-
-    document.body.addEventListener('mouseup', handleEnd)
-    document.body.addEventListener('touchend', handleEnd)
-
-    // Cleanup
-    return () => {
-      button.removeEventListener('mousedown', handleStart)
-      button.removeEventListener('touchstart', handleStart)
-
-      document.body.removeEventListener('mousemove', handleMove)
-      document.body.removeEventListener('touchmove', handleMove)
-
-      document.body.removeEventListener('mouseup', handleEnd)
-      document.body.removeEventListener('touchend', handleEnd)
-
-      document.body.style.cursor = 'default'
-      document.body.style.userSelect = 'auto'
+    // Tính khoảng cách giữa 2 ngón tay
+    const getDistance = (touch1: Touch, touch2: Touch): number => {
+      const dx = touch2.clientX - touch1.clientX
+      const dy = touch2.clientY - touch1.clientY
+      return Math.sqrt(dx * dx + dy * dy)
     }
-  }, [handleStart, handleMove, handleEnd])
+
+    // Tính góc giữa 2 ngón tay (tính bằng radian)
+    const getAngle = (touch1: Touch, touch2: Touch): number => {
+      const dx = touch2.clientX - touch1.clientX
+      const dy = touch2.clientY - touch1.clientY
+      return Math.atan2(dy, dx)
+    }
+
+    // Xử lý khi bắt đầu chạm
+    const handleTouchStart = (e: TouchEvent): void => {
+      if (e.touches.length === 2) {
+        // 2 ngón tay = zoom + rotate
+        e.preventDefault()
+        const touch1 = e.touches[0]
+        const touch2 = e.touches[1]
+
+        touchData.current.initialDistance = getDistance(touch1, touch2)
+        touchData.current.initialScale = scale
+
+        if (enableRotation) {
+          touchData.current.initialAngle = getAngle(touch1, touch2)
+          touchData.current.initialRotation = rotation
+        }
+
+        touchData.current.isDragging = false
+      } else if (e.touches.length === 1 && enablePan) {
+        // 1 ngón tay = pan (di chuyển)
+        touchData.current.isDragging = true
+        touchData.current.lastTouchPos = {
+          x: e.touches[0].clientX,
+          y: e.touches[0].clientY,
+        }
+      }
+    }
+
+    // Xử lý khi di chuyển ngón tay
+    const handleTouchMove = (e: TouchEvent): void => {
+      if (e.touches.length === 2) {
+        // ZOOM + ROTATE với 2 ngón tay
+        e.preventDefault()
+        const touch1 = e.touches[0]
+        const touch2 = e.touches[1]
+
+        // Xử lý ZOOM
+        const currentDistance = getDistance(touch1, touch2)
+        const distanceChange = currentDistance - touchData.current.initialDistance
+        let newScale = touchData.current.initialScale + distanceChange * scaleSensitivity
+        newScale = Math.max(minScale, Math.min(maxScale, newScale))
+        setScale(newScale)
+
+        // Xử lý ROTATE
+        if (enableRotation) {
+          const currentAngle = getAngle(touch1, touch2)
+          const angleChange = currentAngle - touchData.current.initialAngle
+          // Chuyển từ radian sang độ
+          const angleDegrees = (angleChange * 180) / Math.PI
+          const newRotation = touchData.current.initialRotation + angleDegrees
+          setRotation(newRotation)
+        }
+      } else if (e.touches.length === 1 && touchData.current.isDragging && enablePan) {
+        // PAN với 1 ngón tay
+        e.preventDefault()
+        const touch = e.touches[0]
+        const deltaX = touch.clientX - touchData.current.lastTouchPos.x
+        const deltaY = touch.clientY - touchData.current.lastTouchPos.y
+
+        setPosition((prev) => ({
+          x: prev.x + deltaX,
+          y: prev.y + deltaY,
+        }))
+
+        touchData.current.lastTouchPos = {
+          x: touch.clientX,
+          y: touch.clientY,
+        }
+      }
+    }
+
+    // Xử lý khi ngừng chạm
+    const handleTouchEnd = (e: TouchEvent): void => {
+      if (e.touches.length < 2) {
+        touchData.current.initialDistance = 0
+        touchData.current.initialAngle = 0
+      }
+      if (e.touches.length === 0) {
+        touchData.current.isDragging = false
+      }
+    }
+
+    element.addEventListener('touchstart', handleTouchStart, { passive: false })
+    element.addEventListener('touchmove', handleTouchMove, { passive: false })
+    element.addEventListener('touchend', handleTouchEnd)
+
+    return () => {
+      element.removeEventListener('touchstart', handleTouchStart)
+      element.removeEventListener('touchmove', handleTouchMove)
+      element.removeEventListener('touchend', handleTouchEnd)
+    }
+  }, [scale, rotation, minScale, maxScale, scaleSensitivity, enableRotation, enablePan])
+
+  const reset = (): void => {
+    setScale(1)
+    setRotation(0)
+    setPosition({ x: 0, y: 0 })
+  }
 
   return {
+    ref: elementRef,
+    scale,
     rotation,
-    rotateButtonRef,
-    containerRef,
-    resetRotation,
-    isRotating,
+    position,
+    reset,
   }
 }
