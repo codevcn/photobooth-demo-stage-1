@@ -1,11 +1,11 @@
-import { useDragElement } from '@/hooks/element/use-draggable-element'
+import { useDragElement } from '@/hooks/element/use-drag-element'
 import { ITextElement } from '@/utils/types'
 import { X, RotateCw } from 'lucide-react'
-import { usePinch } from '@use-gesture/react'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { eventEmitter } from '@/utils/events'
 import { EInternalEvents } from '@/utils/enums'
-import { useRotateElement } from '@/hooks/element/use-rotate-element'
+import { useRotateElement } from '@/hooks/element/use-pinch-element'
+import { usePinchElement } from '@/hooks/element/use-zoom-element'
 
 const maxZoom: number = 2
 const minZoom: number = 0.3
@@ -25,22 +25,31 @@ export const TextElement = ({
   onUpdateSelectedElementId,
   selectedElementId,
 }: TextElementProps) => {
-  const { ref: refForDrag, position } = useDragElement()
-  const { color, fontSize, text, x, y, id } = element
+  const { color, fontSize, text, id } = element
   const isSelected = selectedElementId === id
+  const [isRotating, setIsRotating] = useState<boolean>(false)
+  const { ref: refForDrag, position } = useDragElement({
+    disabled: isRotating,
+  })
+  const {
+    ref: refForZoom,
+    scale,
+    rotation: angle,
+  } = usePinchElement({ maxScale: maxZoom, minScale: minZoom })
+  const { rotation, rotateButtonRef, containerRef } = useRotateElement({
+    initialRotation: 0,
+    onRotationStart: () => setIsRotating(true),
+    onRotationEnd: () => setIsRotating(false),
+  })
   const rootRef = useRef<HTMLElement | null>(null)
   const propertiesRef = useRef<TElementProperties>({ fontSize, angle: 0 })
-  const { rotation, handleRef } = useRotateElement({
-    initialRotation: 0,
-    sensitivity: 0.5,
-  })
 
   const pickElement = () => {
     eventEmitter.emit(EInternalEvents.PICK_ELEMENT, rootRef.current, 'text')
     onUpdateSelectedElementId(id)
   }
 
-  const adjustElementForPinch = (fontSize: number, angle: number, last: boolean) => {
+  const adjustElementForPinch = (fontSize: number, angle: number) => {
     const root = rootRef.current
     if (root) {
       root.style.transform = `rotate(${angle}deg)`
@@ -48,15 +57,6 @@ export const TextElement = ({
       propertiesRef.current = { fontSize, angle }
     }
   }
-
-  const bindForPinch = usePinch(
-    ({ offset: [scale, angle], last }) => adjustElementForPinch(scale, angle, last),
-    {
-      scaleBounds: { min: minZoom, max: maxZoom },
-      rubberband: true,
-      eventOptions: { passive: false },
-    }
-  )
 
   const onEditElementProperties = (
     fontSize?: number,
@@ -110,6 +110,10 @@ export const TextElement = ({
   }
 
   useEffect(() => {
+    adjustElementForPinch(scale, angle)
+  }, [scale, angle])
+
+  useEffect(() => {
     rotateElementByButton()
   }, [rotation])
 
@@ -125,6 +129,7 @@ export const TextElement = ({
       ref={(node) => {
         refForDrag.current = node
         rootRef.current = node
+        containerRef.current = node
       }}
       style={{
         left: position.x,
@@ -134,7 +139,7 @@ export const TextElement = ({
       onClick={pickElement}
     >
       <div
-        {...bindForPinch()}
+        ref={refForZoom}
         style={{ fontSize: `${fontSize}px`, color }}
         className={`${
           isSelected ? 'outline-2 outline-dark-pink-cl outline' : ''
@@ -152,7 +157,7 @@ export const TextElement = ({
         } NAME-rotate-box absolute -top-6 -left-6 z-20`}
       >
         <button
-          ref={handleRef}
+          ref={rotateButtonRef}
           className="cursor-grab active:cursor-grabbing bg-pink-cl text-white rounded-full p-1 active:scale-90 transition"
         >
           <RotateCw size={14} color="currentColor" />

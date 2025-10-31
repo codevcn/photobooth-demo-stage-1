@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, RefObject, CSSProperties } from 'react'
+import { useRef, useEffect, useState, RefObject } from 'react'
 
 interface PinchZoomOptions {
   minScale?: number
@@ -28,11 +28,10 @@ interface UsePinchZoomReturn {
   rotation: number
   position: Position
   reset: () => void
-  style: CSSProperties
 }
 
 // Hook để zoom, xoay và di chuyển element bằng touch gestures
-export const useZoomElement = (options: PinchZoomOptions = {}): UsePinchZoomReturn => {
+export const usePinchElement = (options: PinchZoomOptions = {}): UsePinchZoomReturn => {
   const {
     minScale = 0.5,
     maxScale = 3,
@@ -177,12 +176,5 @@ export const useZoomElement = (options: PinchZoomOptions = {}): UsePinchZoomRetu
     rotation,
     position,
     reset,
-    style: {
-      // Kết hợp translate (di chuyển), rotate (xoay), và scale (zoom)
-      transform: `translate(${position.x}px, ${position.y}px) rotate(${rotation}deg) scale(${scale})`,
-      transformOrigin: 'center center',
-      transition: 'none',
-      touchAction: 'none',
-    },
   }
 }

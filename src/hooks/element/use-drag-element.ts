@@ -2,7 +2,14 @@ import { useState, useRef, useEffect } from 'react'
 
 type TPosition = { x: number; y: number }
 
-export const useDragElement = (initialPosition: TPosition = { x: 100, y: 100 }) => {
+interface UseDraggableOptions {
+  initialPosition?: TPosition
+  disabled?: boolean // Thêm option để disable dragging
+}
+
+export const useDragElement = (options: UseDraggableOptions = {}) => {
+  const { initialPosition = { x: 100, y: 100 }, disabled = false } = options
+
   const [position, setPosition] = useState<TPosition>(initialPosition)
   const [dragging, setDragging] = useState<boolean>(false)
   const [offset, setOffset] = useState<TPosition>({ x: 0, y: 0 })
@@ -10,6 +17,8 @@ export const useDragElement = (initialPosition: TPosition = { x: 100, y: 100 }) 
 
   // --- CHUỘT ---
   const handleMouseDown = (e: MouseEvent) => {
+    if (disabled) return // Chặn nếu disabled
+
     e.stopPropagation()
     setDragging(true)
     setOffset({
@@ -19,7 +28,7 @@ export const useDragElement = (initialPosition: TPosition = { x: 100, y: 100 }) 
   }
 
   const handleMouseMove = (e: MouseEvent) => {
-    if (dragging) {
+    if (dragging && !disabled) {
       setPosition({
         x: e.clientX - offset.x,
         y: e.clientY - offset.y,
@@ -27,10 +36,16 @@ export const useDragElement = (initialPosition: TPosition = { x: 100, y: 100 }) 
     }
   }
 
-  const handleMouseUp = () => setDragging(false)
+  const handleMouseUp = () => {
+    if (!disabled) {
+      setDragging(false)
+    }
+  }
 
   // --- CẢM ỨNG ---
   const handleTouchStart = (e: TouchEvent) => {
+    if (disabled) return // Chặn nếu disabled
+
     const touch = e.touches[0]
     setDragging(true)
     setOffset({
@@ -40,7 +55,7 @@ export const useDragElement = (initialPosition: TPosition = { x: 100, y: 100 }) 
   }
 
   const handleTouchMove = (e: TouchEvent) => {
-    if (dragging) {
+    if (dragging && !disabled) {
       const touch = e.touches[0]
       setPosition({
         x: touch.clientX - offset.x,
@@ -49,7 +64,11 @@ export const useDragElement = (initialPosition: TPosition = { x: 100, y: 100 }) 
     }
   }
 
-  const handleTouchEnd = () => setDragging(false)
+  const handleTouchEnd = () => {
+    if (!disabled) {
+      setDragging(false)
+    }
+  }
 
   useEffect(() => {
     const el = ref.current
@@ -72,7 +91,7 @@ export const useDragElement = (initialPosition: TPosition = { x: 100, y: 100 }) 
         window.removeEventListener('touchend', handleTouchEnd)
       }
     }
-  }, [dragging, offset, position])
+  }, [dragging, offset, position, disabled])
 
   return { ref, position }
 }
