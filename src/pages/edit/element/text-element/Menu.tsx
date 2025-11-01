@@ -26,7 +26,6 @@ type TPropertyType = 'font-size' | 'angle' | 'posXY' | 'zindex-up' | 'zindex-dow
 interface TextFontPickerProps {
   show: boolean
   onHideShow: (show: boolean) => void
-  elementId: string
 }
 
 // Danh sách các font có sẵn từ fonts.css
@@ -42,7 +41,7 @@ const localFonts = [
   'Nosifer',
 ]
 
-const TextFontPicker = ({ show, onHideShow, elementId }: TextFontPickerProps) => {
+const TextFontPicker = ({ show, onHideShow }: TextFontPickerProps) => {
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
   const { loadFont } = useGoogleFont()
   const [searchKeyword, setSearchKeyword] = useState<string>('')
@@ -162,10 +161,8 @@ interface PrintedImageMenuProps {
 
 export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuProps) => {
   const [showColorPicker, setShowColorPicker] = useState<boolean>(false)
-  const { pickedElementRoot, elementType } = useGlobalContext()
   const [showTextFontPicker, setShowTextFontPicker] = useState<boolean>(false)
   const menuSectionRef = useRef<HTMLDivElement | null>(null)
-  const contentTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   const validateInputsPositiveNumber = (
     inputs: HTMLInputElement[],
@@ -185,7 +182,9 @@ export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuPro
     angle?: number,
     posX?: number,
     posY?: number,
-    zindex?: number
+    zindex?: number,
+    color?: string,
+    content?: string
   ) => {
     eventEmitter.emit(
       EInternalEvents.SUBMIT_TEXT_ELE_PROPS,
@@ -194,7 +193,9 @@ export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuPro
       angle,
       posX,
       posY,
-      zindex
+      zindex,
+      color,
+      content
     )
   }
 
@@ -251,11 +252,8 @@ export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuPro
   }
 
   const handleAdjustColorOnElement = (color: string) => {
-    if (pickedElementRoot && elementType === 'text' && color) {
-      const textElement = pickedElementRoot.querySelector<HTMLElement>('.NAME-element-main-box')
-      if (textElement) {
-        textElement.style.color = color
-      }
+    if (color) {
+      handleChangeProperties(undefined, undefined, undefined, undefined, undefined, color)
     }
   }
 
@@ -272,21 +270,15 @@ export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuPro
   }
 
   const onContentFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (contentTimerRef.current) {
-      clearTimeout(contentTimerRef.current)
-    }
-    contentTimerRef.current = setTimeout(() => {
-      const newContent = e.target.value
-      const textElement = textElements.find((el) => el.id === elementId)
-      if (textElement) {
-        const displayedText = pickedElementRoot?.querySelector<HTMLElement>(
-          '.NAME-element-main-box .NAME-displayed-text-content'
-        )
-        if (displayedText) {
-          displayedText.innerText = newContent
-        }
-      }
-    }, 300)
+    handleChangeProperties(
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      e.target.value || undefined
+    )
   }
 
   const onClickButton = (type: TPropertyType) => {
@@ -425,11 +417,7 @@ export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuPro
           </div>
         </div>
         {createPortal(
-          <TextFontPicker
-            show={showTextFontPicker}
-            onHideShow={setShowTextFontPicker}
-            elementId={elementId}
-          />,
+          <TextFontPicker show={showTextFontPicker} onHideShow={setShowTextFontPicker} />,
           document.body
         )}
       </div>

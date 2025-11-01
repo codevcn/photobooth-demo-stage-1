@@ -40,10 +40,25 @@ export const TextElement = ({
   )
   const rootRef = useRef<HTMLElement | null>(null)
   const { addToElementLayers } = useElementLayerContext()
+  const contentTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   const pickElement = () => {
     eventEmitter.emit(EInternalEvents.PICK_ELEMENT, rootRef.current, 'text')
     onUpdateSelectedElementId(id)
+  }
+
+  const handleContentFieldChange = (newContent: string) => {
+    if (contentTimerRef.current) {
+      clearTimeout(contentTimerRef.current)
+    }
+    contentTimerRef.current = setTimeout(() => {
+      const displayedText = rootRef.current?.querySelector<HTMLElement>(
+        '.NAME-element-main-box .NAME-displayed-text-content'
+      )
+      if (displayedText) {
+        displayedText.innerText = newContent
+      }
+    }, 300)
   }
 
   const listenSubmitEleProps = (
@@ -52,10 +67,23 @@ export const TextElement = ({
     angle?: number,
     posX?: number,
     posY?: number,
-    zindex?: number
+    zindex?: number,
+    color?: string,
+    content?: string
   ) => {
     if (elementId === id) {
       handleSetElementState(posX, posY, undefined, angle, zindex, fontSize)
+    }
+    if (color) {
+      const mainBox = rootRef.current?.querySelector<HTMLElement>(
+        '.NAME-element-main-box .NAME-displayed-text-content'
+      )
+      if (mainBox) {
+        mainBox.style.color = color
+      }
+    }
+    if (content) {
+      handleContentFieldChange(content)
     }
   }
 
@@ -159,6 +187,7 @@ export const TextElement = ({
         >
           <button
             ref={zoomButtonRef}
+            style={{ transform: `rotateY(180deg)` }}
             className="cursor-grab active:cursor-grabbing bg-pink-cl text-white rounded-full p-1 active:scale-90 transition"
           >
             <Scaling size={18} color="currentColor" />

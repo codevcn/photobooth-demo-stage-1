@@ -4,18 +4,6 @@ export class LocalStorageHelper {
   static menuStateName = 'menu-state'
   static mockupImageName = 'mockup-image'
 
-  static saveMenuState(state: TMenuState) {
-    localStorage.setItem(LocalStorageHelper.menuStateName, JSON.stringify(state))
-  }
-
-  static getMenuState(): TMenuState | null {
-    const stateStr = localStorage.getItem(LocalStorageHelper.menuStateName)
-    if (stateStr) {
-      return JSON.parse(stateStr)
-    }
-    return null
-  }
-
   static saveMockupImageAsBase64(
     productInfo: TProductInCart,
     imageDataUrl: string,

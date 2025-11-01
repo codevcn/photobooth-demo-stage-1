@@ -1,10 +1,10 @@
-import { IStickerElement } from '@/utils/types'
+import { IStickerElement, TMenuState } from '@/utils/types'
 import { X, RotateCw, Scaling } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 import { eventEmitter } from '@/utils/events'
 import { EInternalEvents } from '@/utils/enums'
 import { useElementControl } from '@/hooks/element/use-element-control'
-import { getNaturalSizeOfImage } from '@/utils/helpers'
+import { getNaturalSizeOfImage, typeToObject } from '@/utils/helpers'
 import { useElementLayerContext } from '@/context/global-context'
 
 const MAX_ZOOM: number = 3
@@ -116,6 +116,11 @@ export const StickerElement = ({
   }
 
   useEffect(() => {
+    if (selectedElementId !== id) return
+    eventEmitter.emit(EInternalEvents.SYNC_ELEMENT_PROPS, id)
+  }, [scale, angle, position, selectedElementId, id])
+
+  useEffect(() => {
     initElement()
     handleAddElementLayer()
   }, [])
@@ -145,6 +150,12 @@ export const StickerElement = ({
         isSelected ? 'outline-2 outline-dark-pink-cl outline' : ''
       } NAME-root-element absolute h-fit w-fit touch-none bg-pink-400/20`}
       onClick={pickElement}
+      data-element-state={JSON.stringify({
+        posX: position.x,
+        posY: position.y,
+        angle,
+        scale,
+      } as TMenuState)}
     >
       <div
         className={`NAME-element-main-box select-none relative origin-center max-w-[200px] max-h-[300px]`}
@@ -171,6 +182,7 @@ export const StickerElement = ({
         >
           <button
             ref={zoomButtonRef}
+            style={{ transform: `rotateY(180deg)` }}
             className="cursor-grab active:cursor-grabbing bg-pink-cl text-white rounded-full p-1 active:scale-90 transition"
           >
             <Scaling size={18} color="currentColor" />

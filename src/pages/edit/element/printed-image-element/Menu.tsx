@@ -1,7 +1,10 @@
+import { useGlobalContext } from '@/context/global-context'
 import { ELEMENT_ZINDEX_STEP } from '@/utils/contants'
 import { EInternalEvents } from '@/utils/enums'
 import { eventEmitter } from '@/utils/events'
+import { TMenuState } from '@/utils/types'
 import { RefreshCw, Move, Check, Fullscreen, ChevronUp, ChevronDown, Layers2 } from 'lucide-react'
+import { useEffect, useRef } from 'react'
 
 type TPropertyType = 'scale' | 'angle' | 'posXY' | 'zindex-up' | 'zindex-down'
 
@@ -10,6 +13,9 @@ interface PrintedImageMenuProps {
 }
 
 export const PrintedImageElementMenu = ({ elementId }: PrintedImageMenuProps) => {
+  const menuRef = useRef<HTMLDivElement | null>(null)
+  const { pickedElementRoot } = useGlobalContext()
+
   const validateInputsPositiveNumber = (
     inputs: HTMLInputElement[],
     type: TPropertyType
@@ -77,11 +83,16 @@ export const PrintedImageElementMenu = ({ elementId }: PrintedImageMenuProps) =>
     }
   }
 
-  const handleClickCheck = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const menuSection = e.currentTarget.closest<HTMLElement>('.NAME-menu-section')
+  const getAllInputsInForm = () => {
+    const menuSection = menuRef.current
     const scaleInput = menuSection?.querySelector<HTMLInputElement>('.NAME-form-scale input')
     const angleInput = menuSection?.querySelector<HTMLInputElement>('.NAME-form-angle input')
     const posXYInputs = menuSection?.querySelectorAll<HTMLInputElement>('.NAME-form-position input')
+    return { scaleInput, angleInput, posXYInputs }
+  }
+
+  const handleClickCheck = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const { scaleInput, angleInput, posXYInputs } = getAllInputsInForm()
     handleChangeProperties(
       scaleInput?.value ? parseFloat(scaleInput.value) / 100 : undefined,
       angleInput?.value ? parseFloat(angleInput.value) : undefined,
@@ -90,8 +101,46 @@ export const PrintedImageElementMenu = ({ elementId }: PrintedImageMenuProps) =>
     )
   }
 
+  const listenElementProps = (idOfElement: string | null) => {
+    if (elementId !== idOfElement) return
+    const dataset = JSON.parse(pickedElementRoot?.getAttribute('data-element-state') || '{}')
+    const { scale, angle, posX, posY } = dataset as TMenuState
+    const menuSection = menuRef.current
+    if (scale) {
+      const scaleInput = menuSection?.querySelector<HTMLInputElement>('.NAME-form-scale input')
+      if (scaleInput) scaleInput.value = (scale * 100).toFixed(0)
+    }
+    if (angle || angle === 0) {
+      const angleInput = menuSection?.querySelector<HTMLInputElement>('.NAME-form-angle input')
+      if (angleInput) angleInput.value = angle.toFixed(0)
+    }
+    if (posX || posX === 0) {
+      const posXYInputs = menuSection?.querySelectorAll<HTMLInputElement>(
+        '.NAME-form-position input'
+      )
+      if (posXYInputs) posXYInputs[0].value = posX.toFixed(0)
+    }
+    if (posY || posY === 0) {
+      const posXYInputs = menuSection?.querySelectorAll<HTMLInputElement>(
+        '.NAME-form-position input'
+      )
+      if (posXYInputs) posXYInputs[1].value = posY.toFixed(0)
+    }
+  }
+
+  useEffect(() => {
+    listenElementProps(elementId)
+  }, [elementId])
+
+  useEffect(() => {
+    eventEmitter.on(EInternalEvents.SYNC_ELEMENT_PROPS, listenElementProps)
+    return () => {
+      eventEmitter.off(EInternalEvents.SYNC_ELEMENT_PROPS, listenElementProps)
+    }
+  }, [])
+
   return (
-    <div className="NAME-menu-section grid grid-cols-2 gap-y-2 gap-x-1">
+    <div ref={menuRef} className="NAME-menu-section grid grid-cols-2 gap-y-2 gap-x-1">
       <div className="NAME-form-group NAME-form-scale flex items-center bg-pink-cl rounded px-1 py-1 shadow w-full">
         <div className="min-w-[22px]">
           <Fullscreen size={20} className="text-white" strokeWidth={3} />

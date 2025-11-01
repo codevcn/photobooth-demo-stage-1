@@ -24,13 +24,16 @@ interface IInternalEvents {
     angle?: number,
     posX?: number,
     posY?: number,
-    zindex?: number
+    zindex?: number,
+    color?: string,
+    content?: string
   ) => void
   [EInternalEvents.SUBMIT_PRODUCT_IMAGE_ELE_PROPS]: (
     elementId: string | null,
     scale?: number
   ) => void
   [EInternalEvents.PICK_ELEMENT]: (element: HTMLElement | null, elementType: TElementType) => void
+  [EInternalEvents.SYNC_ELEMENT_PROPS]: (elementId: string | null) => void
 }
 
 class EventEmitter<IEvents extends IInternalEvents> {

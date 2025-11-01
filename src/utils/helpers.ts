@@ -110,3 +110,5 @@ export const exitFullScreen = () => {
 export const roundZooming = (zoomValue: number): number => {
   return parseFloat(zoomValue.toFixed(ROUND_ZOOMING_FIXED))
 }
+
+export const typeToObject = <Type>(objectInput: Type): Type => objectInput
