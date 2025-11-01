@@ -1,14 +1,27 @@
 import useGoogleFont from '@/hooks/use-load-font'
-import { GlobalContext } from '@/context/global-context'
+import { useGlobalContext } from '@/context/global-context'
 import { EInternalEvents } from '@/utils/enums'
 import { eventEmitter } from '@/utils/events'
 import { ITextElement } from '@/utils/types'
-import { RefreshCw, Move, Check, ALargeSmall, Palette, TypeOutline, X, Pencil } from 'lucide-react'
-import { useContext, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  RefreshCw,
+  Move,
+  Check,
+  ALargeSmall,
+  Palette,
+  TypeOutline,
+  X,
+  Pencil,
+  Layers2,
+  ChevronUp,
+  ChevronDown,
+} from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { HexColorPicker } from 'react-colorful'
 import { createPortal } from 'react-dom'
+import { ELEMENT_ZINDEX_STEP } from '@/utils/contants'
 
-type TPropertyType = 'font-size' | 'angle' | 'posXY'
+type TPropertyType = 'font-size' | 'angle' | 'posXY' | 'zindex-up' | 'zindex-down'
 
 interface TextFontPickerProps {
   show: boolean
@@ -34,7 +47,7 @@ const TextFontPicker = ({ show, onHideShow, elementId }: TextFontPickerProps) =>
   const { loadFont } = useGoogleFont()
   const [searchKeyword, setSearchKeyword] = useState<string>('')
   const [loadedGoogleFonts, setLoadedGoogleFonts] = useState<string[]>([])
-  const { pickedElementRoot, elementType } = useContext(GlobalContext)
+  const { pickedElementRoot, elementType } = useGlobalContext()
 
   const searchFont = (keyword: string) => {
     if (!keyword) return
@@ -149,7 +162,7 @@ interface PrintedImageMenuProps {
 
 export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuProps) => {
   const [showColorPicker, setShowColorPicker] = useState<boolean>(false)
-  const { pickedElementRoot, elementType } = useContext(GlobalContext)
+  const { pickedElementRoot, elementType } = useGlobalContext()
   const [showTextFontPicker, setShowTextFontPicker] = useState<boolean>(false)
   const menuSectionRef = useRef<HTMLDivElement | null>(null)
   const contentTimerRef = useRef<NodeJS.Timeout | null>(null)
@@ -171,9 +184,18 @@ export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuPro
     fontSize?: number,
     angle?: number,
     posX?: number,
-    posY?: number
+    posY?: number,
+    zindex?: number
   ) => {
-    eventEmitter.emit(EInternalEvents.SUBMIT_TEXT_ELE_PROPS, elementId, fontSize, angle, posX, posY)
+    eventEmitter.emit(
+      EInternalEvents.SUBMIT_TEXT_ELE_PROPS,
+      elementId,
+      fontSize,
+      angle,
+      posX,
+      posY,
+      zindex
+    )
   }
 
   const submit = (inputs: HTMLInputElement[], type: TPropertyType) => {
@@ -267,7 +289,13 @@ export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuPro
     }, 300)
   }
 
-  const getAllFormFieldValues = () => {}
+  const onClickButton = (type: TPropertyType) => {
+    if (type === 'zindex-down') {
+      handleChangeProperties(undefined, undefined, undefined, undefined, -ELEMENT_ZINDEX_STEP)
+    } else if (type === 'zindex-up') {
+      handleChangeProperties(undefined, undefined, undefined, undefined, ELEMENT_ZINDEX_STEP)
+    }
+  }
 
   useEffect(() => {
     eventEmitter.on(EInternalEvents.CLICK_ON_PAGE, listenClickOnPage)
@@ -278,7 +306,7 @@ export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuPro
   }, [])
 
   return (
-    <div ref={menuSectionRef} className="NAME-menu-section grid grid-cols-2 gap-2">
+    <div ref={menuSectionRef} className="NAME-menu-section grid grid-cols-2 gap-x-1 gap-y-2">
       <div className="NAME-form-group NAME-form-content col-span-2 flex items-center bg-pink-cl rounded px-1 py-1 shadow w-full">
         <div className="min-w-[22px]">
           <Pencil size={20} className="text-white" strokeWidth={3} />
@@ -337,6 +365,27 @@ export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuPro
             onKeyDown={(e) => catchEnter(e, 'posXY')}
             className="border rounded px-1 py-0.5 text-base outline-none w-full"
           />
+        </div>
+      </div>
+      <div className="NAME-form-group NAME-form-zindex flex items-center justify-between bg-pink-cl rounded px-1 py-1 shadow w-full">
+        <div className="min-w-[22px]">
+          <Layers2 size={20} className="text-white" strokeWidth={3} />
+        </div>
+        <div className="flex gap-1">
+          <button
+            onClick={() => onClickButton('zindex-up')}
+            className="bg-white border-2 text-pink-cl border-pink-cl rounded px-1.5 py-1 flex gap-0.5 items-center justify-center"
+          >
+            <span className="text-inherit text-base font-bold">Lên</span>
+            <ChevronUp size={20} className="flex text-inherit" strokeWidth={3} />
+          </button>
+          <button
+            onClick={() => onClickButton('zindex-down')}
+            className="bg-white border-2 text-pink-cl border-pink-cl rounded px-1.5 py-1 flex gap-0.5 items-center justify-center"
+          >
+            <span className="text-inherit text-base font-bold">Xuống</span>
+            <ChevronDown size={20} className="flex text-inherit" strokeWidth={3} />
+          </button>
         </div>
       </div>
       <div className="NAME-form-group NAME-form-color flex items-stretch justify-center relative gap-1 rounded">

@@ -1,6 +1,6 @@
 import { EInternalEvents } from '@/utils/enums'
 import { eventEmitter } from '@/utils/events'
-import { RefreshCw, Check, Fullscreen } from 'lucide-react'
+import { Check, Fullscreen } from 'lucide-react'
 
 type TPropertyType = 'scale' | 'angle' | 'posXY'
 
@@ -22,8 +22,8 @@ export const ProductImageElementMenu = ({ elementId }: Sticker) => {
     return validValues.length > 0 ? validValues : []
   }
 
-  const handleChangeProperties = (scale?: number, angle?: number) => {
-    eventEmitter.emit(EInternalEvents.SUBMIT_PRODUCT_IMAGE_ELE_PROPS, elementId, scale, angle)
+  const handleChangeProperties = (scale?: number) => {
+    eventEmitter.emit(EInternalEvents.SUBMIT_PRODUCT_IMAGE_ELE_PROPS, elementId, scale)
   }
 
   const submit = (inputs: HTMLInputElement[], type: TPropertyType) => {
@@ -32,9 +32,6 @@ export const ProductImageElementMenu = ({ elementId }: Sticker) => {
       switch (type) {
         case 'scale':
           handleChangeProperties(values[0] ? values[0] / 100 : undefined)
-          break
-        case 'angle':
-          handleChangeProperties(undefined, values[0])
           break
       }
     }
@@ -53,20 +50,16 @@ export const ProductImageElementMenu = ({ elementId }: Sticker) => {
   const handleClickCheck = (e: React.MouseEvent<HTMLButtonElement>) => {
     const menuSection = e.currentTarget.closest<HTMLElement>('.NAME-menu-section')
     const scaleInput = menuSection?.querySelector<HTMLInputElement>('.NAME-form-scale input')
-    const angleInput = menuSection?.querySelector<HTMLInputElement>('.NAME-form-angle input')
-    handleChangeProperties(
-      scaleInput?.value ? parseFloat(scaleInput.value) / 100 : undefined,
-      angleInput?.value ? parseFloat(angleInput.value) : undefined
-    )
+    handleChangeProperties(scaleInput?.value ? parseFloat(scaleInput.value) / 100 : undefined)
   }
 
   return (
-    <div className="NAME-menu-section grid grid-cols-2 gap-1">
+    <div className="NAME-menu-section grid grid-cols-1 gap-1">
       <div className="NAME-form-group NAME-form-scale flex items-center bg-pink-cl rounded px-1 py-1 shadow mb-1 w-full">
         <div className="min-w-[22px]">
           <Fullscreen size={20} className="text-white" strokeWidth={3} />
         </div>
-        <div className="flex gap-1 items-center mx-1">
+        <div className="flex gap-1 items-center mx-1 grow">
           <input
             type="text"
             placeholder="Độ co giãn, VD: 55"
@@ -74,20 +67,6 @@ export const ProductImageElementMenu = ({ elementId }: Sticker) => {
             className="border rounded px-1 py-0.5 text-base outline-none w-full"
           />
           <span className="text-white text-base font-bold">%</span>
-        </div>
-      </div>
-      <div className="NAME-form-group NAME-form-angle flex items-center bg-pink-cl rounded px-1 py-1 shadow mb-1 w-full">
-        <div className="min-w-[22px]">
-          <RefreshCw size={20} className="text-white" strokeWidth={3} />
-        </div>
-        <div className="flex gap-1 items-center mx-1">
-          <input
-            type="text"
-            placeholder="Độ xoay, VD: 22"
-            onKeyDown={(e) => catchEnter(e, 'angle')}
-            className="border rounded px-1 py-0.5 text-base outline-none w-full"
-          />
-          <span className="text-white text-base font-bold">độ</span>
         </div>
       </div>
       <div className="NAME-form-group NAME-form-position flex items-center bg-pink-cl rounded px-1 py-1 shadow w-full col-span-2">

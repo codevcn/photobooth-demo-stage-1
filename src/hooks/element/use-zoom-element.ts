@@ -1,3 +1,4 @@
+import { roundZooming } from '@/utils/helpers'
 import { useRef, useCallback, useState, useEffect } from 'react'
 
 interface UseElementZoomOptions {
@@ -19,8 +20,8 @@ interface UseElementZoomReturn {
 
 export const useZoomElement = (options: UseElementZoomOptions): UseElementZoomReturn => {
   const {
-    minZoom = 0.3,
-    maxZoom = 2,
+    minZoom,
+    maxZoom,
     sensitivity = 0.01,
     onZoomStart,
     onZoomEnd,
@@ -90,10 +91,14 @@ export const useZoomElement = (options: UseElementZoomOptions): UseElementZoomRe
       const newScale = startScaleRef.current + deltaX * sensitivity
 
       // Giới hạn scale trong khoảng min/max và cập nhật
-      // setCurrentZoom(Math.max(minZoom, Math.min(maxZoom, newScale)))
-      document.body
-        .querySelector<HTMLElement>('.NAME-element-main-box')
-        ?.style.setProperty('transform', `scale(${Math.max(minZoom, Math.min(maxZoom, newScale))})`)
+      let adjustedScale = newScale
+      if (minZoom && newScale < minZoom) {
+        adjustedScale = minZoom
+      }
+      if (maxZoom && newScale > maxZoom) {
+        adjustedScale = maxZoom
+      }
+      setCurrentZoom(adjustedScale)
     },
     [sensitivity, minZoom, maxZoom]
   )

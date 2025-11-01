@@ -8,7 +8,8 @@ interface IInternalEvents {
     scale?: number,
     angle?: number,
     posX?: number,
-    posY?: number
+    posY?: number,
+    zindex?: number
   ) => void
   [EInternalEvents.SUBMIT_STICKER_ELE_PROPS]: (
     elementId: string | null,
@@ -22,12 +23,12 @@ interface IInternalEvents {
     fontSize?: number,
     angle?: number,
     posX?: number,
-    posY?: number
+    posY?: number,
+    zindex?: number
   ) => void
   [EInternalEvents.SUBMIT_PRODUCT_IMAGE_ELE_PROPS]: (
     elementId: string | null,
-    scale?: number,
-    angle?: number
+    scale?: number
   ) => void
   [EInternalEvents.PICK_ELEMENT]: (element: HTMLElement | null, elementType: TElementType) => void
 }

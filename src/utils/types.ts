@@ -48,9 +48,19 @@ export interface IPrintedImage {
 
 export type TElementType = 'text' | 'sticker' | 'printed-image'
 
-export type TGlobalContext = {
+export type TElementLayerState = {
+  elementId: string
+}
+
+export type TGlobalContextValue = {
   pickedElementRoot: HTMLElement | null
   elementType: TElementType | null
+}
+
+export type TElementLayerContextValue = {
+  elementLayers: TElementLayerState[]
+  setElementLayers: React.Dispatch<React.SetStateAction<TElementLayerState[]>>
+  addToElementLayers: (elementLayer: TElementLayerState) => void
 }
 
 export type TMenuState = Partial<{

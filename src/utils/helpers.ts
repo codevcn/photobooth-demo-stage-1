@@ -1,3 +1,4 @@
+import { ROUND_ZOOMING_FIXED } from './contants'
 import { TPaymentType } from './types'
 
 export const getNaturalSizeOfImage = (
@@ -104,4 +105,8 @@ export const exitFullScreen = () => {
   } else if ((document as any).mozCancelFullScreen) {
     ;(document as any).mozCancelFullScreen()
   }
+}
+
+export const roundZooming = (zoomValue: number): number => {
+  return parseFloat(zoomValue.toFixed(ROUND_ZOOMING_FIXED))
 }

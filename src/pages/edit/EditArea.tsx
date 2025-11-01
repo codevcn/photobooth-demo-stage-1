@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, Profiler } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   IProductImage,
   ITextElement,
@@ -10,7 +10,6 @@ import { TextElement } from './element/text-element/TextElement'
 import { StickerElement } from './element/sticker-element/StickerElement'
 import { PrintedImagesModal } from './element/printed-image-element/PrintedImages'
 import { PrintedImageElement } from './element/printed-image-element/PrintedImageElement'
-import { usePinch } from '@use-gesture/react'
 import { PrintedImageElementMenu } from './element/printed-image-element/Menu'
 import { TextElementMenu } from './element/text-element/Menu'
 import { StickerElementMenu } from './element/sticker-element/Menu'
@@ -18,25 +17,12 @@ import { eventEmitter } from '@/utils/events'
 import { EInternalEvents } from '@/utils/enums'
 import { ProductImageElementMenu } from './product/product-image/Menu'
 import { PrintedImagesPreview } from './PrintedImagesPreview'
+import { useElementControl } from '@/hooks/element/use-element-control'
 
-function onRenderCallback(
-  id, // tên của Profiler
-  phase, // "mount" hoặc "update"
-  actualDuration, // thời gian render lần này (ms)
-  baseDuration, // thời gian render ước tính không có memo
-  startTime, // khi React bắt đầu render
-  commitTime, // khi React commit update
-  interactions // Set các interaction được track
-) {
-  console.log(`${id} (${phase}): ${actualDuration}ms`)
-}
-
-const maxZoom: number = 1
+const maxZoom: number = 3
 const minZoom: number = 0.3
 
 type TSelectingType = TElementType | 'product-image' | null
-
-type TElementProperties = { scale: number; angle: number }
 
 interface EditAreaProps {
   editingProduct?: IProductImage
@@ -69,7 +55,11 @@ const EditArea: React.FC<EditAreaProps> = ({
   const editAreaRef = useRef<HTMLDivElement>(null)
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null)
   const [selectingType, setSelectingType] = useState<TSelectingType>(null)
-  const propertiesRef = useRef<TElementProperties>({ scale: 1, angle: 0 })
+  const {
+    forZoom: { ref: refForZoom },
+    state: { scale },
+    handleSetElementState,
+  } = useElementControl(crypto.randomUUID(), { maxZoom, minZoom })
 
   const handleRemoveText = (id: string) => {
     onUpdateText(textElements.filter((el) => el.id !== id))
@@ -91,25 +81,6 @@ const EditArea: React.FC<EditAreaProps> = ({
   const handleOpenPrintedImagesModal = () => {
     setShowPrintedImagesModal((pre) => !pre)
   }
-
-  const adjustElementForPinch = (scale: number, angle: number) => {
-    const root = editAreaRef.current
-    if (root) {
-      const productImage = root.querySelector<HTMLDivElement>(`.NAME-product-image`)
-      if (productImage) {
-        productImage.style.transform = `scale(${scale}) rotate(${angle}deg)`
-      }
-    }
-  }
-
-  const bindForPinch = usePinch(
-    ({ offset: [scale, angle] }) => adjustElementForPinch(scale, angle),
-    {
-      scaleBounds: { min: minZoom, max: maxZoom },
-      rubberband: true,
-      eventOptions: { passive: false },
-    }
-  )
 
   const handleUpdateSelectedElementId = (id: string | null, type: TSelectingType) => {
     setSelectedElementId(id)
@@ -139,21 +110,14 @@ const EditArea: React.FC<EditAreaProps> = ({
     }
   }
 
-  const listenSubmitEleProps = (elementId: string | null, scale?: number, angle?: number) => {
+  const listenSubmitEleProps = (elementId: string | null, scale?: number) => {
     if (elementId === selectedElementId && selectingType === 'product-image') {
       const root = editAreaRef.current
       if (root) {
         const productImage = root.querySelector<HTMLDivElement>(`.NAME-product-image`)
         if (productImage) {
           if (scale) {
-            productImage.style.transform = `scale(${scale}) rotate(${propertiesRef.current.angle}deg)`
-            propertiesRef.current.scale = scale
-          }
-          if (angle || angle === 0) {
-            productImage.style.transform = `scale(${propertiesRef.current.scale}) rotate(${
-              angle || 0
-            }deg)`
-            propertiesRef.current.angle = angle
+            handleSetElementState(undefined, undefined, scale)
           }
         }
       }
@@ -198,47 +162,47 @@ const EditArea: React.FC<EditAreaProps> = ({
       <div className="bg-white rounded-lg">
         <div
           ref={htmlToCanvasEditorRef}
-          className="relative w-full h-fit bg-transparent py-2 px-2 max-h-[500px] min-[300px] overflow-hidden"
+          className="relative z-0 w-full h-fit py-2 px-2 max-h-[500px] overflow-hidden"
         >
-          {editingProduct && (
-            <img
-              {...bindForPinch()}
-              src={editingProduct.url}
-              alt={editingProduct.name}
-              className="NAME-product-image touch-none w-full h-full max-h-[calc(500px-8px)] object-contain"
-              onClick={handlePickProductImage}
-            />
-          )}
+          <img
+            ref={(node) => {
+              refForZoom.current = node
+            }}
+            style={{
+              transform: `scale(${scale})`,
+            }}
+            src={editingProduct?.url}
+            alt={editingProduct?.name}
+            className="NAME-product-image touch-none w-full h-full max-h-[calc(500px-8px)] object-contain"
+            onClick={handlePickProductImage}
+          />
+          <div className="absolute z-0 top-0 left-0 w-full h-full">
+            {/* Text Elements */}
+            {textElements.map((textEl) => (
+              <TextElement
+                key={textEl.id}
+                element={textEl}
+                onRemoveElement={handleRemoveText}
+                onUpdateSelectedElementId={(id) => handleUpdateSelectedElementId(id, 'text')}
+                selectedElementId={selectedElementId}
+                editContainerRef={htmlToCanvasEditorRef}
+              />
+            ))}
 
-          {/* Text Elements */}
-          {textElements.map((textEl) => (
-            <TextElement
-              key={textEl.id}
-              element={textEl}
-              onRemoveElement={handleRemoveText}
-              onUpdateSelectedElementId={(id) => handleUpdateSelectedElementId(id, 'text')}
-              selectedElementId={selectedElementId}
-            />
-          ))}
+            {/* Sticker Elements */}
+            {stickerElements.map((sticker) => (
+              <StickerElement
+                key={sticker.id}
+                element={sticker}
+                onRemoveElement={handleRemoveSticker}
+                onUpdateSelectedElementId={(id) => handleUpdateSelectedElementId(id, 'sticker')}
+                selectedElementId={selectedElementId}
+                editContainerRef={htmlToCanvasEditorRef}
+              />
+            ))}
 
-          {/* Sticker Elements */}
-          {stickerElements.map((sticker) => (
-            <StickerElement
-              key={sticker.id}
-              element={sticker}
-              onRemoveElement={handleRemoveSticker}
-              onUpdateSelectedElementId={(id) => handleUpdateSelectedElementId(id, 'sticker')}
-              selectedElementId={selectedElementId}
-            />
-          ))}
-
-          {/* Printed Image Elements */}
-          {printedImageElements.map((img) => (
-            <Profiler
-              key={img.id}
-              id={`PrintedImageElement-${img.id}`}
-              onRender={onRenderCallback as any}
-            >
+            {/* Printed Image Elements */}
+            {printedImageElements.map((img) => (
               <PrintedImageElement
                 key={img.id}
                 element={img}
@@ -247,9 +211,10 @@ const EditArea: React.FC<EditAreaProps> = ({
                   handleUpdateSelectedElementId(id, 'printed-image')
                 }
                 selectedElementId={selectedElementId}
+                editContainerRef={htmlToCanvasEditorRef}
               />
-            </Profiler>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
 

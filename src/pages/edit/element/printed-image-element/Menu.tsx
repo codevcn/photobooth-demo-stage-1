@@ -1,8 +1,9 @@
+import { ELEMENT_ZINDEX_STEP } from '@/utils/contants'
 import { EInternalEvents } from '@/utils/enums'
 import { eventEmitter } from '@/utils/events'
-import { RefreshCw, Move, Check, Fullscreen } from 'lucide-react'
+import { RefreshCw, Move, Check, Fullscreen, ChevronUp, ChevronDown, Layers2 } from 'lucide-react'
 
-type TPropertyType = 'scale' | 'angle' | 'posXY'
+type TPropertyType = 'scale' | 'angle' | 'posXY' | 'zindex-up' | 'zindex-down'
 
 interface PrintedImageMenuProps {
   elementId: string
@@ -22,14 +23,21 @@ export const PrintedImageElementMenu = ({ elementId }: PrintedImageMenuProps) =>
     return validValues.length > 0 ? validValues : []
   }
 
-  const handleChangeProperties = (scale?: number, angle?: number, posX?: number, posY?: number) => {
+  const handleChangeProperties = (
+    scale?: number,
+    angle?: number,
+    posX?: number,
+    posY?: number,
+    zindex?: number
+  ) => {
     eventEmitter.emit(
       EInternalEvents.SUBMIT_PRINTED_IMAGE_ELE_PROPS,
       elementId,
       scale,
       angle,
       posX,
-      posY
+      posY,
+      zindex
     )
   }
 
@@ -61,6 +69,14 @@ export const PrintedImageElementMenu = ({ elementId }: PrintedImageMenuProps) =>
     }
   }
 
+  const onClickButton = (type: TPropertyType) => {
+    if (type === 'zindex-down') {
+      handleChangeProperties(undefined, undefined, undefined, undefined, -ELEMENT_ZINDEX_STEP)
+    } else if (type === 'zindex-up') {
+      handleChangeProperties(undefined, undefined, undefined, undefined, ELEMENT_ZINDEX_STEP)
+    }
+  }
+
   const handleClickCheck = (e: React.MouseEvent<HTMLButtonElement>) => {
     const menuSection = e.currentTarget.closest<HTMLElement>('.NAME-menu-section')
     const scaleInput = menuSection?.querySelector<HTMLInputElement>('.NAME-form-scale input')
@@ -75,8 +91,8 @@ export const PrintedImageElementMenu = ({ elementId }: PrintedImageMenuProps) =>
   }
 
   return (
-    <div className="NAME-menu-section grid grid-cols-2 gap-1">
-      <div className="NAME-form-group NAME-form-scale flex items-center bg-pink-cl rounded px-1 py-1 shadow mb-1 w-full">
+    <div className="NAME-menu-section grid grid-cols-2 gap-y-2 gap-x-1">
+      <div className="NAME-form-group NAME-form-scale flex items-center bg-pink-cl rounded px-1 py-1 shadow w-full">
         <div className="min-w-[22px]">
           <Fullscreen size={20} className="text-white" strokeWidth={3} />
         </div>
@@ -90,7 +106,7 @@ export const PrintedImageElementMenu = ({ elementId }: PrintedImageMenuProps) =>
           <span className="text-white text-base font-bold">%</span>
         </div>
       </div>
-      <div className="NAME-form-group NAME-form-angle flex items-center bg-pink-cl rounded px-1 py-1 shadow mb-1 w-full">
+      <div className="NAME-form-group NAME-form-angle flex items-center bg-pink-cl rounded px-1 py-1 shadow w-full">
         <div className="min-w-[22px]">
           <RefreshCw size={20} className="text-white" strokeWidth={3} />
         </div>
@@ -123,7 +139,28 @@ export const PrintedImageElementMenu = ({ elementId }: PrintedImageMenuProps) =>
           />
         </div>
       </div>
-      <div className="NAME-form-group NAME-form-position flex items-center bg-pink-cl rounded px-1 py-1 shadow w-full">
+      <div className="NAME-form-group NAME-form-zindex flex items-center justify-between bg-pink-cl rounded px-1 py-1 shadow w-full">
+        <div className="min-w-[22px]">
+          <Layers2 size={20} className="text-white" strokeWidth={3} />
+        </div>
+        <div className="flex gap-1">
+          <button
+            onClick={() => onClickButton('zindex-up')}
+            className="bg-white border-2 text-pink-cl border-pink-cl rounded px-1.5 py-1 flex gap-0.5 items-center justify-center"
+          >
+            <span className="text-inherit text-base font-bold">Lên</span>
+            <ChevronUp size={20} className="flex text-inherit" strokeWidth={3} />
+          </button>
+          <button
+            onClick={() => onClickButton('zindex-down')}
+            className="bg-white border-2 text-pink-cl border-pink-cl rounded px-1.5 py-1 flex gap-0.5 items-center justify-center"
+          >
+            <span className="text-inherit text-base font-bold">Xuống</span>
+            <ChevronDown size={20} className="flex text-inherit" strokeWidth={3} />
+          </button>
+        </div>
+      </div>
+      <div className="NAME-form-group NAME-form-position col-span-2 flex items-center bg-pink-cl rounded px-1 py-1 shadow w-full">
         <button
           onClick={handleClickCheck}
           className="group flex items-center justify-center font-bold w-full gap-1 text-white active:bg-white active:text-green-600 rounded p-1"

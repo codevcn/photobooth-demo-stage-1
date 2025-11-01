@@ -36,8 +36,8 @@ interface UsePinchZoomReturn {
 // Hook để zoom, xoay và di chuyển element bằng touch gestures
 export const usePinchElement = (options: PinchZoomOptions): UsePinchZoomReturn => {
   const {
-    minScale = 0.5,
-    maxScale = 3,
+    minScale,
+    maxScale,
     scaleSensitivity = 0.01,
     enableRotation = true,
     enablePan = true,
@@ -117,7 +117,12 @@ export const usePinchElement = (options: PinchZoomOptions): UsePinchZoomReturn =
         const currentDistance = getDistance(touch1, touch2)
         const distanceChange = currentDistance - touchData.current.initialDistance
         let newScale = touchData.current.initialScale + distanceChange * scaleSensitivity
-        newScale = Math.max(minScale, Math.min(maxScale, newScale))
+        if (minScale && newScale < minScale) {
+          newScale = minScale
+        }
+        if (maxScale && newScale > maxScale) {
+          newScale = maxScale
+        }
         setCurrentScale?.(newScale)
 
         // Xử lý ROTATE
