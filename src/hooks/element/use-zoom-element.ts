@@ -1,30 +1,31 @@
 import { useRef, useCallback, useState, useEffect } from 'react'
 
 interface UseElementZoomOptions {
-  initialZoom?: number // Scale ban đầu (mặc định 1)
   minZoom?: number // Scale tối thiểu (mặc định 0.3)
   maxZoom?: number // Scale tối đa (mặc định 2)
   sensitivity?: number // Độ nhạy zoom (mặc định 0.01)
   onZoomStart?: () => void // Callback khi bắt đầu zoom
   onZoomEnd?: () => void // Callback khi kết thúc zoom
+  currentZoom: number
+  setCurrentZoom: React.Dispatch<React.SetStateAction<number>>
 }
 
 interface UseElementZoomReturn {
-  scale: number
   zoomButtonRef: React.MutableRefObject<HTMLButtonElement | null>
   containerRef: React.MutableRefObject<HTMLElement | null>
   resetZoom: () => void
   isZooming: boolean
 }
 
-export const useZoomElement = (options: UseElementZoomOptions = {}): UseElementZoomReturn => {
+export const useZoomElement = (options: UseElementZoomOptions): UseElementZoomReturn => {
   const {
-    initialZoom = 1,
     minZoom = 0.3,
     maxZoom = 2,
     sensitivity = 0.01,
     onZoomStart,
     onZoomEnd,
+    currentZoom,
+    setCurrentZoom,
   } = options
 
   // Refs
@@ -35,7 +36,6 @@ export const useZoomElement = (options: UseElementZoomOptions = {}): UseElementZ
   const startScaleRef = useRef(1)
 
   // State
-  const [scale, setScale] = useState(initialZoom)
   const [isZooming, setIsZooming] = useState<boolean>(false)
 
   // Xử lý khi bắt đầu nhấn vào nút zoom
@@ -57,12 +57,12 @@ export const useZoomElement = (options: UseElementZoomOptions = {}): UseElementZ
         startXRef.current = e.touches[0].clientX
       }
 
-      startScaleRef.current = scale
+      startScaleRef.current = currentZoom
 
       document.body.style.cursor = 'ew-resize'
       document.body.style.userSelect = 'none'
     },
-    [scale, onZoomStart]
+    [currentZoom, onZoomStart]
   )
 
   // Xử lý khi di chuyển
@@ -89,10 +89,11 @@ export const useZoomElement = (options: UseElementZoomOptions = {}): UseElementZ
       // - Kéo sang trái (-deltaX) = zoom out (thu nhỏ)
       const newScale = startScaleRef.current + deltaX * sensitivity
 
-      // Giới hạn scale trong khoảng min/max
-      const clampedScale = Math.max(minZoom, Math.min(maxZoom, newScale))
-
-      setScale(clampedScale)
+      // Giới hạn scale trong khoảng min/max và cập nhật
+      // setCurrentZoom(Math.max(minZoom, Math.min(maxZoom, newScale)))
+      document.body
+        .querySelector<HTMLElement>('.NAME-element-main-box')
+        ?.style.setProperty('transform', `scale(${Math.max(minZoom, Math.min(maxZoom, newScale))})`)
     },
     [sensitivity, minZoom, maxZoom]
   )
@@ -110,8 +111,8 @@ export const useZoomElement = (options: UseElementZoomOptions = {}): UseElementZ
 
   // Reset zoom
   const resetZoom = useCallback(() => {
-    setScale(initialZoom)
-  }, [initialZoom])
+    setCurrentZoom(currentZoom)
+  }, [currentZoom])
 
   // Effect để đăng ký/hủy sự kiện
   useEffect(() => {
@@ -146,7 +147,6 @@ export const useZoomElement = (options: UseElementZoomOptions = {}): UseElementZ
   }, [handleStart, handleMove, handleEnd])
 
   return {
-    scale,
     zoomButtonRef,
     containerRef,
     resetZoom,

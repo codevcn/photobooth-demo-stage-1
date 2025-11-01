@@ -6,6 +6,12 @@ interface PinchZoomOptions {
   scaleSensitivity?: number
   enableRotation?: boolean
   enablePan?: boolean
+  currentScale: number
+  setCurrentScale: React.Dispatch<React.SetStateAction<number>>
+  currentRotation: number
+  setCurrentRotation: React.Dispatch<React.SetStateAction<number>>
+  currentPosition: Position
+  setCurrentPosition: React.Dispatch<React.SetStateAction<Position>>
 }
 
 interface Position {
@@ -24,26 +30,26 @@ interface TouchData {
 
 interface UsePinchZoomReturn {
   ref: React.MutableRefObject<HTMLDivElement | null>
-  scale: number
-  rotation: number
-  position: Position
   reset: () => void
 }
 
 // Hook để zoom, xoay và di chuyển element bằng touch gestures
-export const usePinchElement = (options: PinchZoomOptions = {}): UsePinchZoomReturn => {
+export const usePinchElement = (options: PinchZoomOptions): UsePinchZoomReturn => {
   const {
     minScale = 0.5,
     maxScale = 3,
     scaleSensitivity = 0.01,
     enableRotation = true,
     enablePan = true,
+    currentScale,
+    setCurrentScale,
+    currentRotation,
+    setCurrentRotation,
+    currentPosition,
+    setCurrentPosition,
   } = options
 
   const elementRef = useRef<HTMLDivElement>(null)
-  const [scale, setScale] = useState<number>(1)
-  const [rotation, setRotation] = useState<number>(0)
-  const [position, setPosition] = useState<Position>({ x: 0, y: 0 })
 
   const touchData = useRef<TouchData>({
     initialDistance: 0,
@@ -81,11 +87,11 @@ export const usePinchElement = (options: PinchZoomOptions = {}): UsePinchZoomRet
         const touch2 = e.touches[1]
 
         touchData.current.initialDistance = getDistance(touch1, touch2)
-        touchData.current.initialScale = scale
+        touchData.current.initialScale = currentScale
 
         if (enableRotation) {
           touchData.current.initialAngle = getAngle(touch1, touch2)
-          touchData.current.initialRotation = rotation
+          touchData.current.initialRotation = currentRotation
         }
 
         touchData.current.isDragging = false
@@ -112,7 +118,7 @@ export const usePinchElement = (options: PinchZoomOptions = {}): UsePinchZoomRet
         const distanceChange = currentDistance - touchData.current.initialDistance
         let newScale = touchData.current.initialScale + distanceChange * scaleSensitivity
         newScale = Math.max(minScale, Math.min(maxScale, newScale))
-        setScale(newScale)
+        setCurrentScale?.(newScale)
 
         // Xử lý ROTATE
         if (enableRotation) {
@@ -121,7 +127,7 @@ export const usePinchElement = (options: PinchZoomOptions = {}): UsePinchZoomRet
           // Chuyển từ radian sang độ
           const angleDegrees = (angleChange * 180) / Math.PI
           const newRotation = touchData.current.initialRotation + angleDegrees
-          setRotation(newRotation)
+          setCurrentRotation?.(newRotation)
         }
       } else if (e.touches.length === 1 && touchData.current.isDragging && enablePan) {
         // PAN với 1 ngón tay
@@ -130,7 +136,7 @@ export const usePinchElement = (options: PinchZoomOptions = {}): UsePinchZoomRet
         const deltaX = touch.clientX - touchData.current.lastTouchPos.x
         const deltaY = touch.clientY - touchData.current.lastTouchPos.y
 
-        setPosition((prev) => ({
+        setCurrentPosition((prev) => ({
           x: prev.x + deltaX,
           y: prev.y + deltaY,
         }))
@@ -162,19 +168,24 @@ export const usePinchElement = (options: PinchZoomOptions = {}): UsePinchZoomRet
       element.removeEventListener('touchmove', handleTouchMove)
       element.removeEventListener('touchend', handleTouchEnd)
     }
-  }, [scale, rotation, minScale, maxScale, scaleSensitivity, enableRotation, enablePan])
+  }, [
+    currentScale,
+    currentPosition,
+    minScale,
+    maxScale,
+    scaleSensitivity,
+    enableRotation,
+    enablePan,
+  ])
 
   const reset = (): void => {
-    setScale(1)
-    setRotation(0)
-    setPosition({ x: 0, y: 0 })
+    setCurrentScale(1)
+    setCurrentRotation(0)
+    setCurrentPosition({ x: 0, y: 0 })
   }
 
   return {
     ref: elementRef,
-    scale,
-    rotation,
-    position,
     reset,
   }
 }

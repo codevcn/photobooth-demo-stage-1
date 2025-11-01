@@ -3,14 +3,18 @@ import { useState, useRef, useEffect } from 'react'
 type TPosition = { x: number; y: number }
 
 interface UseDraggableOptions {
-  initialPosition?: TPosition
+  currentPosition: TPosition
+  setCurrentPosition: React.Dispatch<React.SetStateAction<TPosition>>
   disabled?: boolean // Thêm option để disable dragging
 }
 
-export const useDragElement = (options: UseDraggableOptions = {}) => {
-  const { initialPosition = { x: 100, y: 100 }, disabled = false } = options
+interface UseDraggableReturn {
+  ref: React.MutableRefObject<HTMLDivElement | null>
+}
 
-  const [position, setPosition] = useState<TPosition>(initialPosition)
+export const useDragElement = (options: UseDraggableOptions): UseDraggableReturn => {
+  const { currentPosition, setCurrentPosition, disabled = false } = options
+
   const [dragging, setDragging] = useState<boolean>(false)
   const [offset, setOffset] = useState<TPosition>({ x: 0, y: 0 })
   const ref = useRef<HTMLDivElement | null>(null)
@@ -22,14 +26,14 @@ export const useDragElement = (options: UseDraggableOptions = {}) => {
     e.stopPropagation()
     setDragging(true)
     setOffset({
-      x: e.clientX - position.x,
-      y: e.clientY - position.y,
+      x: e.clientX - currentPosition.x,
+      y: e.clientY - currentPosition.y,
     })
   }
 
   const handleMouseMove = (e: MouseEvent) => {
     if (dragging && !disabled) {
-      setPosition({
+      setCurrentPosition({
         x: e.clientX - offset.x,
         y: e.clientY - offset.y,
       })
@@ -49,15 +53,15 @@ export const useDragElement = (options: UseDraggableOptions = {}) => {
     const touch = e.touches[0]
     setDragging(true)
     setOffset({
-      x: touch.clientX - position.x,
-      y: touch.clientY - position.y,
+      x: touch.clientX - currentPosition.x,
+      y: touch.clientY - currentPosition.y,
     })
   }
 
   const handleTouchMove = (e: TouchEvent) => {
     if (dragging && !disabled) {
       const touch = e.touches[0]
-      setPosition({
+      setCurrentPosition({
         x: touch.clientX - offset.x,
         y: touch.clientY - offset.y,
       })
@@ -91,7 +95,7 @@ export const useDragElement = (options: UseDraggableOptions = {}) => {
         window.removeEventListener('touchend', handleTouchEnd)
       }
     }
-  }, [dragging, offset, position, disabled])
+  }, [dragging, offset, currentPosition, disabled])
 
-  return { ref, position }
+  return { ref }
 }

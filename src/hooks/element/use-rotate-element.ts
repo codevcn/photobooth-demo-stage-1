@@ -1,23 +1,21 @@
 import { useRef, useCallback, useState, useEffect } from 'react'
 
 interface UseElementRotationOptions {
-  initialRotation?: number
+  currentRotation: number
+  setCurrentRotation: React.Dispatch<React.SetStateAction<number>>
   onRotationStart?: () => void // Callback khi bắt đầu xoay
   onRotationEnd?: () => void // Callback khi kết thúc xoay
 }
 
 interface UseElementRotationReturn {
-  rotation: number
   rotateButtonRef: React.MutableRefObject<HTMLButtonElement | null>
   containerRef: React.MutableRefObject<HTMLElement | null>
   resetRotation: () => void
   isRotating: boolean
 }
 
-export const useRotateElement = (
-  options: UseElementRotationOptions = {}
-): UseElementRotationReturn => {
-  const { initialRotation = 0, onRotationStart, onRotationEnd } = options
+export const useRotateElement = (options: UseElementRotationOptions): UseElementRotationReturn => {
+  const { currentRotation, setCurrentRotation, onRotationStart, onRotationEnd } = options
 
   // Refs
   const rotateButtonRef = useRef<HTMLButtonElement>(null)
@@ -27,7 +25,6 @@ export const useRotateElement = (
   const startRotationRef = useRef(0)
 
   // State
-  const [rotation, setRotation] = useState(initialRotation)
   const [isRotating, setIsRotating] = useState<boolean>(false)
 
   // Hàm tính góc từ tâm phần tử đến điểm (x, y)
@@ -68,12 +65,12 @@ export const useRotateElement = (
       }
 
       startAngleRef.current = getAngleFromCenter(clientX, clientY)
-      startRotationRef.current = rotation
+      startRotationRef.current = currentRotation
 
       document.body.style.cursor = 'grabbing'
       document.body.style.userSelect = 'none'
     },
-    [rotation, getAngleFromCenter, onRotationStart]
+    [currentRotation, getAngleFromCenter, onRotationStart]
   )
 
   // Xử lý khi di chuyển
@@ -106,7 +103,7 @@ export const useRotateElement = (
 
       // Cập nhật góc xoay mới
       const newRotation = startRotationRef.current + angleDelta
-      setRotation(newRotation)
+      setCurrentRotation(newRotation)
     },
     [getAngleFromCenter]
   )
@@ -124,8 +121,8 @@ export const useRotateElement = (
 
   // Reset góc xoay
   const resetRotation = useCallback(() => {
-    setRotation(initialRotation)
-  }, [initialRotation])
+    setCurrentRotation(currentRotation)
+  }, [currentRotation])
 
   // Effect để đăng ký/hủy sự kiện
   useEffect(() => {
@@ -160,7 +157,6 @@ export const useRotateElement = (
   }, [handleStart, handleMove, handleEnd])
 
   return {
-    rotation,
     rotateButtonRef,
     containerRef,
     resetRotation,

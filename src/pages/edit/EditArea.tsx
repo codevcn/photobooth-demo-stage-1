@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, Profiler } from 'react'
 import {
   IProductImage,
   ITextElement,
@@ -18,6 +18,18 @@ import { eventEmitter } from '@/utils/events'
 import { EInternalEvents } from '@/utils/enums'
 import { ProductImageElementMenu } from './product/product-image/Menu'
 import { PrintedImagesPreview } from './PrintedImagesPreview'
+
+function onRenderCallback(
+  id, // tên của Profiler
+  phase, // "mount" hoặc "update"
+  actualDuration, // thời gian render lần này (ms)
+  baseDuration, // thời gian render ước tính không có memo
+  startTime, // khi React bắt đầu render
+  commitTime, // khi React commit update
+  interactions // Set các interaction được track
+) {
+  console.log(`${id} (${phase}): ${actualDuration}ms`)
+}
 
 const maxZoom: number = 1
 const minZoom: number = 0.3
@@ -222,13 +234,21 @@ const EditArea: React.FC<EditAreaProps> = ({
 
           {/* Printed Image Elements */}
           {printedImageElements.map((img) => (
-            <PrintedImageElement
+            <Profiler
               key={img.id}
-              element={img}
-              onRemoveElement={handleRemovePrintedImage}
-              onUpdateSelectedElementId={(id) => handleUpdateSelectedElementId(id, 'printed-image')}
-              selectedElementId={selectedElementId}
-            />
+              id={`PrintedImageElement-${img.id}`}
+              onRender={onRenderCallback as any}
+            >
+              <PrintedImageElement
+                key={img.id}
+                element={img}
+                onRemoveElement={handleRemovePrintedImage}
+                onUpdateSelectedElementId={(id) =>
+                  handleUpdateSelectedElementId(id, 'printed-image')
+                }
+                selectedElementId={selectedElementId}
+              />
+            </Profiler>
           ))}
         </div>
       </div>

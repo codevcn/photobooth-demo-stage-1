@@ -1,16 +1,9 @@
-import { useDragElement } from '@/hooks/element/use-drag-element'
 import { IStickerElement } from '@/utils/types'
-import { X, RotateCw } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { X, RotateCw, Scaling } from 'lucide-react'
+import { useEffect, useRef } from 'react'
 import { eventEmitter } from '@/utils/events'
 import { EInternalEvents } from '@/utils/enums'
-import { useRotateElement } from '@/hooks/element/use-rotate-element'
-import { usePinchElement } from '@/hooks/element/use-pinch-element'
-
-const maxZoom: number = 2
-const minZoom: number = 0.3
-
-type TElementProperties = { scale: number; angle: number }
+import { useElementControl } from '@/hooks/element/use-element-control'
 
 interface StickerElementProps {
   element: IStickerElement
@@ -27,73 +20,19 @@ export const StickerElement = ({
 }: StickerElementProps) => {
   const { path, height, width, id } = element
   const isSelected = selectedElementId === id
-  const [isRotating, setIsRotating] = useState<boolean>(false)
-  const { ref: refForDrag, position } = useDragElement({
-    disabled: isRotating,
-  })
   const {
-    ref: refForZoom,
-    scale,
-    rotation: angle,
-  } = usePinchElement({ maxScale: maxZoom, minScale: minZoom })
-  const { rotation, rotateButtonRef, containerRef } = useRotateElement({
-    initialRotation: 0,
-    onRotationStart: () => setIsRotating(true),
-    onRotationEnd: () => setIsRotating(false),
-  })
+    forPinch: { ref: refForPinch },
+    forRotate: { ref: refForRotate, rotateButtonRef },
+    forZoom: { ref: refForZoom, zoomButtonRef },
+    forDrag: { ref: refForDrag },
+    state: { position, angle, scale },
+    handleSetElementState,
+  } = useElementControl()
   const rootRef = useRef<HTMLElement | null>(null)
-  const propertiesRef = useRef<TElementProperties>({ scale: 1, angle: 0 })
 
   const pickElement = () => {
     eventEmitter.emit(EInternalEvents.PICK_ELEMENT, rootRef.current, 'sticker')
     onUpdateSelectedElementId(id)
-  }
-
-  const adjustElementForPinch = (scale: number, angle: number) => {
-    const root = rootRef.current
-    if (root) {
-      root.style.transform = `scale(${scale}) rotate(${angle}deg)`
-      propertiesRef.current = { scale, angle }
-    }
-  }
-
-  const onEditElementProperties = (
-    scale?: number,
-    angle?: number,
-    posX?: number,
-    posY?: number
-  ) => {
-    const root = rootRef.current
-    if (root) {
-      const elementMainBox = root.querySelector<HTMLDivElement>(`.NAME-element-main-box`)
-      if (elementMainBox) {
-        if (scale) {
-          elementMainBox.style.transform = `scale(${scale}) rotate(${propertiesRef.current.angle}deg)`
-          propertiesRef.current.scale = scale
-        }
-        if (angle || angle === 0) {
-          elementMainBox.style.transform = `scale(${propertiesRef.current.scale}) rotate(${angle}deg)`
-          propertiesRef.current.angle = angle
-        }
-        if (posX || posX === 0) {
-          root.style.left = `${posX}px`
-        }
-        if (posY || posY === 0) {
-          root.style.top = `${posY}px`
-        }
-      }
-    }
-  }
-
-  const rotateElementByButton = () => {
-    const rootElement = rootRef.current
-    if (rootElement) {
-      const elementMainBox = rootElement.querySelector<HTMLDivElement>(`.NAME-element-main-box`)
-      if (elementMainBox) {
-        elementMainBox.style.transform = `scale(${propertiesRef.current.scale}) rotate(${rotation}deg)`
-        propertiesRef.current.angle = rotation
-      }
-    }
   }
 
   const listenSubmitEleProps = (
@@ -104,17 +43,9 @@ export const StickerElement = ({
     posY?: number
   ) => {
     if (elementId === id) {
-      onEditElementProperties(scale, angle, posX, posY)
+      handleSetElementState(posX, posY, scale, angle)
     }
   }
-
-  useEffect(() => {
-    adjustElementForPinch(scale, angle)
-  }, [scale, angle])
-
-  useEffect(() => {
-    rotateElementByButton()
-  }, [rotation])
 
   useEffect(() => {
     eventEmitter.on(EInternalEvents.SUBMIT_STICKER_ELE_PROPS, listenSubmitEleProps)
@@ -128,25 +59,23 @@ export const StickerElement = ({
       ref={(node) => {
         refForDrag.current = node
         rootRef.current = node
-        containerRef.current = node
+        refForRotate.current = node
+        refForZoom.current = node
+        refForPinch.current = node
       }}
       style={{
         left: position.x,
         top: position.y,
+        width: width === -1 ? '180px' : width,
+        aspectRatio: width === -1 || height === -1 ? 'auto' : `${width} / ${height}`,
+        transform: `scale(${scale}) rotate(${angle}deg)`,
       }}
-      className={`NAME-root-element absolute h-fit w-fit touch-none bg-pink-400/20`}
+      className={`${
+        isSelected ? 'outline-2 outline-dark-pink-cl outline' : ''
+      } NAME-root-element absolute h-fit w-fit touch-none bg-pink-400/20`}
       onClick={pickElement}
     >
-      <div
-        ref={refForZoom}
-        style={{
-          width: width === -1 ? 'auto' : width,
-          aspectRatio: width === -1 || height === -1 ? 'auto' : `${width} / ${height}`,
-        }}
-        className={`${
-          isSelected ? 'outline-2 outline-dark-pink-cl outline' : ''
-        } NAME-element-main-box max-w-[200px] select-none relative origin-center`}
-      >
+      <div className={`NAME-element-main-box max-w-[200px] select-none relative origin-center`}>
         <div className="h-full w-full">
           <img
             src={path}
@@ -165,6 +94,18 @@ export const StickerElement = ({
             className="cursor-grab active:cursor-grabbing bg-pink-cl text-white rounded-full p-1 active:scale-90 transition"
           >
             <RotateCw size={14} color="currentColor" />
+          </button>
+        </div>
+        <div
+          className={`${
+            isSelected ? 'block' : 'hidden'
+          } NAME-remove-box absolute -bottom-6 -right-6 z-20`}
+        >
+          <button
+            ref={zoomButtonRef}
+            className="cursor-grab active:cursor-grabbing bg-pink-cl text-white rounded-full p-1 active:scale-90 transition"
+          >
+            <Scaling size={14} color="currentColor" />
           </button>
         </div>
         <div

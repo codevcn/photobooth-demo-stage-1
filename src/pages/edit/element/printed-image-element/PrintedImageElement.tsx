@@ -1,17 +1,9 @@
-import { useDragElement } from '@/hooks/element/use-drag-element'
 import { IPrintedImage } from '@/utils/types'
 import { X, RotateCw, Scaling } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 import { eventEmitter } from '@/utils/events'
 import { EInternalEvents } from '@/utils/enums'
-import { useRotateElement } from '@/hooks/element/use-rotate-element'
-import { usePinchElement } from '@/hooks/element/use-pinch-element'
-import { useZoomElement } from '@/hooks/element/use-zoom-element'
-
-const maxZoom: number = 2
-const minZoom: number = 0.3
-
-type TElementProperties = { scale: number; angle: number }
+import { useElementControl } from '@/hooks/element/use-element-control'
 
 interface PrintedImageElementProps {
   element: IPrintedImage
@@ -29,69 +21,18 @@ export const PrintedImageElement = ({
   const { url, height, width, id, x, y } = element
   const isSelected = selectedElementId === id
   const {
-    ref: refForPinch,
-    scale,
-    rotation: angle,
-  } = usePinchElement({ maxScale: maxZoom, minScale: minZoom })
-  const {
-    rotation,
-    rotateButtonRef,
-    containerRef: refForRotate,
-    isRotating,
-  } = useRotateElement({
-    initialRotation: 0,
-  })
-  const { zoomButtonRef, containerRef: refForZoom, isZooming } = useZoomElement()
-  const { ref: refForDrag, position } = useDragElement({
-    disabled: isRotating || isZooming,
-  })
+    forPinch: { ref: refForPinch },
+    forRotate: { ref: refForRotate, rotateButtonRef },
+    forZoom: { ref: refForZoom, zoomButtonRef },
+    forDrag: { ref: refForDrag },
+    state: { position, angle, scale },
+    handleSetElementState,
+  } = useElementControl(x, y)
   const rootRef = useRef<HTMLElement | null>(null)
-  const propertiesRef = useRef<TElementProperties>({ scale: 1, angle: 0 })
 
   const pickElement = () => {
     eventEmitter.emit(EInternalEvents.PICK_ELEMENT, rootRef.current, 'printed-image')
     onUpdateSelectedElementId(id)
-  }
-
-  const adjustElementForPinch = (scale: number, angle: number) => {
-    const root = rootRef.current
-    if (root) {
-      root.style.transform = `scale(${scale}) rotate(${angle}deg)`
-      propertiesRef.current = { scale, angle }
-    }
-  }
-
-  const onEditElementProperties = (
-    scale?: number,
-    angle?: number,
-    posX?: number,
-    posY?: number
-  ) => {
-    const root = rootRef.current
-    if (root) {
-      if (scale) {
-        root.style.transform = `scale(${scale}) rotate(${propertiesRef.current.angle}deg)`
-        propertiesRef.current.scale = scale
-      }
-      if (angle || angle === 0) {
-        root.style.transform = `scale(${propertiesRef.current.scale}) rotate(${angle}deg)`
-        propertiesRef.current.angle = angle
-      }
-      if (posX || posX === 0) {
-        root.style.left = `${posX}px`
-      }
-      if (posY || posY === 0) {
-        root.style.top = `${posY}px`
-      }
-    }
-  }
-
-  const rotateElementByButton = () => {
-    const rootElement = rootRef.current
-    if (rootElement) {
-      rootElement.style.transform = `scale(${propertiesRef.current.scale}) rotate(${rotation}deg)`
-      propertiesRef.current.angle = rotation
-    }
   }
 
   const listenSubmitEleProps = (
@@ -102,7 +43,7 @@ export const PrintedImageElement = ({
     posY?: number
   ) => {
     if (elementId === id) {
-      onEditElementProperties(scale, angle, posX, posY)
+      handleSetElementState(posX, posY, scale, angle)
     }
   }
 
@@ -122,14 +63,6 @@ export const PrintedImageElement = ({
       })
     })
   }
-
-  useEffect(() => {
-    adjustElementForPinch(scale, angle)
-  }, [scale, angle])
-
-  useEffect(() => {
-    rotateElementByButton()
-  }, [rotation])
 
   useEffect(() => {
     moveElementIntoCenter()
@@ -156,6 +89,7 @@ export const PrintedImageElement = ({
         top: position.y || y,
         width: width === -1 ? '180px' : width,
         aspectRatio: width === -1 || height === -1 ? 'auto' : `${width} / ${height}`,
+        transform: `scale(${scale}) rotate(${angle}deg)`,
       }}
       className={`${
         isSelected ? 'outline-2 outline-dark-pink-cl outline' : ''
