@@ -8,18 +8,21 @@ import SizeSelector from './product/product-size/SizeSelector'
 import TextEditor from './element/text-element/TextEditor'
 import StickerPicker from './element/sticker-element/StickerPicker'
 import {
-  IPrintedImage,
-  IProductImage,
-  IStickerElement,
-  ITextElement,
+  TPrintedImage,
+  TProductImage,
+  TStickerElement,
+  TTextElement,
   TElementLayerState,
   TElementType,
   TProductSize,
 } from '@/utils/types'
 import { eventEmitter } from '@/utils/events'
 import { EInternalEvents } from '@/utils/enums'
-import { ElementLayerContext, GlobalContext } from '../../context/global-context'
-import { productImages } from '@/dev/storage'
+import {
+  ElementLayerContext,
+  useEditedImageContext,
+  useProductImageContext,
+} from '../../context/global-context'
 import { LocalStorageHelper } from '@/utils/localstorage'
 import { toast } from 'react-toastify'
 import { useHtmlToCanvas } from '@/hooks/use-html-to-canvas'
@@ -27,31 +30,8 @@ import { ArrowLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { swapArrayItems } from '@/utils/helpers'
 import { INITIAL_TEXT_FONT_SIZE } from '@/utils/contants'
-
-type TProviderState = {
-  pickedElementRoot: HTMLElement | null
-  elementType: TElementType | null
-}
-
-const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
-  const [providerState, setProviderState] = useState<TProviderState>({
-    pickedElementRoot: null,
-    elementType: null,
-  })
-
-  const listenPickElement = (element: HTMLElement | null, elementType: TElementType | null) => {
-    setProviderState({ pickedElementRoot: element, elementType })
-  }
-
-  useEffect(() => {
-    eventEmitter.on(EInternalEvents.PICK_ELEMENT, listenPickElement)
-    return () => {
-      eventEmitter.off(EInternalEvents.PICK_ELEMENT, listenPickElement)
-    }
-  }, [])
-
-  return <GlobalContext.Provider value={providerState}>{children}</GlobalContext.Provider>
-}
+import { productService } from '@/services/product.service'
+import { PageLoading } from '@/components/custom/Loading'
 
 const ElementLayerProvider = ({ children }: { children: React.ReactNode }) => {
   const [elementLayers, setElementLayers] = useState<TElementLayerState[]>([])
@@ -72,53 +52,14 @@ const ElementLayerProvider = ({ children }: { children: React.ReactNode }) => {
   )
 }
 
-const EditPage = () => {
-  const [sessionId] = useState<string>('12331-5465464-1321311-hththt')
-  // Gallery images
-  const [galleryImages] = useState<IProductImage[][]>(productImages)
-  // Printed images
-  const [printedImages] = useState<IPrintedImage[]>([
-    {
-      id: 'printed-1',
-      url: '/images/print-img-1.png',
-      height: -1,
-      width: -1,
-      x: 0,
-      y: 0,
-    },
-    {
-      id: 'printed-2',
-      url: '/images/print-img-2.png',
-      height: -1,
-      width: -1,
-      x: 0,
-      y: 0,
-    },
-    {
-      id: 'printed-3',
-      url: '/images/print-img-3.png',
-      height: -1,
-      width: -1,
-      x: 0,
-      y: 0,
-    },
-    {
-      id: 'printed-4',
-      url: '/images/print-img-4.png',
-      height: -1,
-      width: -1,
-      x: 0,
-      y: 0,
-    },
-    {
-      id: 'printed-5',
-      url: '/images/print-img-5.jpg',
-      height: -1,
-      width: -1,
-      x: 0,
-      y: 0,
-    },
-  ])
+type TEditPageProps = {
+  productImages: TProductImage[][]
+}
+
+const EditPage = ({ productImages }: TEditPageProps) => {
+  const [sessionId] = useState<string>(crypto.randomUUID())
+  const [galleryImages] = useState<TProductImage[][]>(productImages)
+  const { editedImages: printedImages } = useEditedImageContext()
 
   const [activeImageId, setActiveImageId] = useState<string>(galleryImages[0][0].id)
   const [selectedColor, setSelectedColor] = useState<string>('')
@@ -132,23 +73,16 @@ const EditPage = () => {
   const [showStickerPicker, setShowStickerPicker] = useState(false)
 
   // Edit elements
-  const [textElements, setTextElements] = useState<ITextElement[]>([])
-  const [stickerElements, setStickerElements] = useState<IStickerElement[]>([])
-  const [printedImageElements, setPrintedImageElements] = useState<IPrintedImage[]>([
-    {
-      id: 'printed-1',
-      url: '/images/print-img-1.png',
-      height: -1,
-      width: -1,
-      x: 0,
-      y: 0,
-    },
+  const [textElements, setTextElements] = useState<TTextElement[]>([])
+  const [stickerElements, setStickerElements] = useState<TStickerElement[]>([])
+  const [printedImageElements, setPrintedImageElements] = useState<TPrintedImage[]>([
+    printedImages[0],
   ])
 
   const { editorRef, handleSaveHtmlAsImage } = useHtmlToCanvas()
 
-  const [activeProduct, peerProducts] = useMemo<[IProductImage, IProductImage[]]>(() => {
-    let activeProduct: IProductImage
+  const [activeProduct, peerProducts] = useMemo<[TProductImage, TProductImage[]]>(() => {
+    let activeProduct: TProductImage
     const products = galleryImages.find((imgs) => {
       for (const img of imgs) {
         if (img.id === activeImageId) {
@@ -178,7 +112,7 @@ const EditPage = () => {
     }
   }
 
-  const handleAddPrintedElement = (type: TElementType, printedImageElements: IPrintedImage[]) => {
+  const handleAddPrintedElement = (type: TElementType, printedImageElements: TPrintedImage[]) => {
     if (type === 'printed-image' && printedImageElements.length > 0) {
       setPrintedImageElements((pre) => {
         for (const ele of printedImageElements) {
@@ -214,7 +148,7 @@ const EditPage = () => {
   }
 
   const handleAddText = (text: string) => {
-    const newText: ITextElement = {
+    const newText: TTextElement = {
       id: Date.now().toString(),
       text,
       x: 50,
@@ -227,7 +161,7 @@ const EditPage = () => {
   }
 
   const handleAddSticker = (path: string) => {
-    const newSticker: IStickerElement = {
+    const newSticker: TStickerElement = {
       id: crypto.randomUUID(),
       path,
       x: 50,
@@ -266,95 +200,121 @@ const EditPage = () => {
     activeImageId &&
     activeProduct &&
     peerProducts && (
-      <GlobalProvider>
-        <ElementLayerProvider>
-          <div className="min-h-screen bg-superlight-pink-cl flex flex-col max-w-md mx-auto">
-            {/* Gallery Section */}
-            <div className="pt-4 pb-3 px-4 bg-white shadow-sm relative">
-              <div
-                onClick={() => navigate('/')}
-                className="absolute top-3 left-2 bg-pink-cl py-0.5 px-2 rounded-lg"
-              >
-                <ArrowLeft size={20} className="text-white" />
-              </div>
-              <ProductGallery
-                galleryImages={galleryImages}
-                activeImageId={activeImageId}
-                onSelectImage={setActiveImageId}
-                printedImages={printedImages}
-              />
+      <ElementLayerProvider>
+        <div className="min-h-screen bg-superlight-pink-cl flex flex-col max-w-md mx-auto">
+          {/* Gallery Section */}
+          <div className="pt-4 pb-3 px-4 bg-white shadow-sm relative">
+            <div
+              onClick={() => navigate('/')}
+              className="absolute top-3 left-2 bg-pink-cl py-0.5 px-2 rounded-lg"
+            >
+              <ArrowLeft size={20} className="text-white" />
             </div>
-
-            {/* Edit Area */}
-            <div className="mt-4">
-              <div className="flex-1 px-2 mb-4">
-                <EditArea
-                  editingProduct={activeProduct}
-                  color={selectedColor}
-                  textElements={textElements}
-                  stickerElements={stickerElements}
-                  onUpdateText={setTextElements}
-                  onUpdateStickers={setStickerElements}
-                  printedImages={printedImages}
-                  onAddPrintedImages={(ele) => handleAddPrintedElement('printed-image', ele)}
-                  onRemovePrintedImages={(ids) => handleRemoveELement('printed-image', ids)}
-                  printedImageElements={printedImageElements}
-                  htmlToCanvasEditorRef={editorRef}
-                />
-              </div>
-
-              {/* Action Bar */}
-              <div className="px-4 pb-3">
-                <ActionBar cartCount={cartCount} onAddToCart={handleAddToCart} />
-              </div>
-
-              {/* Bottom Menu */}
-              <div className="bg-white border-t border-gray-200">
-                <BottomMenu
-                  onAddText={() => setShowTextEditor(true)}
-                  onAddSticker={() => setShowStickerPicker(true)}
-                  onChooseColor={() => setShowColorPicker(true)}
-                  onChooseSize={() => setShowSizeSelector(true)}
-                  activeProduct={activeProduct}
-                  peerProducts={peerProducts}
-                />
-              </div>
-
-              {/* Overlays */}
-              {showColorPicker && (
-                <ColorPicker
-                  selectedColor={selectedColor}
-                  onSelectColor={handleSelectColor}
-                  onClose={() => setShowColorPicker(false)}
-                  activeProduct={activeProduct}
-                  peerProducts={peerProducts}
-                />
-              )}
-
-              {showSizeSelector && (
-                <SizeSelector
-                  selectedSize={selectedSize}
-                  onSelectSize={setSelectedSize}
-                  onClose={() => setShowSizeSelector(false)}
-                  sizes={activeProduct.size}
-                />
-              )}
-
-              {showTextEditor && (
-                <TextEditor onAddText={handleAddText} onClose={() => setShowTextEditor(false)} />
-              )}
-
-              <StickerPicker
-                onAddSticker={handleAddSticker}
-                onClose={() => setShowStickerPicker(false)}
-                show={showStickerPicker}
-              />
-            </div>
+            <ProductGallery
+              galleryImages={galleryImages}
+              activeImageId={activeImageId}
+              onSelectImage={setActiveImageId}
+              printedImages={printedImages}
+            />
           </div>
-        </ElementLayerProvider>
-      </GlobalProvider>
+
+          {/* Edit Area */}
+          <div className="mt-4">
+            <div className="flex-1 px-2 mb-4">
+              <EditArea
+                editingProduct={activeProduct}
+                color={selectedColor}
+                textElements={textElements}
+                stickerElements={stickerElements}
+                onUpdateText={setTextElements}
+                onUpdateStickers={setStickerElements}
+                printedImages={printedImages}
+                onAddPrintedImages={(ele) => handleAddPrintedElement('printed-image', ele)}
+                onRemovePrintedImages={(ids) => handleRemoveELement('printed-image', ids)}
+                printedImageElements={printedImageElements}
+                htmlToCanvasEditorRef={editorRef}
+              />
+            </div>
+
+            {/* Action Bar */}
+            <div className="px-4 pb-3">
+              <ActionBar cartCount={cartCount} onAddToCart={handleAddToCart} />
+            </div>
+
+            {/* Bottom Menu */}
+            <div className="bg-white border-t border-gray-200">
+              <BottomMenu
+                onAddText={() => setShowTextEditor(true)}
+                onAddSticker={() => setShowStickerPicker(true)}
+                onChooseColor={() => setShowColorPicker(true)}
+                onChooseSize={() => setShowSizeSelector(true)}
+                activeProduct={activeProduct}
+                peerProducts={peerProducts}
+              />
+            </div>
+
+            {/* Overlays */}
+            {showColorPicker && (
+              <ColorPicker
+                selectedColor={selectedColor}
+                onSelectColor={handleSelectColor}
+                onClose={() => setShowColorPicker(false)}
+                activeProduct={activeProduct}
+                peerProducts={peerProducts}
+              />
+            )}
+
+            {showSizeSelector && (
+              <SizeSelector
+                selectedSize={selectedSize}
+                onSelectSize={setSelectedSize}
+                onClose={() => setShowSizeSelector(false)}
+                sizes={activeProduct.size}
+              />
+            )}
+
+            {showTextEditor && (
+              <TextEditor onAddText={handleAddText} onClose={() => setShowTextEditor(false)} />
+            )}
+
+            <StickerPicker
+              onAddSticker={handleAddSticker}
+              onClose={() => setShowStickerPicker(false)}
+              show={showStickerPicker}
+            />
+          </div>
+        </div>
+      </ElementLayerProvider>
     )
   )
 }
 
-export default EditPage
+const PageWrapper = () => {
+  const [error, setError] = useState<string | null>(null)
+  const { productImages, setProductImages } = useProductImageContext()
+
+  const fetchProducts = async () => {
+    try {
+      const data = await productService.fetchProductsByPage(1, 20)
+      setProductImages(data)
+    } catch (error) {
+      setError('Không thể tải dữ liệu sản phẩm. Vui lòng thử lại sau.')
+    }
+  }
+
+  useEffect(() => {
+    fetchProducts()
+  }, [])
+
+  return error ? (
+    <div className="flex items-center justify-center w-screen h-screen">
+      <p className="text-red-500 text-center">{error}</p>
+    </div>
+  ) : productImages.length > 0 ? (
+    <EditPage productImages={productImages} />
+  ) : (
+    <PageLoading message="Đang tải dữ liệu..." />
+  )
+}
+
+export default PageWrapper

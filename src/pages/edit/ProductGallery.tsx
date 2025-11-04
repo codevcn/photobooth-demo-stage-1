@@ -1,11 +1,11 @@
-import { IPrintedImage, IProductImage } from '@/utils/types'
+import { TPrintedImage, TProductImage } from '@/utils/types'
 import React, { useMemo } from 'react'
 
 interface ProductGalleryProps {
-  galleryImages: IProductImage[][]
+  galleryImages: TProductImage[][]
   activeImageId: string
   onSelectImage: (id: string) => void
-  printedImages: IPrintedImage[]
+  printedImages: TPrintedImage[]
 }
 
 const countForTraditional: number = 6

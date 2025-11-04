@@ -2,7 +2,7 @@ import useGoogleFont from '@/hooks/use-load-font'
 import { useGlobalContext } from '@/context/global-context'
 import { EInternalEvents } from '@/utils/enums'
 import { eventEmitter } from '@/utils/events'
-import { ITextElement } from '@/utils/types'
+import { TTextElement } from '@/utils/types'
 import {
   RefreshCw,
   Move,
@@ -156,7 +156,7 @@ const TextFontPicker = ({ show, onHideShow }: TextFontPickerProps) => {
 
 interface PrintedImageMenuProps {
   elementId: string
-  textElements: ITextElement[]
+  textElements: TTextElement[]
 }
 
 export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuProps) => {

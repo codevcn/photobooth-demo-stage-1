@@ -1,4 +1,4 @@
-import { ITextElement } from '@/utils/types'
+import { TTextElement } from '@/utils/types'
 import { X, RotateCw, Scaling } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 import { eventEmitter } from '@/utils/events'
@@ -10,7 +10,7 @@ const MAX_TEXT_FONT_SIZE: number = 1000
 const MIN_TEXT_FONT_SIZE: number = 5
 
 interface TextElementProps {
-  element: ITextElement
+  element: TTextElement
   onRemoveElement: (id: string) => void
   selectedElementId: string | null
   onUpdateSelectedElementId: (id: string | null) => void

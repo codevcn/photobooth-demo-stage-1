@@ -5,7 +5,7 @@ export type TProductColor = {
   value: string
 }
 
-export interface IProductImage {
+export type TProductImage = {
   id: string
   url: string
   name: string
@@ -18,7 +18,7 @@ export interface IProductImage {
   category: 'shirt' | 'hat' | 'cup' | 'keychain' | 'phonecase' | 'figurine' | 'totebag'
 }
 
-export interface ITextElement {
+export type TTextElement = {
   id: string
   text: string
   x: number
@@ -28,7 +28,7 @@ export interface ITextElement {
   content: string
 }
 
-export interface IStickerElement {
+export type TStickerElement = {
   id: string
   path: string
   x: number
@@ -37,7 +37,7 @@ export interface IStickerElement {
   width: number
 }
 
-export interface IPrintedImage {
+export type TPrintedImage = {
   id: string
   url: string
   x: number
@@ -55,6 +55,7 @@ export type TElementLayerState = {
 export type TGlobalContextValue = {
   pickedElementRoot: HTMLElement | null
   elementType: TElementType | null
+  sessionId: string | null
 }
 
 export type TElementLayerContextValue = {
@@ -96,3 +97,22 @@ export type TSavedMockupData = {
 }
 
 export type TPaymentType = 'momo' | 'zalo' | 'cod'
+
+export type TBrands = 'photoism'
+
+export type TUserInputImage = {
+  url: string
+  blob: Blob
+}
+
+export type TEditedImage = TPrintedImage
+
+export type TEditedImageContextValue = {
+  editedImages: TEditedImage[]
+  setEditedImages: React.Dispatch<React.SetStateAction<TEditedImage[]>>
+}
+
+export type TProductImageContextValue = {
+  productImages: TProductImage[][]
+  setProductImages: React.Dispatch<React.SetStateAction<TProductImage[][]>>
+}

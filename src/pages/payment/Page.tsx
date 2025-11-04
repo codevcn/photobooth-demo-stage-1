@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Minus, Plus, Tag, Banknote, X, ArrowBigLeft, ArrowLeft } from 'lucide-react'
-import { formatNumberWithCommas } from '@/utils/helpers'
-import { productImages } from '@/dev/storage'
-import { IProductImage } from '@/utils/types'
+import { formatNumberWithCommas, generateSessionId } from '@/utils/helpers'
+import { TProductImage } from '@/utils/types'
 import { PaymentModal } from '@/pages/payment/PaymentModal'
 import { useNavigate } from 'react-router-dom'
 import { createPortal } from 'react-dom'
 import { LocalStorageHelper } from '@/utils/localstorage'
+import { useGlobalContext, useProductImageContext } from '@/context/global-context'
 
 interface IPaymentModalProps {
   imgSrc?: string
@@ -15,7 +15,6 @@ interface IPaymentModalProps {
 
 const ProductImageModal = ({ imgSrc, onClose }: IPaymentModalProps) => {
   if (!imgSrc) return null
-
   return (
     <div className="flex fixed inset-0">
       <div onClick={onClose} className="absolute w-full h-full bg-black/50 z-10"></div>
@@ -44,7 +43,7 @@ type TProductItem = {
 }
 
 const PaymentPage = () => {
-  const [sessionId] = useState<string>('12331-5465464-1321311-hththt')
+  const { sessionId } = useGlobalContext()
   const [cartItems, setCartItems] = useState<TProductItem[]>([])
   const [discountCode, setDiscountCode] = useState('')
   const [discountApplied, setDiscountApplied] = useState(false)
@@ -52,6 +51,7 @@ const PaymentPage = () => {
   const [showModal, setShowModal] = useState(false)
   const navigate = useNavigate()
   const [selectedImage, setSelectedImage] = useState<string>()
+  const { productImages } = useProductImageContext()
 
   const updateQuantity = (idAsImageDataURL: string, delta: number) => {
     setCartItems((items) =>
@@ -73,7 +73,7 @@ const PaymentPage = () => {
     }
   }
 
-  const findProductInfoInMainProducts = (id: string): IProductImage | null => {
+  const findProductInfoInMainProducts = (id: string): TProductImage | null => {
     for (const product of productImages.flat()) {
       if (product.id === id) {
         return product
@@ -114,7 +114,11 @@ const PaymentPage = () => {
       items.filter((item) => {
         const matching = item.mockupData.id === idAsImageDataURL
         if (matching) {
-          LocalStorageHelper.removeSavedMockupImage(sessionId, productId, item.mockupData.id)
+          LocalStorageHelper.removeSavedMockupImage(
+            sessionId || generateSessionId(),
+            productId,
+            item.mockupData.id
+          )
           return false
         } else {
           return true

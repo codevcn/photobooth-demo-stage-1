@@ -1,9 +1,9 @@
 import { formatNumberWithCommas } from '@/utils/helpers'
-import { IProductImage } from '@/utils/types'
+import { TProductImage } from '@/utils/types'
 import { useEffect, useRef, useState } from 'react'
 
 interface ProductImageProps {
-  image: IProductImage
+  image: TProductImage
   imgsContainerRef: React.RefObject<HTMLDivElement>
 }
 
@@ -25,8 +25,8 @@ const ProductImage: React.FC<ProductImageProps> = ({ image, imgsContainerRef }) 
 interface ProductDetailsProps {
   show: boolean
   onHideShow: (show: boolean) => void
-  productDetails: IProductImage
-  peerProducts: IProductImage[]
+  productDetails: TProductImage
+  peerProducts: TProductImage[]
 }
 
 export const ProductDetails: React.FC<ProductDetailsProps> = ({
@@ -37,7 +37,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
 }) => {
   const imgsContainerRef = useRef<HTMLDivElement>(null)
   const [pickedIndex, setPickedIndex] = useState<number>(0)
-  const [pickedItem, setPickedItem] = useState<IProductImage>(productDetails)
+  const [pickedItem, setPickedItem] = useState<TProductImage>(productDetails)
   const { name, description, priceInVND, priceAfterDiscount, id: pickedItemId } = pickedItem
 
   const pickItem = (imgId: string) => {

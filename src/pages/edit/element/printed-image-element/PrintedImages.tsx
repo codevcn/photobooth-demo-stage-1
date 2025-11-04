@@ -1,13 +1,13 @@
 import { getNaturalSizeOfImage } from '@/utils/helpers'
-import { IPrintedImage } from '@/utils/types'
+import { TPrintedImage } from '@/utils/types'
 import { X } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 
 interface ImageProps {
-  img: IPrintedImage
+  img: TPrintedImage
   index: number
   imgsContainerRef: React.RefObject<HTMLDivElement>
-  onAddImage: (printedImg: IPrintedImage) => void
+  onAddImage: (printedImg: TPrintedImage) => void
 }
 
 const Image = ({ img, index, imgsContainerRef, onAddImage }: ImageProps) => {
@@ -61,9 +61,9 @@ const Image = ({ img, index, imgsContainerRef, onAddImage }: ImageProps) => {
 
 interface PrintedImagesProps {
   show: boolean
-  onAddImage: (printedImg: IPrintedImage) => void
+  onAddImage: (printedImg: TPrintedImage) => void
   onClose: () => void
-  printedImages: IPrintedImage[]
+  printedImages: TPrintedImage[]
 }
 
 export const PrintedImagesModal = ({
@@ -80,14 +80,10 @@ export const PrintedImagesModal = ({
         opacity: show ? 1 : 0,
         pointerEvents: show ? 'auto' : 'none',
       }}
-      className="fixed inset-0 z-[999] bg-black/80 flex items-end sm:items-center justify-center"
+      className="fixed top-0 left-0 h-screen w-screen z-[999] flex items-center justify-center"
     >
-      <div
-        style={{
-          opacity: show ? 1 : 0,
-        }}
-        className="bg-background w-full max-w-[430px] rounded-t-3xl max-h-[80vh] flex flex-col transition duration-500 ease-in-out"
-      >
+      <div onClick={onClose} className="bg-black/70 absolute inset-0 z-10"></div>
+      <div className="relative z-20 bg-background w-full max-w-[430px] rounded-lg max-h-[80vh] flex flex-col transition duration-500 ease-in-out">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border">
           <h2 className="text-lg font-semibold">Chọn ảnh bạn đã chụp</h2>

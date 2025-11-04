@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo } from 'react'
 import { X, Check } from 'lucide-react'
-import { IProductImage } from '@/utils/types'
+import { TProductImage } from '@/utils/types'
 
 interface ColorPickerProps {
   selectedColor: string
   onSelectColor: (color: string, productId: string) => void
   onClose: () => void
-  activeProduct: IProductImage
-  peerProducts: IProductImage[]
+  activeProduct: TProductImage
+  peerProducts: TProductImage[]
 }
 
 type TColor = {

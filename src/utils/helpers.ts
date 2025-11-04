@@ -112,3 +112,5 @@ export const roundZooming = (zoomValue: number): number => {
 }
 
 export const typeToObject = <Type>(objectInput: Type): Type => objectInput
+
+export const generateSessionId = (): string => crypto.randomUUID()

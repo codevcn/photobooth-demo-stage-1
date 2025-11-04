@@ -1,4 +1,4 @@
-import { IStickerElement, TMenuState } from '@/utils/types'
+import { TStickerElement, TMenuState } from '@/utils/types'
 import { X, RotateCw, Scaling } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 import { eventEmitter } from '@/utils/events'
@@ -11,7 +11,7 @@ const MAX_ZOOM: number = 3
 const MIN_ZOOM: number = 0.3
 
 interface StickerElementProps {
-  element: IStickerElement
+  element: TStickerElement
   onRemoveElement: (id: string) => void
   selectedElementId: string | null
   onUpdateSelectedElementId: (id: string | null) => void

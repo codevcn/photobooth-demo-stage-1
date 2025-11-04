@@ -1,6 +1,6 @@
-import { IProductImage } from '@/utils/types'
+import { TProductImage } from '@/utils/types'
 
-export const productImages: IProductImage[][] = [
+export const productImages: TProductImage[][] = [
   [
     {
       id: 'gallery-shirt-1',

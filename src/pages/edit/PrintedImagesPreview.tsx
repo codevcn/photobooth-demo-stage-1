@@ -1,9 +1,9 @@
-import { IPrintedImage } from '@/utils/types'
+import { TPrintedImage } from '@/utils/types'
 import { useMemo } from 'react'
 
 interface PrintedImagesPreviewProps {
   onOpenPrintedImagesModal: () => void
-  printedImages: IPrintedImage[]
+  printedImages: TPrintedImage[]
 }
 
 export const PrintedImagesPreview = ({
@@ -15,10 +15,10 @@ export const PrintedImagesPreview = ({
   return (
     <div
       onClick={onOpenPrintedImagesModal}
-      className="border-solid text-pink-cl bg-white active:scale-90 transition relative"
+      className="border-solid text-pink-cl bg-white active:scale-90 transition relative shadow"
     >
-      {slicedImages.map((img, index) => (
-        <div key={img.id} className="h-[50px] overflow-hidden border-2 border-pink-cl rounded">
+      {slicedImages.map((img) => (
+        <div key={img.id} className="h-[50px] overflow-hidden rounded">
           <img
             src={img.url}
             alt="Printed image"

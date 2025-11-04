@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import {
-  IProductImage,
-  ITextElement,
-  IStickerElement,
-  IPrintedImage,
+  TProductImage,
+  TTextElement,
+  TStickerElement,
+  TPrintedImage,
   TElementType,
 } from '@/utils/types'
 import { TextElement } from './element/text-element/TextElement'
@@ -25,15 +25,15 @@ const minZoom: number = 0.3
 type TSelectingType = TElementType | 'product-image' | null
 
 interface EditAreaProps {
-  editingProduct?: IProductImage
+  editingProduct?: TProductImage
   color: string
-  textElements: ITextElement[]
-  stickerElements: IStickerElement[]
-  onUpdateText: (elements: ITextElement[]) => void
-  onUpdateStickers: (elements: IStickerElement[]) => void
-  printedImages: IPrintedImage[]
-  printedImageElements: IPrintedImage[]
-  onAddPrintedImages: (elements: IPrintedImage[]) => void
+  textElements: TTextElement[]
+  stickerElements: TStickerElement[]
+  onUpdateText: (elements: TTextElement[]) => void
+  onUpdateStickers: (elements: TStickerElement[]) => void
+  printedImages: TPrintedImage[]
+  printedImageElements: TPrintedImage[]
+  onAddPrintedImages: (elements: TPrintedImage[]) => void
   onRemovePrintedImages: (ids: string[]) => void
   htmlToCanvasEditorRef: React.RefObject<HTMLDivElement>
 }
@@ -69,7 +69,7 @@ const EditArea: React.FC<EditAreaProps> = ({
     onUpdateStickers(stickerElements.filter((el) => el.id !== id))
   }
 
-  const handleAddImage = (newImage: IPrintedImage) => {
+  const handleAddImage = (newImage: TPrintedImage) => {
     onAddPrintedImages([newImage])
     setShowPrintedImagesModal(false)
   }

@@ -18,4 +18,9 @@ export default defineConfig({
     port: 3000, // Cổng mặc định, có thể đổi nếu cần
     strictPort: true, // Nếu port bị chiếm, không tự động đổi
   },
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+    minify: 'esbuild',
+  },
 })

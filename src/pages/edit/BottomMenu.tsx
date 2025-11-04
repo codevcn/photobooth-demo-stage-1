@@ -2,15 +2,15 @@ import { useMemo, useState } from 'react'
 import { Type, Sticker, Palette, Ruler, Info } from 'lucide-react'
 import { ProductDetails } from './ProductDetails'
 import { createPortal } from 'react-dom'
-import { IProductImage } from '@/utils/types'
+import { TProductImage } from '@/utils/types'
 
 interface BottomMenuProps {
   onAddText: () => void
   onAddSticker: () => void
   onChooseColor: () => void
   onChooseSize: () => void
-  activeProduct: IProductImage
-  peerProducts: IProductImage[]
+  activeProduct: TProductImage
+  peerProducts: TProductImage[]
 }
 
 const BottomMenu: React.FC<BottomMenuProps> = ({
