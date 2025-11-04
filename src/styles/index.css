@@ -111,18 +111,6 @@
   scrollbar-width: none;
 }
 
-/* Touch-friendly animations */
-@keyframes pop-in {
-  0% {
-    transform: scale(0.95);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
 .animate-pop-in {
   animation: pop-in 0.2s ease-out;
 }
@@ -147,48 +135,12 @@
   font-size: 20px;
   animation: blink 1.5s infinite;
   pointer-events: none;
-  z-index: 99;
+  z-index: 10;
   width: 24px;
 }
 
 .NAME-attractive-button {
   animation: jump 4s infinite 4s forwards;
-}
-
-@keyframes blink {
-  0%,
-  100% {
-    opacity: 0;
-    transform: scale(0.5);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes jump {
-  0% {
-    transform: translateY(0);
-  }
-  2% {
-    transform: translateY(-16px);
-  }
-  4% {
-    transform: translateY(0px);
-  }
-  14% {
-    transform: translateY(0);
-  }
-  16% {
-    transform: translateY(-8px);
-  }
-  18% {
-    transform: translateY(0);
-  }
-  100% {
-    transform: translateY(0);
-  }
 }
 
 .NAME-star:nth-child(1) {

@@ -117,3 +117,51 @@
     box-shadow: 0 0 0 10px rgba(236, 72, 153, 0);
   }
 }
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes jump {
+  0% {
+    transform: translateY(0);
+  }
+  2% {
+    transform: translateY(-16px);
+  }
+  4% {
+    transform: translateY(0px);
+  }
+  14% {
+    transform: translateY(0);
+  }
+  16% {
+    transform: translateY(-8px);
+  }
+  18% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* Touch-friendly animations */
+@keyframes pop-in {
+  0% {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

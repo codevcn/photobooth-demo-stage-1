@@ -3,7 +3,7 @@ import { Upload } from 'lucide-react'
 import { TUserInputImage } from '@/utils/types'
 
 interface ImageSelectorProps {
-  onImageSelect: (imageData: TUserInputImage) => void
+  onImageSelect: (imageData: TUserInputImage[]) => void
 }
 
 export default function ImageSelector({ onImageSelect }: ImageSelectorProps) {
@@ -12,7 +12,7 @@ export default function ImageSelector({ onImageSelect }: ImageSelectorProps) {
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file && file.type.startsWith('image/')) {
-      onImageSelect({ blob: file, url: URL.createObjectURL(file) })
+      onImageSelect([{ blob: file, url: URL.createObjectURL(file) }])
     }
   }
 

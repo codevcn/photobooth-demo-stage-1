@@ -161,14 +161,12 @@ export const PrintedImageElement = ({
         scale,
       } as TMenuState)}
     >
-      <div
-        className={`NAME-element-main-box select-none relative origin-center max-w-[200px] max-h-[300px]`}
-      >
-        <div className="h-full w-full">
+      <div className={`NAME-element-main-box select-none relative origin-center`}>
+        <div>
           <img
-            src={url || '/placeholder.svg'}
-            alt="Overlay"
-            className="NAME-element-display object-contain"
+            src={url}
+            alt="Ảnh in"
+            className="NAME-element-display object-cover max-w-[200px] max-h-[300px]"
           />
         </div>
         <div

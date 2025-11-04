@@ -15,7 +15,7 @@ export const PrintedImagesPreview = ({
   return (
     <div
       onClick={onOpenPrintedImagesModal}
-      className="border-solid text-pink-cl bg-white active:scale-90 transition relative shadow"
+      className="flex justify-center min-w-[50px] rounded border-solid text-pink-cl bg-white active:scale-90 transition relative shadow"
     >
       {slicedImages.map((img) => (
         <div key={img.id} className="h-[50px] overflow-hidden rounded">

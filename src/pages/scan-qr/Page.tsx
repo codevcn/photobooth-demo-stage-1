@@ -5,6 +5,7 @@ import ImageSelector from './ImageSelector'
 import { CropImage } from './CropImage'
 import { TUserInputImage } from '@/utils/types'
 import { useEditedImageContext } from '@/context/global-context'
+import { toast } from 'react-toastify'
 
 const ScanQRPage = () => {
   const [data, setData] = useState<TUserInputImage>()
@@ -22,11 +23,20 @@ const ScanQRPage = () => {
   }
 
   const removeFromEditedImages = (image: TUserInputImage) => {
-    setEditedImages((prevImages) => prevImages.filter(({ url }) => url !== image.url))
+    setEditedImages((prevImages) => {
+      if (prevImages.length <= 1) {
+        toast.error('Phải có ít nhất một ảnh được giữ lại.')
+        return prevImages
+      }
+      return prevImages.filter(({ url }) => url !== image.url)
+    })
   }
 
-  const handleData = (imageData: TUserInputImage) => {
-    setData(imageData)
+  const handleData = (imageDataList: TUserInputImage[]) => {
+    setData(imageDataList[0])
+    for (const img of imageDataList) {
+      addToEditedImages(img)
+    }
   }
 
   const handleCropComplete = (croppedImage: TUserInputImage | null, error: Error | null) => {
@@ -43,9 +53,6 @@ const ScanQRPage = () => {
   }
 
   useEffect(() => {
-    if (data) {
-      addToEditedImages(data)
-    }
     setShowCropper(!!data)
   }, [data])
 

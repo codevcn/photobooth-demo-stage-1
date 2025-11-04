@@ -80,7 +80,7 @@ export const PrintedImagesModal = ({
         opacity: show ? 1 : 0,
         pointerEvents: show ? 'auto' : 'none',
       }}
-      className="fixed top-0 left-0 h-screen w-screen z-[999] flex items-center justify-center"
+      className="fixed inset-0 z-[999] flex items-center justify-center"
     >
       <div onClick={onClose} className="bg-black/70 absolute inset-0 z-10"></div>
       <div className="relative z-20 bg-background w-full max-w-[430px] rounded-lg max-h-[80vh] flex flex-col transition duration-500 ease-in-out">
@@ -92,7 +92,7 @@ export const PrintedImagesModal = ({
             className="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center transition-colors"
             aria-label="Close"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5" strokeWidth={3} />
           </button>
         </div>
 

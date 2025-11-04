@@ -5,7 +5,7 @@ import { toast } from 'react-toastify'
 import { TUserInputImage } from '@/utils/types'
 
 interface QRScannerProps {
-  onScanSuccess: (result: TUserInputImage) => void
+  onScanSuccess: (result: TUserInputImage[]) => void
   showCropper: boolean
 }
 
@@ -29,7 +29,7 @@ export default function QRScanner({ onScanSuccess, showCropper }: QRScannerProps
             (percentage, imageData) => {
               setProgress(percentage)
               if (imageData) {
-                onScanSuccess({ blob: imageData.blob, url: URL.createObjectURL(imageData.blob) })
+                onScanSuccess(imageData)
               }
             },
             'photoism'

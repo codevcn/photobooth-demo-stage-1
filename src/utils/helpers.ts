@@ -114,3 +114,20 @@ export const roundZooming = (zoomValue: number): number => {
 export const typeToObject = <Type>(objectInput: Type): Type => objectInput
 
 export const generateSessionId = (): string => crypto.randomUUID()
+
+/**
+ * Chuyển canvas thành Blob
+ */
+export const canvasToBlob = (
+  canvas: HTMLCanvasElement,
+  callback: (blob: Blob | null) => void,
+  type: string = 'image/png'
+): void => {
+  canvas.toBlob((blob) => {
+    if (blob) {
+      callback(blob)
+    } else {
+      callback(null)
+    }
+  }, type)
+}

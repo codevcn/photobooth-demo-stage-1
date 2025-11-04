@@ -3,12 +3,104 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import ReactCrop, { type Crop } from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
-import { Loader2 } from 'lucide-react'
+import { Loader2, X } from 'lucide-react'
 import { useDebounce } from '@/hooks/use-debounce'
 import { TUserInputImage } from '@/utils/types'
-import { AttractiveButton } from '@/components/custom/AttractiveButton'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
+import { CropPreview } from './CropPreview'
+
+type TEditedImagesProps = {
+  editedImages: TUserInputImage[]
+  removeFromEditedImages: (image: TUserInputImage) => void
+  onSetAsEditedImage: (image: TUserInputImage) => void
+}
+
+const EditedImages = ({
+  editedImages,
+  removeFromEditedImages,
+  onSetAsEditedImage,
+}: TEditedImagesProps) => {
+  const [pickedImage, setPickedImage] = useState<TUserInputImage>()
+  const [toDelete, setToDelete] = useState<TUserInputImage>()
+
+  const pickImage = (image: TUserInputImage) => {
+    setPickedImage(image)
+  }
+
+  const handleSetToDelete = (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+    image: TUserInputImage
+  ) => {
+    e.stopPropagation()
+    setToDelete(image)
+  }
+
+  const confirmDelete = () => {
+    if (toDelete) {
+      removeFromEditedImages(toDelete)
+    }
+    setToDelete(undefined)
+  }
+
+  return (
+    <div className="flex items-center gap-2 mt-2 pb-1 h-fit w-full overflow-x-auto overflow-y-visible">
+      {editedImages.map((img) => (
+        <div
+          key={img.url}
+          onClick={() => pickImage(img)}
+          className="relative w-16 h-16 m-0.5 mt-2 flex items-center aspect-square outline outline-1 outline-gray-300 rounded"
+        >
+          <img src={img.url} alt="Ảnh đã cắt" className="h-full w-full object-contain" />
+          <button
+            onClick={(e) => handleSetToDelete(e, img)}
+            className="absolute -top-2 -right-2 p-0.5 rounded-full bg-red-600"
+          >
+            <X className="text-white" size={16} />
+          </button>
+        </div>
+      ))}
+
+      {pickedImage && (
+        <CropPreview
+          editedImages={editedImages}
+          pickedImage={pickedImage}
+          onPickedItem={setPickedImage}
+          onHide={() => setPickedImage(undefined)}
+          setAsEditedImage={onSetAsEditedImage}
+        />
+      )}
+
+      {toDelete && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div
+            className="bg-black/50 z-10 absolute inset-0"
+            onClick={() => setToDelete(undefined)}
+          ></div>
+          <div className="relative z-20 bg-white p-4 rounded shadow-lg">
+            <div>
+              <p className="font-bold">Bạn xác nhận sẽ bỏ ảnh?</p>
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                onClick={() => setToDelete(undefined)}
+                className="py-2 px-4 font-bold rounded bg-gray-600 text-white"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="py-2 px-4 font-bold rounded bg-pink-cl text-white"
+              >
+                Xác nhận
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
 
 const minCropSizeWidth: number = 50
 const minCropSizeHeight: number = 50
@@ -195,6 +287,10 @@ export const CropImage = ({
     navigate('/edit')
   }, [editedImages])
 
+  const handleSetAsEditedImage = (image: TUserInputImage) => {
+    setImageUrl(image.url)
+  }
+
   useEffect(() => {
     if (customWidth < minCropSizeWidth || customHeight < minCropSizeHeight) return
     for (const input of inputsContainerRef.current?.querySelectorAll<HTMLInputElement>('input') ||
@@ -221,13 +317,13 @@ export const CropImage = ({
   return (
     <div
       style={{ display: imageData ? 'flex' : 'none' }}
-      className="fixed top-0 left-0 h-screen w-screen flex items-center justify-center z-[90]"
+      className="fixed inset-0 flex items-center justify-center z-[90]"
     >
       <div className="absolute inset-0 bg-black/50 z-10"></div>
-      <div className="p-4 overflow-auto relative z-20">
-        <div className="bg-white rounded-lg px-2 py-4">
+      <div className="p-2 relative z-20 w-full">
+        <div className="bg-white rounded-lg px-2 py-4 overflow-y-auto overflow-x-hidden w-full max-h-[98vh]">
           {imageUrl && (
-            <div className="mb-4 flex justify-center">
+            <div className="mb-4 flex justify-center overflow-y-auto">
               <ReactCrop
                 crop={crop}
                 onChange={handleCropChange}
@@ -240,17 +336,18 @@ export const CropImage = ({
                   alt="Ảnh để crop"
                   src={imageUrl}
                   onLoad={onImageLoad}
-                  className="max-h-[65vh] object-contain"
+                  className="object-contain"
+                  style={{ maxHeight: '500px' }}
                   crossOrigin="anonymous"
                 />
               </ReactCrop>
             </div>
           )}
 
-          <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+          {/* <div className="mb-4 p-3 bg-gray-50 rounded-lg">
             <h3 className="text-sm font-semibold text-gray-800">Kích thước vùng cắt</h3>
             <p className="text-xs italic">
-              <span>Chiều rộng và chiều cao của vùng cắt không được nhỏ hơn</span>
+              <span>Chiều rộng và chiều cao của vùng cắt không được nhỏ hơn lần lượt</span>
               <span> </span>
               <span>{minCropSizeWidth}</span>px và <span>{minCropSizeHeight}</span>px.
             </p>
@@ -278,34 +375,22 @@ export const CropImage = ({
                 />
               </div>
             </div>
-
-            <p className="text-sm text-gray-800 mt-4">
-              <span className="font-bold mr-1">Tỷ lệ:</span>
-              <span>{crop ? (crop.width / crop.height).toFixed(2) : '1.00'}</span>
-              <span className="font-bold mx-0.5">:</span>
-              <span>1</span>
-            </p>
-          </div>
+          </div> */}
 
           <div className="p-3 w-full bg-gray-50 rounded-lg text-gray-600">
-            <p className="font-bold text-sm mb-2">Ảnh mà bạn cắt sẽ xuất hiện ở đây</p>
+            <p className="font-bold text-sm">Ảnh bạn cắt sẽ xuất hiện ở đây</p>
             {editedImages.length > 0 ? (
-              <div className="flex items-center gap-2 mt-2 h-fit w-full overflow-x-auto">
-                {editedImages.map(({ url }) => (
-                  <div
-                    key={url}
-                    className="min-w-14 m-0.5 flex items-center h-14 aspect-square outline outline-1 outline-gray-300 rounded overflow-hidden"
-                  >
-                    <img src={url} alt="Ảnh đã cắt" className="h-full w-full object-contain" />
-                  </div>
-                ))}
-              </div>
+              <EditedImages
+                editedImages={editedImages}
+                removeFromEditedImages={removeFromEditedImages}
+                onSetAsEditedImage={handleSetAsEditedImage}
+              />
             ) : (
               <div className="w-full">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width="56"
-                  height="56"
+                  width="64"
+                  height="64"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -363,16 +448,14 @@ export const CropImage = ({
                 )}
               </button>
             </div>
-            <div className="w-full pt-3">
-              <AttractiveButton
-                actionText="Lưu giữ kỷ niệm của bạn"
-                classNames={{
-                  button:
-                    'px-3 h-12 w-full text-lg bg-pink-cl text-white font-bold rounded-xl shadow-lg',
-                  star: 'fill-pink-cl',
-                }}
+            <div className="w-full pt-1">
+              <button
+                className="flex items-center justify-center gap-2 w-full h-10 flex-1 px-4 rounded-md bg-pink-cl text-white font-bold active:scale-90 transition-colors disabled:opacity-50"
                 onClick={navToEditPage}
-              />
+                disabled={!completedCrop || isCropping}
+              >
+                <span>Lưu giữ kỷ niệm của bạn</span>
+              </button>
             </div>
           </div>
         </div>
