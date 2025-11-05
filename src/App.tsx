@@ -8,9 +8,18 @@ import Temp from './dev/pages/Temp'
 import { ToastContainer } from 'react-toastify'
 import ScanQRPage from './pages/scan-qr/Page'
 import { AppRootProvider } from './providers/RootProvider'
+import { useEffect } from 'react'
+import { useEditedImageContext } from './context/global-context'
 
 function App() {
   LocalStorageHelper.clearAllMockupImages()
+  const { clearAllEditedImages } = useEditedImageContext()
+
+  useEffect(() => {
+    return () => {
+      clearAllEditedImages()
+    }
+  }, [])
 
   return (
     <AppRootProvider>

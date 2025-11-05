@@ -1,5 +1,5 @@
-import { TBrands, TUserInputImage } from '@/utils/types'
-import { TGetCustomerMediaResponse } from './photoism/types'
+import { TUserInputImage } from '@/utils/types'
+import { TGetCustomerMediaResponse } from './types'
 import { canvasToBlob, delay } from '@/utils/helpers'
 
 type TGetImageDataProgressCallback = (
@@ -9,18 +9,19 @@ type TGetImageDataProgressCallback = (
 
 let count = 0
 const getLinkByCount = () => {
-  if (count === 0) {
-    count++
-    return 'https://photobooth-public.s3.ap-southeast-1.amazonaws.com/d63a64aa48c6c49289dd7.jpg'
-  }
-  if (count === 1) {
-    count++
-    return 'https://photobooth-public.s3.ap-southeast-1.amazonaws.com/d63a64aa48c6c4989dd7.jpg'
-  }
-  if (count === 2) {
-    count = 0
-    return 'https://photobooth-public.s3.ap-southeast-1.amazonaws.com/d63a64aaa48c6c4989dd7.jpg'
-  }
+  return 'https://photobooth-public.s3.ap-southeast-1.amazonaws.com/d63a64aa48c6c4989dd7.jpg'
+  // if (count === 1) {
+  //   count++
+  //   return 'https://photobooth-public.s3.ap-southeast-1.amazonaws.com/d63a64aa48c6c4989dd7.jpg'
+  // }
+  // if (count === 2) {
+  //   count++
+  //   return 'https://photobooth-public.s3.ap-southeast-1.amazonaws.com/d63a64aaa48c6c4989dd7.jpg'
+  // }
+  // if (count === 3) {
+  //   count = 0
+  //   return 'https://photobooth-public.s3.ap-southeast-1.amazonaws.com/d63a64aa48c6c49289dd7.jpg'
+  // }
 }
 
 type TSendLinkToServerResponse = {
@@ -158,7 +159,6 @@ class QRGetter {
     // const urlObj = new URL(redirectLocation)
     // const uParam = urlObj.searchParams.get('u')
     // if (!uParam) throw new Error('No u parameter found in redirect URL')
-    await delay(100)
     // return uParam
     return 'test-uuid'
   }
@@ -184,9 +184,9 @@ class QRGetter {
     //   body: `{\"uid\":\"${uuid}\",\"appUserId\":null}`,
     //   method: 'POST',
     // })
-    // onProgress(50, null)
     // return (await a.json()) as TGetCustomerMediaResponse
     await delay(1000)
+    onProgress(50, null)
     return {
       content: {
         fileInfo: {
@@ -230,16 +230,16 @@ class QRGetter {
 
       // Gọi callback progress
       if (onProgress && total > 0) {
-        onProgress(50 + Math.round((loaded / total) * 100) / 2, null)
+        onProgress(50 + Math.round(((loaded / total) * 100) / 4) - 1, null) // trừ 1 để không đạt tới 75%
       }
     }
 
     // Ghép các chunks thành Blob
     const blob = new Blob(chunks)
-    onProgress(100, [{ blob, url: URL.createObjectURL(blob) }])
+    onProgress(75, [{ blob, url }])
   }
 
-  private async getImageDataOnPhotoism(
+  private async extractImageDataAtLocal(
     url: string,
     onProgress: TGetImageDataProgressCallback
   ): Promise<void> {
@@ -250,18 +250,51 @@ class QRGetter {
       await this.fetchImageData(data.content.fileInfo.picFile.path, onProgress)
     } catch (err) {
       console.error('>>> Lỗi lấy dữ liệu hình ảnh:', err)
+      throw err
     }
   }
 
-  async getImageData(
-    url: string,
-    onProgress: TGetImageDataProgressCallback,
-    brand: TBrands
+  private async extractImageDataAtServer(
+    totalImageToExtractAtServer: number,
+    imageIndex: number,
+    imageURL: string,
+    imageBlob: Blob,
+    onProgress: TGetImageDataProgressCallback
   ): Promise<void> {
-    switch (brand) {
-      case 'photoism':
-        await this.getImageDataOnPhotoism(url, onProgress)
-    }
+    const result = await this.sendLinkToServer(imageURL)
+    onProgress(90, null)
+    const croppedImages = await this.cropImageFromBlob(imageBlob, result.image_part)
+    onProgress(
+      90 + Math.round(10 / (imageIndex + 1 / totalImageToExtractAtServer)),
+      croppedImages.map((blob) => ({ blob, url: imageURL }))
+    )
+  }
+
+  async handleImageData(url: string, onProgress: TGetImageDataProgressCallback): Promise<void> {
+    const finalImageDataList: TUserInputImage[] = []
+    await this.extractImageDataAtLocal(url, async (percentage, imgList) => {
+      onProgress(percentage, null)
+      if (imgList) {
+        finalImageDataList.push(...imgList)
+        await Promise.allSettled(
+          imgList.map((img, index) =>
+            this.extractImageDataAtServer(
+              imgList.length,
+              index,
+              img.url,
+              img.blob,
+              (percentage, imgList) => {
+                onProgress(percentage, null)
+                if (imgList) {
+                  finalImageDataList.push(...imgList)
+                }
+              }
+            )
+          )
+        )
+        onProgress(100, finalImageDataList)
+      }
+    })
   }
 }
 export const qrGetter = new QRGetter()

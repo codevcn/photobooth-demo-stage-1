@@ -110,6 +110,7 @@ export type TEditedImage = TPrintedImage
 export type TEditedImageContextValue = {
   editedImages: TEditedImage[]
   setEditedImages: React.Dispatch<React.SetStateAction<TEditedImage[]>>
+  clearAllEditedImages: () => void
 }
 
 export type TProductImageContextValue = {

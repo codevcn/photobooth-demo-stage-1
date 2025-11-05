@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import QrScanner from 'qr-scanner'
-import { qrGetter } from '@/configs/brands/qr-getter'
+import { qrGetter } from '@/configs/brands/photoism/qr-getter'
 import { toast } from 'react-toastify'
 import { TUserInputImage } from '@/utils/types'
 
@@ -24,16 +24,14 @@ export default function QRScanner({ onScanSuccess, showCropper }: QRScannerProps
         if (!isScanning) {
           setIsScanning(true)
           qrScanner.stop()
-          qrGetter.getImageData(
-            result.data,
-            (percentage, imageData) => {
-              setProgress(percentage)
-              if (imageData) {
-                onScanSuccess(imageData)
-              }
-            },
-            'photoism'
-          )
+          qrGetter.handleImageData(result.data, (percentage, imageData) => {
+            setProgress(percentage)
+            if (imageData) {
+              onScanSuccess(
+                imageData.map((img) => ({ ...img, url: URL.createObjectURL(img.blob) }))
+              )
+            }
+          })
         }
       },
       {

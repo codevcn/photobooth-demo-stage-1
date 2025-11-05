@@ -25,6 +25,7 @@ export const useElementLayerContext = () => useContext(ElementLayerContext)
 export const EditedImageContext = createContext<TEditedImageContextValue>({
   editedImages: [],
   setEditedImages: () => {},
+  clearAllEditedImages: () => {},
 })
 
 export const useEditedImageContext = () => useContext(EditedImageContext)

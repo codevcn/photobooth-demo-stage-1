@@ -91,11 +91,11 @@ export const PrintedImageElement = ({
           )
           // reset max size limit after image load
           const editorContainerRect = editContainer.getBoundingClientRect()
+          const { width, height } = editorContainerRect
+          display.style.cssText = `max-width: ${width / 2}px; max-height: ${height / 2}px;`
           const mainBox = root.querySelector<HTMLElement>('.NAME-element-main-box')
           if (!mainBox) return
-          mainBox.style.cssText = `max-width: ${editorContainerRect.width - 16}px; max-height: ${
-            editorContainerRect.height - 16
-          }px;`
+          mainBox.style.cssText = `max-width: ${width / 2}px; max-height: ${height / 2}px;`
         }
         display.src = url
       },
@@ -161,13 +161,11 @@ export const PrintedImageElement = ({
         scale,
       } as TMenuState)}
     >
-      <div className={`NAME-element-main-box select-none relative origin-center`}>
-        <div>
-          <img
-            src={url}
-            alt="Ảnh in"
-            className="NAME-element-display object-cover max-w-[200px] max-h-[300px]"
-          />
+      <div
+        className={`NAME-element-main-box select-none relative origin-center max-w-[200px] max-h-[300px]`}
+      >
+        <div className="h-full w-full">
+          <img src={url} alt="Ảnh in" className="NAME-element-display object-cover" />
         </div>
         <div
           className={`${

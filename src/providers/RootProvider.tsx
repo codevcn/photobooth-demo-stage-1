@@ -14,6 +14,10 @@ export const AppRootProvider = ({ children }: { children: React.ReactNode }) => 
     sessionId: generateSessionId(),
   })
 
+  const clearAllEditedImages = () => {
+    setEditedImages([])
+  }
+
   const listenPickElement = (element: HTMLElement | null, elementType: TElementType | null) => {
     setProviderState((pre) => ({ ...pre, pickedElementRoot: element, elementType }))
   }
@@ -27,7 +31,7 @@ export const AppRootProvider = ({ children }: { children: React.ReactNode }) => 
 
   return (
     <GlobalContext.Provider value={providerState}>
-      <EditedImageContext.Provider value={{ editedImages, setEditedImages }}>
+      <EditedImageContext.Provider value={{ editedImages, setEditedImages, clearAllEditedImages }}>
         <ProductImageContext.Provider value={{ productImages, setProductImages }}>
           {children}
         </ProductImageContext.Provider>

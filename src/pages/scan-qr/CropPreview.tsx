@@ -16,7 +16,6 @@ export const CropPreview = ({
   onHide,
   setAsEditedImage,
 }: TCropPreviewProps) => {
-  console.log('>>> picked:', { pickedImage, editedImages })
   const pickItem = (imgId: TUserInputImage['url']) => {
     const selectedImage = editedImages.find(({ url }) => url === imgId)
     if (!selectedImage) return

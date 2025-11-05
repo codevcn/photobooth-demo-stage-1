@@ -309,9 +309,6 @@ export const CropImage = ({
       return
     }
     setImageUrl(imageData.url)
-    return () => {
-      URL.revokeObjectURL(imageData.url)
-    }
   }, [imageData])
 
   return (
