@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import ProductGallery from './ProductGallery'
 import EditArea from './EditArea'
-import ActionBar from './ActionBar'
 import BottomMenu from './BottomMenu'
 import ColorPicker from './product/product-color/ColorPicker'
 import SizeSelector from './product/product-size/SizeSelector'
@@ -22,6 +21,7 @@ import {
   ElementLayerContext,
   useEditedImageContext,
   useElementLayerContext,
+  useGlobalContext,
   useProductImageContext,
 } from '../../context/global-context'
 import { LocalStorageHelper } from '@/utils/localstorage'
@@ -40,7 +40,7 @@ type TEditPageProps = {
 }
 
 const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
-  const [sessionId] = useState<string>(crypto.randomUUID())
+  const { sessionId } = useGlobalContext()
   const [galleryImages] = useState<TProductImage[][]>(productImages)
 
   const [activeImageId, setActiveImageId] = useState<string>(galleryImages[0][0].id)
@@ -120,6 +120,7 @@ const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
   }
 
   const handleAddToCart = () => {
+    if (!sessionId) return
     handleSaveHtmlAsImage(
       { id: activeImageId, color: activeProduct.color, size: selectedSize },
       sessionId,
@@ -202,7 +203,7 @@ const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
 
         {/* Edit Area */}
         <div className="mt-4">
-          <div className="flex-1 px-2 mb-4">
+          <div className="flex-1 px-2">
             <EditArea
               editingProduct={activeProduct}
               color={selectedColor}
@@ -215,12 +216,9 @@ const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
               onRemovePrintedImages={(ids) => handleRemoveELement('printed-image', ids)}
               printedImageElements={printedImageElements}
               htmlToCanvasEditorRef={editorRef}
+              cartCount={cartCount}
+              handleAddToCart={handleAddToCart}
             />
-          </div>
-
-          {/* Action Bar */}
-          <div className="px-4 pb-3">
-            <ActionBar cartCount={cartCount} onAddToCart={handleAddToCart} />
           </div>
 
           {/* Bottom Menu */}
@@ -299,19 +297,21 @@ const PageWrapper = () => {
   const [error, setError] = useState<string | null>(null)
   const { productImages, setProductImages } = useProductImageContext()
   const { editedImages: printedImages } = useEditedImageContext()
+  const [fetched, setFetched] = useState<boolean>(false)
   const navigate = useNavigate()
 
   const fetchProducts = async () => {
     try {
       const data = await productService.fetchProductsByPage(1, 20)
       setProductImages(data)
+      setFetched(true)
     } catch (error) {
       setError('Không thể tải dữ liệu sản phẩm. Vui lòng thử lại sau.')
     }
   }
 
   useEffect(() => {
-    if (productImages.length === 0 || printedImages.length === 0) {
+    if (fetched && (productImages.length === 0 || printedImages.length === 0)) {
       setError('Không có sản phẩm hoặc hình in nào để chỉnh sửa.')
     }
   }, [productImages, printedImages])

@@ -110,15 +110,12 @@ const PaymentPage = () => {
   }
 
   const removeProductFromCart = (idAsImageDataURL: string, productId: string) => {
+    if (!sessionId) return
     setCartItems((items) =>
       items.filter((item) => {
         const matching = item.mockupData.id === idAsImageDataURL
         if (matching) {
-          LocalStorageHelper.removeSavedMockupImage(
-            sessionId || generateSessionId(),
-            productId,
-            item.mockupData.id
-          )
+          LocalStorageHelper.removeSavedMockupImage(sessionId, productId, idAsImageDataURL)
           return false
         } else {
           return true

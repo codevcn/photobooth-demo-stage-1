@@ -21,26 +21,54 @@ export const useHtmlToCanvas = (): TUseHtmlToCanvasReturn => {
     sessionId: string,
     onSaved: (imageUrl: string) => void
   ) => {
-    queueMicrotask(() => {
+    // Sử dụng requestIdleCallback để không block UI
+    const processImage = () => {
       if (!editorRef.current) return
+
       html2canvas(editorRef.current, {
         backgroundColor: null,
         scale: 2, // Tăng chất lượng
         useCORS: true, // Cho phép load ảnh cross-origin
         logging: false,
+        allowTaint: false, // Ngăn chặn tainted canvas
+        foreignObjectRendering: false, // Tăng hiệu suất
+        imageTimeout: 10000, // Timeout cho việc load image
+        removeContainer: true, // Cleanup sau khi render
+        windowWidth: editorRef.current.scrollWidth,
+        windowHeight: editorRef.current.scrollHeight,
       })
         .then((canvas) => {
-          canvas.toBlob((blob) => {
-            if (blob) {
-              const url = URL.createObjectURL(blob)
-              LocalStorageHelper.saveMockupImageAsBase64(productInfo, url, sessionId)
-              onSaved(url)
-            }
-          }, 'image/png')
+          // Tách việc convert blob thành task riêng
+          requestIdleCallback(() => {
+            canvas.toBlob(
+              (blob) => {
+                if (blob) {
+                  const url = URL.createObjectURL(blob)
+                  // Tách việc save localStorage thành task riêng
+                  requestIdleCallback(() => {
+                    LocalStorageHelper.saveMockupImageAsBase64(productInfo, url, sessionId)
+                    onSaved(url)
+                  })
+                }
+              },
+              'image/png',
+              1
+            )
+          })
         })
         .catch(() => {
           toast.error('Failed to save image. Please try again.')
         })
+    }
+
+    // Đảm bảo DOM đã render xong
+    queueMicrotask(() => {
+      if (typeof window.requestIdleCallback === 'function') {
+        requestIdleCallback(processImage, { timeout: 5000 })
+      } else {
+        // Fallback cho browsers không support requestIdleCallback
+        setTimeout(processImage, 0)
+      }
     })
   }
 

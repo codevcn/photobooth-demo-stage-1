@@ -12,10 +12,10 @@ import { useEffect } from 'react'
 import { useEditedImageContext } from './context/global-context'
 
 function App() {
-  LocalStorageHelper.clearAllMockupImages()
   const { clearAllEditedImages } = useEditedImageContext()
 
   useEffect(() => {
+    LocalStorageHelper.clearAllMockupImages()
     return () => {
       clearAllEditedImages()
     }

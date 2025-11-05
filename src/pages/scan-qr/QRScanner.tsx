@@ -110,7 +110,7 @@ export default function QRScanner({ onScanSuccess, showCropper }: QRScannerProps
           console.error('>>> Lỗi xử lý dữ liệu mã QR:', err)
           setError('Không thể xử lý mã QR. Vui lòng thử lại.')
         })
-    }, 3000)
+    }, 1000)
   }, [])
 
   return (

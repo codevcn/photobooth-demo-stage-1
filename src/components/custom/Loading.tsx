@@ -1,3 +1,5 @@
+import { cn } from '@/lib/utils'
+
 type TAppLoadingProps = {
   message: string
 }
@@ -25,6 +27,30 @@ type TPageLoadingProps = {
 export const PageLoading = ({ message }: TPageLoadingProps) => {
   return (
     <div id="page-loading" className="flex flex-col items-center justify-center h-screen w-screen">
+      <div className="relative bottom-[20px]">
+        <div className="STYLE-animation-loading-shapes"></div>
+        <p className="QUERY-loading-message text-pink-cl w-max text-lg font-bold mt-6 absolute top-[calc(50%+50px)] left-1/2 -translate-x-1/2 -translate-y-1/2">
+          {message}
+        </p>
+      </div>
+    </div>
+  )
+}
+
+type TSectionLoadingProps = {
+  message: string
+} & Partial<{
+  classNames: {
+    container: string
+  }
+}>
+
+export const SectionLoading = ({ message, classNames }: TSectionLoadingProps) => {
+  return (
+    <div
+      id="section-loading"
+      className={cn('flex flex-col items-center justify-center', classNames?.container)}
+    >
       <div className="relative bottom-[20px]">
         <div className="STYLE-animation-loading-shapes"></div>
         <p className="QUERY-loading-message text-pink-cl w-max text-lg font-bold mt-6 absolute top-[calc(50%+50px)] left-1/2 -translate-x-1/2 -translate-y-1/2">

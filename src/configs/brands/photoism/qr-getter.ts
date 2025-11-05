@@ -32,7 +32,7 @@ type TSendLinkToServerResponse = {
 
 class QRGetter {
   private async sendLinkToServer(url: string): Promise<TSendLinkToServerResponse> {
-    await delay(1000)
+    // await delay(1000)
     // const data = await fetch(
     //   `https://financial-text-avenue-keeps.trycloudflare.com/img?u=${encodeURIComponent(url)}`
     // )
@@ -194,7 +194,7 @@ class QRGetter {
     // })
     // onProgress(50, null, null)
     // return (await a.json()) as TGetCustomerMediaResponse
-    await delay(1000)
+    // await delay(1000)
     onProgress(50, null, null)
     return {
       content: {

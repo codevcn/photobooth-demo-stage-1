@@ -152,7 +152,7 @@ export const TextElement = ({
       }}
       className={`${
         isSelected ? 'outline-2 outline-dark-pink-cl outline' : ''
-      } NAME-root-element absolute h-fit w-fit bg-pink-400/20 touch-none`}
+      } NAME-root-element absolute h-fit w-fit touch-none`}
       onClick={pickElement}
     >
       <div

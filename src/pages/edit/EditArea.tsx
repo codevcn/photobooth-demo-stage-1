@@ -18,6 +18,7 @@ import { EInternalEvents } from '@/utils/enums'
 import { ProductImageElementMenu } from './product/product-image/Menu'
 import { PrintedImagesPreview } from './PrintedImagesPreview'
 import { useElementControl } from '@/hooks/element/use-element-control'
+import ActionBar from './ActionBar'
 
 const maxZoom: number = 3
 const minZoom: number = 0.3
@@ -36,6 +37,8 @@ interface EditAreaProps {
   onAddPrintedImages: (elements: TPrintedImage[]) => void
   onRemovePrintedImages: (ids: string[]) => void
   htmlToCanvasEditorRef: React.RefObject<HTMLDivElement>
+  cartCount: number
+  handleAddToCart: () => void
 }
 
 const EditArea: React.FC<EditAreaProps> = ({
@@ -50,6 +53,8 @@ const EditArea: React.FC<EditAreaProps> = ({
   onAddPrintedImages,
   onRemovePrintedImages,
   htmlToCanvasEditorRef,
+  cartCount,
+  handleAddToCart,
 }) => {
   const [showPrintedImagesModal, setShowPrintedImagesModal] = useState<boolean>(false)
   const editAreaRef = useRef<HTMLDivElement>(null)
@@ -87,6 +92,11 @@ const EditArea: React.FC<EditAreaProps> = ({
     setSelectingType(type)
   }
 
+  const cancelSelectingElement = () => {
+    setSelectedElementId(null)
+    setSelectingType(null)
+  }
+
   const listenClickOnPageEvent = (target: HTMLElement | null) => {
     if (target) {
       if (
@@ -94,8 +104,7 @@ const EditArea: React.FC<EditAreaProps> = ({
         !target.closest('.NAME-menu-section') &&
         !target.closest('.NAME-text-font-picker')
       ) {
-        setSelectedElementId(null)
-        setSelectingType(null)
+        cancelSelectingElement()
       }
     }
   }
@@ -122,6 +131,13 @@ const EditArea: React.FC<EditAreaProps> = ({
         }
       }
     }
+  }
+
+  const beforeAddToCart = () => {
+    cancelSelectingElement()
+    setTimeout(() => {
+      handleAddToCart()
+    }, 0)
   }
 
   useEffect(() => {
@@ -233,6 +249,11 @@ const EditArea: React.FC<EditAreaProps> = ({
           )}
         </div>
       )}
+
+      {/* Action Bar */}
+      <div className="px-4 pb-3 mt-4">
+        <ActionBar cartCount={cartCount} onAddToCart={beforeAddToCart} />
+      </div>
     </div>
   )
 }

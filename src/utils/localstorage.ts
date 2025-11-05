@@ -1,8 +1,12 @@
-import { TMenuState, TProductInCart, TSavedMockupData } from './types'
+import { TProductInCart, TSavedMockupData } from './types'
 
 export class LocalStorageHelper {
   static menuStateName = 'menu-state'
   static mockupImageName = 'mockup-image'
+
+  private static generateImageDataUUID(): string {
+    return crypto.randomUUID()
+  }
 
   static saveMockupImageAsBase64(
     productInfo: TProductInCart,
@@ -15,7 +19,7 @@ export class LocalStorageHelper {
       let isSet: boolean = false
       for (const product of existingData.productsInfo) {
         if (product.id === productId) {
-          product.mockupDataURLs[crypto.randomUUID()] = imageDataUrl
+          product.mockupDataURLs[LocalStorageHelper.generateImageDataUUID()] = imageDataUrl
           isSet = true
           break
         }
@@ -60,12 +64,12 @@ export class LocalStorageHelper {
     return count
   }
 
-  static removeSavedMockupImage(sessionId: string, productId: string, imageDataUrl: string) {
+  static removeSavedMockupImage(sessionId: string, productId: string, imageDataUUID: string) {
     const data = this.getSavedMockupData()
     if (data && data.sessionId === sessionId) {
       for (const product of data.productsInfo) {
         if (product.id === productId) {
-          delete product.mockupDataURLs[imageDataUrl]
+          delete product.mockupDataURLs[imageDataUUID]
           break
         }
       }

@@ -383,7 +383,7 @@ export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuPro
       <div className="NAME-form-group NAME-form-color flex items-stretch justify-center relative gap-1 rounded">
         <div
           onClick={() => setShowColorPicker((pre) => !pre)}
-          className="flex items-center justify-center cursor-pointer gap-1 active:scale-90 hover:scale-95 transition bg-pink-cl rounded shadow px-1 py-1 w-full"
+          className="flex items-center justify-center cursor-pointer gap-1 active:scale-90 hover:scale-95 transition bg-pink-cl rounded shadow px-1 h-10 w-full"
         >
           <div className="min-w-[22px] text-white font-bold">
             <span>Chọn màu chữ</span>
@@ -405,7 +405,7 @@ export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuPro
       <div className="NAME-form-group NAME-form-font flex items-stretch justify-center gap-1 relative rounded w-full">
         <div
           onClick={() => setShowTextFontPicker((pre) => !pre)}
-          className="flex items-center justify-center cursor-pointer gap-1 active:scale-90 hover:scale-95 transition bg-pink-cl rounded shadow px-1 py-1 w-full"
+          className="flex items-center justify-center cursor-pointer gap-1 active:scale-90 hover:scale-95 transition bg-pink-cl rounded shadow px-1 h-10 w-full"
         >
           <div className="min-w-[22px] text-white font-bold">
             <span>Chọn font chữ</span>
@@ -421,7 +421,7 @@ export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuPro
           document.body
         )}
       </div>
-      <div className="NAME-form-group NAME-form-position flex items-center bg-pink-cl rounded px-1 py-1 shadow w-full">
+      <div className="NAME-form-group NAME-form-position col-span-2 flex items-center bg-pink-cl rounded px-1 h-10 shadow w-full">
         <button
           type="button"
           onClick={handleClickCheck}

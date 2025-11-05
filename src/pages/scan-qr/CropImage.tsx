@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { CropPreview } from './CropPreview'
 import { getNaturalSizeOfImage } from '@/utils/helpers'
+import { SectionLoading } from '@/components/custom/Loading'
 
 type TEditedImagesProps = {
   editedImages: TUserInputImage[]
@@ -48,13 +49,7 @@ const EditedImages = ({
   }
 
   return (
-    <div
-      style={{
-        flexWrap: 'wrap',
-        justifyContent: 'center',
-      }}
-      className="NAME-crop-image-preview flex items-center gap-2 mt-2 pb-1 h-fit w-full overflow-x-auto overflow-y-visible"
-    >
+    <div className="flex items-center gap-2 flex-wrap justify-center mt-2 pb-1 h-fit w-full overflow-x-auto overflow-y-visible">
       {editedImages.slice(0, MAX_PREVIEWS_COUNT).map((img, index) => (
         <div
           key={img.url}
@@ -154,28 +149,11 @@ export const CropImage = ({
   const [customWidth, setCustomWidth] = useState<number>(0)
   const [customHeight, setCustomHeight] = useState<number>(0)
   const imgRef = useRef<HTMLImageElement>(null)
-  const [imageUrl, setImageUrl] = useState<string | null>(null)
   const debounce = useDebounce()
   const inputsContainerRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
   const cropImageContainerRef = useRef<HTMLDivElement>(null)
-
-  const onImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
-    const { width, height } = e.currentTarget
-    // Initial crop tự do, không bắt buộc hình vuông
-    const initialCrop: Crop = {
-      unit: '%',
-      x: 5,
-      y: 5,
-      width: 90,
-      height: 90,
-    }
-    setCrop(initialCrop)
-    setCompletedCrop(initialCrop)
-
-    setCustomWidth(Math.round(width * 0.9))
-    setCustomHeight(Math.round(height * 0.9))
-  }, [])
+  const [rotatedImageUrl, setRotatedImageUrl] = useState<string | null>(null)
 
   const handleCrop = useCallback(() => {
     const image = imgRef.current
@@ -312,91 +290,72 @@ export const CropImage = ({
   }, [editedImages])
 
   const handleSetAsEditedImage = (image: TUserInputImage) => {
-    setImageUrl(image.url)
+    rotateImageIfNeeded(image.url)
   }
+
+  const rotateImageIfNeeded = useCallback((imageUrl: string) => {
+    const img = new Image()
+    img.crossOrigin = 'anonymous'
+    img.onload = () => {
+      if (img.naturalWidth > img.naturalHeight) {
+        // Ảnh ngang cần xoay 90 độ
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext('2d')
+        if (!ctx) return
+
+        // Đảo kích thước canvas
+        canvas.width = img.naturalHeight
+        canvas.height = img.naturalWidth
+
+        // Xoay và vẽ ảnh
+        ctx.translate(canvas.width / 2, canvas.height / 2)
+        ctx.rotate(-Math.PI / 2)
+        ctx.drawImage(img, -img.naturalWidth / 2, -img.naturalHeight / 2)
+
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              const rotatedUrl = URL.createObjectURL(blob)
+              setRotatedImageUrl(rotatedUrl)
+            }
+          },
+          'image/jpeg',
+          0.95
+        )
+      } else {
+        // Ảnh dọc không cần xoay
+        setRotatedImageUrl(imageUrl)
+      }
+    }
+    img.src = imageUrl
+  }, [])
 
   const adjustUIBasedOnImage = () => {
     if (imageData) {
-      const container = cropImageContainerRef.current
-      if (!container) return
       const imageUrl = imageData.url
-      getNaturalSizeOfImage(
-        imageUrl,
-        (naturalWidth, naturalHeight) => {
-          const cropImgArea = container.querySelector<HTMLDivElement>('.NAME-crop-area')
-          if (cropImgArea) {
-            console.log('>>> natural:', { naturalWidth, naturalHeight })
-            if (naturalWidth > naturalHeight) {
-              // cropImgArea.style.cssText = `
-              //   display: flex;
-              //   column-gap: 10px;
-              //   align-items: start;
-              //   max-height: 90vh;
-              //   padding-right: 8px;
-              // `
-              // const cropImgPreview = container.querySelector<HTMLDivElement>(
-              //   '.NAME-crop-image-preview'
-              // )
-              // if (cropImgPreview) {
-              //   cropImgPreview.style.cssText = `flex-wrap: wrap; justify-content: center;`
-              // }
-              // const cropImgInteraction = container.querySelector<HTMLDivElement>(
-              //   '.NAME-crop-area-interaction'
-              // )
-              // if (cropImgInteraction) {
-              //   cropImgInteraction.style.cssText = `max-width: 220px; margin-top: 0; display: flex; flex-direction: column; align-items: stretch;`
-              // }
-              // const interactionTitle =
-              //   container.querySelector<HTMLParagraphElement>('.NAME-interaction-title')
-              // if (interactionTitle) {
-              //   interactionTitle.style.cssText = `text-align: center;`
-              // }
-              // const cropImgButtons = container.querySelector<HTMLDivElement>(
-              //   '.NAME-interaction-internal-buttons'
-              // )
-              // if (cropImgButtons) {
-              //   cropImgButtons.style.cssText = `flex-direction: column;`
-              // }
-              // const cropImgNav = container.querySelector<HTMLDivElement>(
-              //   '.NAME-interaction-navigation'
-              // )
-              // if (cropImgNav) {
-              //   cropImgNav.style.cssText = `margin-top: 8px;`
-              // }
-            }
-          }
-          setImageUrl(imageUrl)
-        },
-        (err) => {}
-      )
+      rotateImageIfNeeded(imageUrl)
     } else {
-      setImageUrl(null)
+      setRotatedImageUrl(null)
     }
   }
 
-  const adjustCroppedImage = () => {
-    if (!imageUrl) return
-    const container = cropImageContainerRef.current
-    if (!container) return
-    const cropDisplay = container.querySelector<HTMLDivElement>('.NAME-crop-display')
-    if (cropDisplay) {
-      const cropDisplayRect = cropDisplay.getBoundingClientRect()
-      const { height, width } = cropDisplayRect
-      if (width > height) {
-        cropDisplay.style.cssText = `transform: rotate(-90deg); transform-origin: center;`
-        // const cropInteraction = container.querySelector<HTMLDivElement>(
-        //   '.NAME-crop-area-interaction'
-        // )
-        // if (cropInteraction) {
+  const onImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
+    const croppedImage = e.currentTarget
+    const { width, height } = croppedImage.getBoundingClientRect()
 
-        // }
-      }
+    const initialCrop: Crop = {
+      unit: '%',
+      x: 5,
+      y: 5,
+      width: 90,
+      height: 90,
     }
-  }
+    setCrop(initialCrop)
+    setCompletedCrop(initialCrop)
 
-  useEffect(() => {
-    adjustCroppedImage()
-  }, [imageUrl])
+    setCustomWidth(Math.round(width * 0.9))
+    setCustomHeight(Math.round(height * 0.9))
+  }, [])
 
   useEffect(() => {
     if (customWidth < minCropSizeWidth || customHeight < minCropSizeHeight) return
@@ -422,19 +381,10 @@ export const CropImage = ({
     >
       <div className="absolute inset-0 bg-black/50 z-10"></div>
       <div className="relative z-20 w-full">
-        <div
-          style={{
-            display: 'flex',
-            columnGap: '10px',
-            alignItems: 'start',
-            maxHeight: '90vh',
-            paddingRight: '8px',
-          }}
-          className="NAME-crop-area flex items-stretch bg-gray-100 rounded-lg px-6 py-4 overflow-y-auto overflow-x-hidden w-full max-h-[98vh]"
-        >
-          <div className="">
-            <div className="NAME-crop-display w-fit">
-              {imageUrl && (
+        <div className="flex gap-2.5 items-start max-h-[90vh] pr-2 bg-gray-100 rounded-lg px-6 py-4 overflow-y-auto overflow-x-hidden w-full">
+          <div className="flex items-center justify-center w-1/2 h-[70vh]">
+            <div className="flex items-center justify-center w-full h-full overflow-hidden">
+              {rotatedImageUrl ? (
                 <ReactCrop
                   crop={crop}
                   onChange={handleCropChange}
@@ -445,13 +395,19 @@ export const CropImage = ({
                   <img
                     ref={imgRef}
                     alt="Ảnh để crop"
-                    src={imageUrl}
+                    src={rotatedImageUrl}
                     onLoad={onImageLoad}
-                    className="NAME-crop-area-image object-contain"
-                    style={{ maxHeight: '80vh', minWidth: '150px' }}
+                    className="object-contain max-h-full max-w-full"
                     crossOrigin="anonymous"
                   />
                 </ReactCrop>
+              ) : (
+                <SectionLoading
+                  classNames={{
+                    container: 'w-fit',
+                  }}
+                  message="Đang tải ảnh..."
+                />
               )}
             </div>
           </div>
@@ -489,23 +445,9 @@ export const CropImage = ({
             </div>
           </div> */}
 
-          <div
-            style={{
-              maxWidth: '220px',
-              marginTop: '0',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'stretch',
-            }}
-            className="NAME-crop-area-interaction p-3 w-full bg-white rounded-lg text-gray-600 mt-4"
-          >
+          <div className="min-w-[200px] flex flex-col items-stretch w-1/2 h-[70vh] p-3 bg-white rounded-lg text-gray-600">
             <div>
-              <p
-                style={{ textAlign: 'center' }}
-                className="NAME-interaction-title font-bold text-sm"
-              >
-                Ảnh bạn cắt sẽ xuất hiện ở đây
-              </p>
+              <p className="font-bold text-sm text-center">Ảnh bạn cắt sẽ xuất hiện ở đây</p>
               {editedImages.length > 0 ? (
                 <EditedImages
                   editedImages={editedImages}
@@ -534,13 +476,8 @@ export const CropImage = ({
               )}
             </div>
 
-            <div className="NAME-interaction-buttons mt-4">
-              <div
-                style={{
-                  flexDirection: 'column',
-                }}
-                className="NAME-interaction-internal-buttons flex gap-y-2 gap-x-2"
-              >
+            <div className="mt-4">
+              <div className="flex gap-y-2 gap-x-2 flex-col">
                 <button
                   className="w-full h-10 rounded text-white bg-gray-400 font-bold hover:bg-gray-500 transition-colors disabled:opacity-50"
                   onClick={onClose}
@@ -585,7 +522,7 @@ export const CropImage = ({
                   )}
                 </button>
               </div>
-              <div style={{ marginTop: '8px' }} className="NAME-interaction-navigation w-full pt-1">
+              <div className="w-full pt-1 mt-2">
                 <button
                   className="flex items-center justify-center gap-2 w-full h-10 flex-1 px-4 rounded bg-pink-cl text-white font-bold active:scale-90 transition-colors disabled:opacity-50"
                   onClick={navToEditPage}
