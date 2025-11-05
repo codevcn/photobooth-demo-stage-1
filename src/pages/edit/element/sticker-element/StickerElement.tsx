@@ -32,7 +32,7 @@ export const StickerElement = ({
     forRotate: { ref: refForRotate, rotateButtonRef },
     forZoom: { ref: refForZoom, zoomButtonRef },
     forDrag: { ref: refForDrag },
-    state: { position, angle, scale },
+    state: { position, angle, scale, zindex },
     handleSetElementState,
   } = useElementControl(id, {
     maxZoom: MAX_ZOOM,
@@ -51,10 +51,11 @@ export const StickerElement = ({
     scale?: number,
     angle?: number,
     posX?: number,
-    posY?: number
+    posY?: number,
+    zindex?: number
   ) => {
     if (elementId === id) {
-      handleSetElementState(posX, posY, scale, angle)
+      handleSetElementState(posX, posY, scale, angle, zindex)
     }
   }
 
@@ -145,6 +146,7 @@ export const StickerElement = ({
         left: position.x,
         top: position.y,
         transform: `scale(${scale}) rotate(${angle}deg)`,
+        zIndex: zindex,
       }}
       className={`${
         isSelected ? 'outline-2 outline-dark-pink-cl outline' : ''

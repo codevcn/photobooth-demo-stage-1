@@ -9,12 +9,16 @@ import { TUserInputImage } from '@/utils/types'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { CropPreview } from './CropPreview'
+import { getNaturalSizeOfImage } from '@/utils/helpers'
 
 type TEditedImagesProps = {
   editedImages: TUserInputImage[]
   removeFromEditedImages: (image: TUserInputImage) => void
   onSetAsEditedImage: (image: TUserInputImage) => void
 }
+
+const MAX_HEIGHT_CROP_DISPLAY: number = 250
+const MAX_PREVIEWS_COUNT: number = 6
 
 const EditedImages = ({
   editedImages,
@@ -44,20 +48,39 @@ const EditedImages = ({
   }
 
   return (
-    <div className="flex items-center gap-2 mt-2 pb-1 h-fit w-full overflow-x-auto overflow-y-visible">
-      {editedImages.map((img) => (
+    <div
+      style={{
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+      }}
+      className="NAME-crop-image-preview flex items-center gap-2 mt-2 pb-1 h-fit w-full overflow-x-auto overflow-y-visible"
+    >
+      {editedImages.slice(0, MAX_PREVIEWS_COUNT).map((img, index) => (
         <div
           key={img.url}
           onClick={() => pickImage(img)}
-          className="relative w-16 h-16 m-0.5 mt-2 flex items-center aspect-square outline outline-1 outline-gray-300 rounded"
+          className={`${
+            index === MAX_PREVIEWS_COUNT - 1 ? 'bg-gray-50' : ''
+          } relative w-16 h-16 m-0.5 mt-2 flex items-center justify-center aspect-square outline outline-1 outline-gray-300 rounded`}
         >
-          <img src={img.url} alt="Ảnh đã cắt" className="h-full w-full object-contain" />
-          <button
-            onClick={(e) => handleSetToDelete(e, img)}
-            className="absolute -top-2 -right-2 p-0.5 rounded-full bg-red-600"
-          >
-            <X className="text-white" size={16} />
-          </button>
+          {index === MAX_PREVIEWS_COUNT - 1 ? (
+            <>
+              <p className="text-2xl font-bold text-gray-400">
+                <span>+</span>
+                <span>{editedImages.length - MAX_PREVIEWS_COUNT + 1}</span>
+              </p>
+            </>
+          ) : (
+            <>
+              <img src={img.url} alt="Ảnh đã cắt" className="h-full w-full object-contain" />
+              <button
+                onClick={(e) => handleSetToDelete(e, img)}
+                className="absolute -top-2 -right-2 p-0.5 rounded-full bg-pink-cl"
+              >
+                <X className="text-white" size={16} />
+              </button>
+            </>
+          )}
         </div>
       ))}
 
@@ -135,6 +158,7 @@ export const CropImage = ({
   const debounce = useDebounce()
   const inputsContainerRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
+  const cropImageContainerRef = useRef<HTMLDivElement>(null)
 
   const onImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget
@@ -291,6 +315,89 @@ export const CropImage = ({
     setImageUrl(image.url)
   }
 
+  const adjustUIBasedOnImage = () => {
+    if (imageData) {
+      const container = cropImageContainerRef.current
+      if (!container) return
+      const imageUrl = imageData.url
+      getNaturalSizeOfImage(
+        imageUrl,
+        (naturalWidth, naturalHeight) => {
+          const cropImgArea = container.querySelector<HTMLDivElement>('.NAME-crop-area')
+          if (cropImgArea) {
+            console.log('>>> natural:', { naturalWidth, naturalHeight })
+            if (naturalWidth > naturalHeight) {
+              // cropImgArea.style.cssText = `
+              //   display: flex;
+              //   column-gap: 10px;
+              //   align-items: start;
+              //   max-height: 90vh;
+              //   padding-right: 8px;
+              // `
+              // const cropImgPreview = container.querySelector<HTMLDivElement>(
+              //   '.NAME-crop-image-preview'
+              // )
+              // if (cropImgPreview) {
+              //   cropImgPreview.style.cssText = `flex-wrap: wrap; justify-content: center;`
+              // }
+              // const cropImgInteraction = container.querySelector<HTMLDivElement>(
+              //   '.NAME-crop-area-interaction'
+              // )
+              // if (cropImgInteraction) {
+              //   cropImgInteraction.style.cssText = `max-width: 220px; margin-top: 0; display: flex; flex-direction: column; align-items: stretch;`
+              // }
+              // const interactionTitle =
+              //   container.querySelector<HTMLParagraphElement>('.NAME-interaction-title')
+              // if (interactionTitle) {
+              //   interactionTitle.style.cssText = `text-align: center;`
+              // }
+              // const cropImgButtons = container.querySelector<HTMLDivElement>(
+              //   '.NAME-interaction-internal-buttons'
+              // )
+              // if (cropImgButtons) {
+              //   cropImgButtons.style.cssText = `flex-direction: column;`
+              // }
+              // const cropImgNav = container.querySelector<HTMLDivElement>(
+              //   '.NAME-interaction-navigation'
+              // )
+              // if (cropImgNav) {
+              //   cropImgNav.style.cssText = `margin-top: 8px;`
+              // }
+            }
+          }
+          setImageUrl(imageUrl)
+        },
+        (err) => {}
+      )
+    } else {
+      setImageUrl(null)
+    }
+  }
+
+  const adjustCroppedImage = () => {
+    if (!imageUrl) return
+    const container = cropImageContainerRef.current
+    if (!container) return
+    const cropDisplay = container.querySelector<HTMLDivElement>('.NAME-crop-display')
+    if (cropDisplay) {
+      const cropDisplayRect = cropDisplay.getBoundingClientRect()
+      const { height, width } = cropDisplayRect
+      if (width > height) {
+        cropDisplay.style.cssText = `transform: rotate(-90deg); transform-origin: center;`
+        // const cropInteraction = container.querySelector<HTMLDivElement>(
+        //   '.NAME-crop-area-interaction'
+        // )
+        // if (cropInteraction) {
+
+        // }
+      }
+    }
+  }
+
+  useEffect(() => {
+    adjustCroppedImage()
+  }, [imageUrl])
+
   useEffect(() => {
     if (customWidth < minCropSizeWidth || customHeight < minCropSizeHeight) return
     for (const input of inputsContainerRef.current?.querySelectorAll<HTMLInputElement>('input') ||
@@ -304,44 +411,52 @@ export const CropImage = ({
   }, [customWidth, customHeight])
 
   useEffect(() => {
-    if (!imageData) {
-      setImageUrl(null)
-      return
-    }
-    setImageUrl(imageData.url)
+    adjustUIBasedOnImage()
   }, [imageData])
 
   return (
     <div
+      ref={cropImageContainerRef}
       style={{ display: imageData ? 'flex' : 'none' }}
       className="fixed inset-0 flex items-center justify-center z-[90]"
     >
       <div className="absolute inset-0 bg-black/50 z-10"></div>
-      <div className="p-2 relative z-20 w-full">
-        <div className="bg-white rounded-lg px-2 py-4 overflow-y-auto overflow-x-hidden w-full max-h-[98vh]">
-          {imageUrl && (
-            <div className="mb-4 flex justify-center overflow-y-auto">
-              <ReactCrop
-                crop={crop}
-                onChange={handleCropChange}
-                onComplete={handleCropComplete}
-                minWidth={minCropSizeWidth}
-                minHeight={minCropSizeHeight}
-              >
-                <img
-                  ref={imgRef}
-                  alt="Ảnh để crop"
-                  src={imageUrl}
-                  onLoad={onImageLoad}
-                  className="object-contain"
-                  style={{ maxHeight: '500px' }}
-                  crossOrigin="anonymous"
-                />
-              </ReactCrop>
+      <div className="relative z-20 w-full">
+        <div
+          style={{
+            display: 'flex',
+            columnGap: '10px',
+            alignItems: 'start',
+            maxHeight: '90vh',
+            paddingRight: '8px',
+          }}
+          className="NAME-crop-area flex items-stretch bg-gray-100 rounded-lg px-6 py-4 overflow-y-auto overflow-x-hidden w-full max-h-[98vh]"
+        >
+          <div className="">
+            <div className="NAME-crop-display w-fit">
+              {imageUrl && (
+                <ReactCrop
+                  crop={crop}
+                  onChange={handleCropChange}
+                  onComplete={handleCropComplete}
+                  minWidth={minCropSizeWidth}
+                  minHeight={minCropSizeHeight}
+                >
+                  <img
+                    ref={imgRef}
+                    alt="Ảnh để crop"
+                    src={imageUrl}
+                    onLoad={onImageLoad}
+                    className="NAME-crop-area-image object-contain"
+                    style={{ maxHeight: '80vh', minWidth: '150px' }}
+                    crossOrigin="anonymous"
+                  />
+                </ReactCrop>
+              )}
             </div>
-          )}
+          </div>
 
-          {/* <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+          {/* <div className="mt-4 p-3 bg-gray-50 rounded-lg">
             <h3 className="text-sm font-semibold text-gray-800">Kích thước vùng cắt</h3>
             <p className="text-xs italic">
               <span>Chiều rộng và chiều cao của vùng cắt không được nhỏ hơn lần lượt</span>
@@ -374,85 +489,111 @@ export const CropImage = ({
             </div>
           </div> */}
 
-          <div className="p-3 w-full bg-gray-50 rounded-lg text-gray-600">
-            <p className="font-bold text-sm">Ảnh bạn cắt sẽ xuất hiện ở đây</p>
-            {editedImages.length > 0 ? (
-              <EditedImages
-                editedImages={editedImages}
-                removeFromEditedImages={removeFromEditedImages}
-                onSetAsEditedImage={handleSetAsEditedImage}
-              />
-            ) : (
-              <div className="w-full">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="64"
-                  height="64"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="lucide lucide-image-icon lucide-image"
-                >
-                  <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-                  <circle cx="9" cy="9" r="2" />
-                  <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
-                </svg>
-              </div>
-            )}
-          </div>
-
-          <div className="space-y-2 mt-4">
-            <div className="flex gap-2">
-              <button
-                className="flex-1 h-10 rounded-md text-white bg-gray-400 font-bold hover:bg-gray-500 transition-colors disabled:opacity-50"
-                onClick={onClose}
-                disabled={isCropping}
+          <div
+            style={{
+              maxWidth: '220px',
+              marginTop: '0',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'stretch',
+            }}
+            className="NAME-crop-area-interaction p-3 w-full bg-white rounded-lg text-gray-600 mt-4"
+          >
+            <div>
+              <p
+                style={{ textAlign: 'center' }}
+                className="NAME-interaction-title font-bold text-sm"
               >
-                Hủy
-              </button>
-              <button
-                className="flex items-center justify-center gap-2 h-10 flex-1 rounded-md bg-pink-cl text-white font-bold active:scale-90 transition-colors disabled:opacity-50"
-                onClick={handleCrop}
-                disabled={!completedCrop || isCropping}
-              >
-                {isCropping ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" strokeWidth={3} />
-                    <span>Đang xử lý...</span>
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <rect
-                        x="6"
-                        y="6"
-                        width="12"
-                        height="12"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                      />
-                      <path
-                        d="M6 6L3 3M18 6L21 3M6 18L3 21M18 18L21 21"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                    <span>Cắt và lưu</span>
-                  </>
-                )}
-              </button>
+                Ảnh bạn cắt sẽ xuất hiện ở đây
+              </p>
+              {editedImages.length > 0 ? (
+                <EditedImages
+                  editedImages={editedImages}
+                  removeFromEditedImages={removeFromEditedImages}
+                  onSetAsEditedImage={handleSetAsEditedImage}
+                />
+              ) : (
+                <div className="w-full">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="64"
+                    height="64"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="lucide lucide-image-icon lucide-image"
+                  >
+                    <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                    <circle cx="9" cy="9" r="2" />
+                    <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+                  </svg>
+                </div>
+              )}
             </div>
-            <div className="w-full pt-1">
-              <button
-                className="flex items-center justify-center gap-2 w-full h-10 flex-1 px-4 rounded-md bg-pink-cl text-white font-bold active:scale-90 transition-colors disabled:opacity-50"
-                onClick={navToEditPage}
-                disabled={!completedCrop || isCropping}
+
+            <div className="NAME-interaction-buttons mt-4">
+              <div
+                style={{
+                  flexDirection: 'column',
+                }}
+                className="NAME-interaction-internal-buttons flex gap-y-2 gap-x-2"
               >
-                <span>Lưu giữ kỷ niệm của bạn</span>
-              </button>
+                <button
+                  className="w-full h-10 rounded text-white bg-gray-400 font-bold hover:bg-gray-500 transition-colors disabled:opacity-50"
+                  onClick={onClose}
+                  disabled={!completedCrop || isCropping}
+                >
+                  Hủy
+                </button>
+                <button
+                  className="flex items-center justify-center gap-2 w-full h-10 rounded bg-pink-cl text-white font-bold active:scale-90 transition-colors disabled:opacity-50"
+                  onClick={handleCrop}
+                  disabled={!completedCrop || isCropping}
+                >
+                  {isCropping ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" strokeWidth={3} />
+                      <span>Đang xử lý...</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <rect
+                          x="6"
+                          y="6"
+                          width="12"
+                          height="12"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                        />
+                        <path
+                          d="M6 6L3 3M18 6L21 3M6 18L3 21M18 18L21 21"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                      <span>Cắt và lưu</span>
+                    </>
+                  )}
+                </button>
+              </div>
+              <div style={{ marginTop: '8px' }} className="NAME-interaction-navigation w-full pt-1">
+                <button
+                  className="flex items-center justify-center gap-2 w-full h-10 flex-1 px-4 rounded bg-pink-cl text-white font-bold active:scale-90 transition-colors disabled:opacity-50"
+                  onClick={navToEditPage}
+                  disabled={!completedCrop || isCropping}
+                >
+                  <span>Lưu giữ kỷ niệm</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -67,6 +67,7 @@ export const useElementControl = (
   const { initialPosX, initialPosY, maxZoom, minZoom, initialFontSize, maxFontSize, minFontSize } =
     initialParams || {}
   const { elementLayers, setElementLayers } = useContext(ElementLayerContext)
+  console.log('>>> element layers:', elementLayers)
   const [position, setPosition] = useState<TElementState['position']>({
     x: initialPosX || 0,
     y: initialPosY || 0,
@@ -128,27 +129,27 @@ export const useElementControl = (
     zindex?: number,
     fontSize?: number
   ) => {
-    if (posX) {
+    if (posX || posX === 0) {
       setPosition((prev) => ({ ...prev, x: posX }))
     }
-    if (posY) {
+    if (posY || posY === 0) {
       setPosition((prev) => ({ ...prev, y: posY }))
     }
     if (scale) {
       setScale(scale)
     }
-    if (angle) {
+    if (angle || angle === 0) {
       setAngle(angle)
     }
     if (zindex) {
       setElementLayers((pre) => {
         const copiedArray = [...pre]
-        const targetIndex = copiedArray.findIndex((item) => item.elementId === elementId)
-        if (targetIndex === -1) return pre
+        const currentIndex = copiedArray.findIndex((item) => item.elementId === elementId)
+        if (currentIndex === -1) return pre
         const isPositiveZindex = zindex > 0
-        if (isPositiveZindex && targetIndex === copiedArray.length - 1) return pre
-        if (!isPositiveZindex && targetIndex === 0) return pre
-        swapArrayItems(copiedArray, targetIndex, targetIndex + (isPositiveZindex ? 1 : -1))
+        if (isPositiveZindex && currentIndex === copiedArray.length - 1) return pre
+        if (!isPositiveZindex && currentIndex === 0) return pre
+        swapArrayItems(copiedArray, currentIndex, currentIndex + (isPositiveZindex ? 1 : -1))
         return copiedArray
       })
     }

@@ -22,7 +22,7 @@ export const PrintedImageElementMenu = ({ elementId }: PrintedImageMenuProps) =>
   ): (number | undefined)[] => {
     const values = inputs.map((input) => input.value.trim())
     // Allow negative numbers if type is 'angle'
-    const numberRegex = type === 'angle' ? /^-?\d+(\.\d+)?$/ : /^\d+(\.\d+)?$/
+    const numberRegex = type === 'angle' ? /^-?\d*\.?\d+$|^0$/ : /^\d+(\.\d+)?$/
     const validValues = values.map((value) =>
       numberRegex.test(value) ? parseFloat(value) : undefined
     )

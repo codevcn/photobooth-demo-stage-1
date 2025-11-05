@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo } from 'react'
-import { X, Check } from 'lucide-react'
 import { TProductImage } from '@/utils/types'
 
 interface ColorPickerProps {
@@ -37,16 +36,31 @@ const ColorPicker: React.FC<ColorPickerProps> = ({
   }, [])
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-end z-50 animate-pop-in">
-      <div className="bg-white w-full rounded-t-3xl p-4 shadow-xl">
+    <div className="fixed inset-0 flex items-center justify-center z-50 animate-pop-in p-4">
+      <div onClick={onClose} className="bg-black/50 absolute inset-0 z-10"></div>
+      <div className="bg-white w-full rounded-xl p-4 shadow-2xl relative z-20">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xl font-bold text-gray-800">Chọn màu cho sản phẩm</h3>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full touch-target">
-            <X size={24} />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="lucide lucide-x-icon lucide-x text-black"
+            >
+              <path d="M18 6 6 18" />
+              <path d="m6 6 12 12" />
+            </svg>
           </button>
         </div>
 
-        <div className="grid grid-cols-4 gap-3 mb-4">
+        <div className="grid grid-cols-4 gap-3 mb-4 overflow-y-auto p-2">
           {colors.map(({ value, title, productId }) => {
             const isSelected = selectedColor === value
             return (
@@ -63,7 +77,20 @@ const ColorPicker: React.FC<ColorPickerProps> = ({
                 >
                   {isSelected && (
                     <div className="w-full h-full flex items-center justify-center">
-                      <Check size={26} strokeWidth={3} className="text-white drop-shadow-lg" />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="26"
+                        height="26"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="lucide lucide-check-icon lucide-check text-pink-cl"
+                      >
+                        <path d="M20 6 9 17l-5-5" />
+                      </svg>
                     </div>
                   )}
                 </div>

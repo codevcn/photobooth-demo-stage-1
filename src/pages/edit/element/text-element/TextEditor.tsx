@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { X, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
+import { useDebounce } from '@/hooks/use-debounce'
 
 interface TextEditorProps {
   onAddText: (text: string) => void
@@ -7,7 +8,8 @@ interface TextEditorProps {
 }
 
 const TextEditor: React.FC<TextEditorProps> = ({ onAddText, onClose }) => {
-  const [text, setText] = useState('')
+  const [text, setText] = useState<string>('')
+  const debounce = useDebounce()
 
   const handleAdd = () => {
     if (text.trim()) {
@@ -17,6 +19,10 @@ const TextEditor: React.FC<TextEditorProps> = ({ onAddText, onClose }) => {
     }
   }
 
+  const handleEdit = debounce((e: React.ChangeEvent<HTMLInputElement>) => {
+    setText(e.target.value)
+  }, 300)
+
   const catchEnterKey = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault()
@@ -25,20 +31,34 @@ const TextEditor: React.FC<TextEditorProps> = ({ onAddText, onClose }) => {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-end z-50 animate-pop-in">
-      <div className="bg-white w-full rounded-t-3xl p-4 shadow-2xl">
+    <div className="fixed inset-0 flex items-center justify-center z-50 animate-pop-in p-4">
+      <div onClick={onClose} className="bg-black/50 absolute inset-0 z-10"></div>
+      <div className="bg-white w-full rounded-xl p-4 shadow-2xl relative z-20">
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-xl font-bold text-gray-800">Thêm chữ</h3>
           <button onClick={onClose} className="p-2 active:bg-gray-100 rounded-full touch-target">
-            <X size={24} />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="lucide lucide-x-icon lucide-x text-black"
+            >
+              <path d="M18 6 6 18" />
+              <path d="m6 6 12 12" />
+            </svg>
           </button>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 mt-4">
           <input
             type="text"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={handleEdit}
             onKeyDown={catchEnterKey}
             placeholder="Nhập chữ tại đây..."
             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-lg"
@@ -53,10 +73,6 @@ const TextEditor: React.FC<TextEditorProps> = ({ onAddText, onClose }) => {
             <Plus size={24} />
             <span>Thêm chữ vào sản phẩm</span>
           </button>
-
-          <p className="text-xs text-gray-500 text-center">
-            Mẹo: Bạn có thể chạm và kéo chữ để thay đổi vị trí trên sản phẩm.
-          </p>
         </div>
       </div>
     </div>

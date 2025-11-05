@@ -1,5 +1,5 @@
 import React from 'react'
-import { X, Check } from 'lucide-react'
+import { Check } from 'lucide-react'
 import { TProductSize } from '@/utils/types'
 
 interface SizeSelectorProps {
@@ -21,16 +21,31 @@ const SizeSelector: React.FC<SizeSelectorProps> = ({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-end z-50 animate-pop-in">
-      <div className="bg-white w-full rounded-t-3xl p-4 shadow-2xl">
+    <div className="fixed inset-0 flex items-center justify-center z-50 animate-pop-in p-4">
+      <div onClick={onClose} className="bg-black/50 absolute inset-0 z-10"></div>
+      <div className="bg-white w-full rounded-xl p-4 shadow-2xl relative z-20">
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-xl font-bold text-gray-800">Chọn kích thước</h3>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full touch-target">
-            <X size={24} />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="lucide lucide-x-icon lucide-x text-black"
+            >
+              <path d="M18 6 6 18" />
+              <path d="m6 6 12 12" />
+            </svg>
           </button>
         </div>
 
-        <div className="grid grid-cols-3 gap-2 mb-4">
+        <div className="grid grid-cols-3 gap-2 mt-4">
           {sizes.map((size) => {
             const isSelected = selectedSize === size
             return (

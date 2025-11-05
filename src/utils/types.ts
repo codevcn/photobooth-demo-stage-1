@@ -62,6 +62,7 @@ export type TElementLayerContextValue = {
   elementLayers: TElementLayerState[]
   setElementLayers: React.Dispatch<React.SetStateAction<TElementLayerState[]>>
   addToElementLayers: (elementLayer: TElementLayerState) => void
+  removeFromElementLayers: (elementId: string[]) => void
 }
 
 export type TMenuState = Partial<{

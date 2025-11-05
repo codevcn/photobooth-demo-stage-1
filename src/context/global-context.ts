@@ -18,6 +18,7 @@ export const ElementLayerContext = createContext<TElementLayerContextValue>({
   elementLayers: [],
   setElementLayers: () => {},
   addToElementLayers: () => {},
+  removeFromElementLayers: () => {},
 })
 
 export const useElementLayerContext = () => useContext(ElementLayerContext)

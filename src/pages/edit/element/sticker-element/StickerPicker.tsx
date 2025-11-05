@@ -1,5 +1,4 @@
 import React from 'react'
-import { X } from 'lucide-react'
 
 interface StickerPickerProps {
   onAddSticker: (emoji: string) => void
@@ -25,13 +24,28 @@ const StickerPicker: React.FC<StickerPickerProps> = ({ onAddSticker, onClose, sh
   return (
     <div
       style={{ display: show ? 'flex' : 'none' }}
-      className="fixed inset-0 bg-black/50 flex items-end z-50 animate-pop-in"
+      className="fixed inset-0 flex items-center justify-center z-50 animate-pop-in p-4"
     >
-      <div className="flex flex-col items-center bg-white w-full rounded-t-3xl py-4 shadow-2xl max-h-[70vh]">
+      <div onClick={onClose} className="bg-black/50 absolute inset-0 z-10"></div>
+      <div className="flex flex-col items-center bg-white w-full rounded-xl py-4 shadow-xl max-h-[80vh] relative z-20">
         <div className="flex items-center w-full sticky top-0 bg-white mb-2 grow px-6">
           <h3 className="text-xl font-bold text-gray-800 w-full">Thêm nhãn dán</h3>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full touch-target">
-            <X size={24} />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="lucide lucide-x-icon lucide-x text-black"
+            >
+              <path d="M18 6 6 18" />
+              <path d="m6 6 12 12" />
+            </svg>
           </button>
         </div>
 
@@ -51,10 +65,6 @@ const StickerPicker: React.FC<StickerPickerProps> = ({ onAddSticker, onClose, sh
             </button>
           ))}
         </div>
-
-        <p className="text-sm text-gray-600 text-center mt-2 grow px-6 leading-snug">
-          Chạm vào nhãn dán bất kỳ để thêm vào khu vực chỉnh sửa
-        </p>
       </div>
     </div>
   )

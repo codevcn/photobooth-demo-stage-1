@@ -16,7 +16,8 @@ interface IInternalEvents {
     scale?: number,
     angle?: number,
     posX?: number,
-    posY?: number
+    posY?: number,
+    zindex?: number
   ) => void
   [EInternalEvents.SUBMIT_TEXT_ELE_PROPS]: (
     elementId: string | null,
