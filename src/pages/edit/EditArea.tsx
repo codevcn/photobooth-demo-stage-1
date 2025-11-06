@@ -18,6 +18,8 @@ import { EInternalEvents } from '@/utils/enums'
 import { ProductImageElementMenu } from './product/product-image/Menu'
 import { PrintedImagesPreview } from './PrintedImagesPreview'
 import { useElementControl } from '@/hooks/element/use-element-control'
+import { usePrintArea } from '@/hooks/use-print-area'
+import { PrintAreaOverlay } from '@/components/print-area/PrintAreaOverlay'
 import ActionBar from './ActionBar'
 
 const maxZoom: number = 3
@@ -57,7 +59,7 @@ const EditArea: React.FC<EditAreaProps> = ({
   handleAddToCart,
 }) => {
   const [showPrintedImagesModal, setShowPrintedImagesModal] = useState<boolean>(false)
-  const editAreaRef = useRef<HTMLDivElement>(null)
+  const editAreaContainerRef = useRef<HTMLDivElement>(null)
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null)
   const [selectingType, setSelectingType] = useState<TSelectingType>(null)
   const {
@@ -65,6 +67,9 @@ const EditArea: React.FC<EditAreaProps> = ({
     state: { scale },
     handleSetElementState,
   } = useElementControl(crypto.randomUUID(), { maxZoom, minZoom })
+
+  const { printAreaRef, overlayRef, isOutOfBounds, printAreaBounds, initializePrintArea } =
+    usePrintArea()
 
   const handleRemoveText = (id: string) => {
     onUpdateText(textElements.filter((el) => el.id !== id))
@@ -121,7 +126,7 @@ const EditArea: React.FC<EditAreaProps> = ({
 
   const listenSubmitEleProps = (elementId: string | null, scale?: number) => {
     if (elementId === selectedElementId && selectingType === 'product-image') {
-      const root = editAreaRef.current
+      const root = editAreaContainerRef.current
       if (root) {
         const productImage = root.querySelector<HTMLDivElement>(`.NAME-product-image`)
         if (productImage) {
@@ -154,8 +159,46 @@ const EditArea: React.FC<EditAreaProps> = ({
     }
   }, [])
 
+  // Cập nhật vùng in khi sản phẩm thay đổi
+  useEffect(() => {
+    if (editingProduct && htmlToCanvasEditorRef.current) {
+      // Delay để đảm bảo DOM đã render xong
+      const timeoutId = setTimeout(() => {
+        if (htmlToCanvasEditorRef.current) {
+          // Sử dụng initializePrintArea với container element thay vì getBoundingClientRect
+          initializePrintArea(editingProduct, htmlToCanvasEditorRef.current)
+        }
+      }, 50)
+
+      return () => clearTimeout(timeoutId)
+    }
+  }, [editingProduct?.id, initializePrintArea]) // Sử dụng initializePrintArea thay vì updatePrintArea
+
+  // Theo dõi resize của container
+  useEffect(() => {
+    if (!editingProduct || !htmlToCanvasEditorRef.current) return
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        // Chỉ update khi kích thước thực sự thay đổi đáng kể
+        const { width, height } = entry.contentRect
+        if (width > 0 && height > 0) {
+          // Sử dụng initializePrintArea thay vì updatePrintArea để tránh getBoundingClientRect
+          setTimeout(() => {
+            if (htmlToCanvasEditorRef.current) {
+              initializePrintArea(editingProduct, htmlToCanvasEditorRef.current)
+            }
+          }, 100)
+        }
+      }
+    })
+
+    resizeObserver.observe(htmlToCanvasEditorRef.current)
+    return () => resizeObserver.disconnect()
+  }, [editingProduct, initializePrintArea]) // Thay đổi dependency
+
   return (
-    <div className="rounded-2xl relative" ref={editAreaRef}>
+    <div className="rounded-2xl relative" ref={editAreaContainerRef}>
       <div className="flex items-center justify-between mb-4">
         <div className="text-left">
           <h3 className="text-lg font-bold text-gray-800">Khu vực chỉnh sửa</h3>
@@ -178,6 +221,7 @@ const EditArea: React.FC<EditAreaProps> = ({
       <div className="bg-white rounded-lg">
         <div
           ref={htmlToCanvasEditorRef}
+          data-edit-container="true"
           className="relative z-0 w-full h-fit py-2 px-2 max-h-[500px] overflow-hidden"
         >
           <img
@@ -192,7 +236,15 @@ const EditArea: React.FC<EditAreaProps> = ({
             className="NAME-product-image touch-none w-full h-full max-h-[calc(500px-8px)] object-contain"
             onClick={handlePickProductImage}
           />
-          <div className="absolute z-0 top-0 left-0 w-full h-full">
+
+          {/* Print Area Overlay */}
+          <PrintAreaOverlay
+            overlayRef={overlayRef}
+            printAreaRef={printAreaRef}
+            isOutOfBounds={isOutOfBounds}
+          />
+
+          <div className="absolute z-20 top-0 left-0 w-full h-full">
             {/* Text Elements */}
             {textElements.map((textEl) => (
               <TextElement
@@ -201,7 +253,7 @@ const EditArea: React.FC<EditAreaProps> = ({
                 onRemoveElement={handleRemoveText}
                 onUpdateSelectedElementId={(id) => handleUpdateSelectedElementId(id, 'text')}
                 selectedElementId={selectedElementId}
-                editContainerRef={htmlToCanvasEditorRef}
+                canvasAreaRef={htmlToCanvasEditorRef}
               />
             ))}
 
@@ -213,7 +265,7 @@ const EditArea: React.FC<EditAreaProps> = ({
                 onRemoveElement={handleRemoveSticker}
                 onUpdateSelectedElementId={(id) => handleUpdateSelectedElementId(id, 'sticker')}
                 selectedElementId={selectedElementId}
-                editContainerRef={htmlToCanvasEditorRef}
+                canvasAreaRef={htmlToCanvasEditorRef}
               />
             ))}
 
@@ -227,7 +279,7 @@ const EditArea: React.FC<EditAreaProps> = ({
                   handleUpdateSelectedElementId(id, 'printed-image')
                 }
                 selectedElementId={selectedElementId}
-                editContainerRef={htmlToCanvasEditorRef}
+                canvasAreaRef={htmlToCanvasEditorRef}
               />
             ))}
           </div>

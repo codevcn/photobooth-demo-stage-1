@@ -15,7 +15,7 @@ interface PrintedImageElementProps {
   onRemoveElement: (id: string) => void
   selectedElementId: string | null
   onUpdateSelectedElementId: (id: string | null) => void
-  editContainerRef: React.MutableRefObject<HTMLDivElement | null>
+  canvasAreaRef: React.MutableRefObject<HTMLDivElement | null>
 }
 
 export const PrintedImageElement = ({
@@ -23,7 +23,7 @@ export const PrintedImageElement = ({
   onRemoveElement,
   onUpdateSelectedElementId,
   selectedElementId,
-  editContainerRef,
+  canvasAreaRef,
 }: PrintedImageElementProps) => {
   const { url, id, x, y } = element
   const isSelected = selectedElementId === id
@@ -107,7 +107,7 @@ export const PrintedImageElement = ({
     requestAnimationFrame(() => {
       const root = rootRef.current
       if (!root) return
-      const editContainer = editContainerRef.current
+      const editContainer = canvasAreaRef.current
       if (!editContainer) return
       moveElementIntoCenter(root, editContainer)
       initElementDisplaySize(root, editContainer)
@@ -151,7 +151,7 @@ export const PrintedImageElement = ({
         zIndex: zindex,
       }}
       className={`${
-        isSelected ? 'outline-2 outline-dark-pink-cl outline' : ''
+        isSelected ? 'shadow-[0_0_0_2px_#d91670]' : ''
       } NAME-root-element absolute h-fit w-fit touch-none bg-pink-400/20`}
       onClick={pickElement}
       data-element-state={JSON.stringify({

@@ -14,7 +14,7 @@ interface TextElementProps {
   onRemoveElement: (id: string) => void
   selectedElementId: string | null
   onUpdateSelectedElementId: (id: string | null) => void
-  editContainerRef: React.MutableRefObject<HTMLDivElement | null>
+  canvasAreaRef: React.MutableRefObject<HTMLDivElement | null>
 }
 
 export const TextElement = ({
@@ -22,7 +22,7 @@ export const TextElement = ({
   onRemoveElement,
   onUpdateSelectedElementId,
   selectedElementId,
-  editContainerRef,
+  canvasAreaRef,
 }: TextElementProps) => {
   const { color, text, id, fontSize: initialFontSize } = element
   const isSelected = selectedElementId === id
@@ -111,7 +111,7 @@ export const TextElement = ({
     requestAnimationFrame(() => {
       const root = rootRef.current
       if (!root) return
-      const editContainer = editContainerRef.current
+      const editContainer = canvasAreaRef.current
       if (!editContainer) return
       moveElementIntoCenter(root, editContainer)
       initElementDisplaySize(root, editContainer)
@@ -151,7 +151,7 @@ export const TextElement = ({
         zIndex: zindex,
       }}
       className={`${
-        isSelected ? 'outline-2 outline-dark-pink-cl outline' : ''
+        isSelected ? 'shadow-[0_0_0_2px_#d91670]' : ''
       } NAME-root-element absolute h-fit w-fit touch-none`}
       onClick={pickElement}
     >
