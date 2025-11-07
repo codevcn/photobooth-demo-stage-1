@@ -1,17 +1,4 @@
-export type TVoucher = {
-  code: string
-  description: string
-  discountType: 'percentage' | 'fixed'
-  discountValue: number // percentage: 0-100, fixed: số tiền
-  minOrderValue?: number // Giá trị đơn hàng tối thiểu
-  maxDiscount?: number // Giảm tối đa (cho percentage)
-}
-
-type VoucherValidationResult = {
-  success: boolean
-  message: string
-  voucher?: TVoucher
-}
+import { TVoucher, VoucherValidationResult } from '@/utils/types'
 
 class VoucherService {
   // Danh sách voucher mẫu

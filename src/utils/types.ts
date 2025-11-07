@@ -124,3 +124,18 @@ export type TProductImageContextValue = {
   productImages: TProductImage[][]
   setProductImages: React.Dispatch<React.SetStateAction<TProductImage[][]>>
 }
+
+export type TVoucher = {
+  code: string
+  description: string
+  discountType: 'percentage' | 'fixed'
+  discountValue: number // percentage: 0-100, fixed: số tiền
+  minOrderValue?: number // Giá trị đơn hàng tối thiểu
+  maxDiscount?: number // Giảm tối đa (cho percentage)
+}
+
+export type VoucherValidationResult = {
+  success: boolean
+  message: string
+  voucher?: TVoucher
+}

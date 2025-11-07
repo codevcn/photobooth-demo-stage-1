@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Minus, Plus, Banknote, X, ArrowBigLeft, ArrowLeft } from 'lucide-react'
 import { formatNumberWithCommas } from '@/utils/helpers'
-import { TProductImage } from '@/utils/types'
+import { TProductImage, TVoucher } from '@/utils/types'
 import { PaymentModal } from '@/pages/payment/PaymentModal'
 import { useNavigate } from 'react-router-dom'
 import { createPortal } from 'react-dom'
 import { LocalStorageHelper } from '@/utils/localstorage'
 import { useGlobalContext, useProductImageContext } from '@/context/global-context'
-import { TVoucher } from '@/services/voucher.service'
 import { VoucherSection } from '@/pages/payment/Voucher'
 
 interface IPaymentModalProps {

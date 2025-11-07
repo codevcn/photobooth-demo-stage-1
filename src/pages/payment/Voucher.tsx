@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Tag, X, Loader2 } from 'lucide-react'
-import { voucherService, TVoucher } from '@/services/voucher.service'
+import { voucherService } from '@/services/voucher.service'
+import { TVoucher } from '@/utils/types'
 
 interface VoucherSectionProps {
   orderSubtotal: number
@@ -45,7 +46,7 @@ export const VoucherSection = ({ orderSubtotal, onVoucherApplied }: VoucherSecti
       if (result.success && result.voucher) {
         setAppliedVoucher(result.voucher)
         setDiscountMessage(result.message)
-        
+
         // Tính discount và notify parent component
         const discount = voucherService.calculateDiscount(orderSubtotal, result.voucher)
         onVoucherApplied(result.voucher, discount)
