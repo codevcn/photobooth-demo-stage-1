@@ -39,7 +39,7 @@ export const PrintAreaOverlay: React.FC<TPrintAreaOverlayProps> = ({
         className="absolute inset-0 pointer-events-none z-2 transition-all duration-500"
         style={{
           opacity: 0,
-          background: isOutOfBounds
+          backgroundColor: isOutOfBounds
             ? `
             linear-gradient(135deg, 
               rgba(239, 68, 68, 0.15) 0%, 
@@ -58,7 +58,7 @@ export const PrintAreaOverlay: React.FC<TPrintAreaOverlayProps> = ({
         <div
           className="absolute inset-0 transition-opacity duration-300 pointer-events-none"
           style={{
-            background: `
+            backgroundColor: `
               radial-gradient(
                 ellipse at center,
                 transparent 20%,

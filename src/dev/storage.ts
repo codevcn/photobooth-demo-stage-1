@@ -16,10 +16,12 @@ export const productImages: TProductImage[][] = [
       priceInVND: 250000,
       priceAfterDiscount: 200000,
       category: 'shirt',
-      print_x: 25,
-      print_y: 20,
-      print_w: 50,
-      print_h: 40,
+      printArea: {
+        print_x: 25,
+        print_y: 20,
+        print_w: 50,
+        print_h: 40,
+      },
     },
     {
       id: 'gallery-shirt-2',
@@ -35,10 +37,12 @@ export const productImages: TProductImage[][] = [
       priceInVND: 270000,
       priceAfterDiscount: 216000,
       category: 'shirt',
-      print_x: 25,
-      print_y: 20,
-      print_w: 50,
-      print_h: 40,
+      printArea: {
+        print_x: 25,
+        print_y: 20,
+        print_w: 50,
+        print_h: 40,
+      },
     },
     {
       id: 'gallery-shirt-3',
@@ -54,10 +58,12 @@ export const productImages: TProductImage[][] = [
       priceInVND: 260000,
       priceAfterDiscount: 208000,
       category: 'shirt',
-      print_x: 25,
-      print_y: 20,
-      print_w: 50,
-      print_h: 40,
+      printArea: {
+        print_x: 25,
+        print_y: 20,
+        print_w: 50,
+        print_h: 40,
+      },
     },
     {
       id: 'gallery-shirt-4',
@@ -73,6 +79,12 @@ export const productImages: TProductImage[][] = [
       priceInVND: 255000,
       priceAfterDiscount: 204000,
       category: 'shirt',
+      printArea: {
+        print_x: 25,
+        print_y: 20,
+        print_w: 50,
+        print_h: 40,
+      },
     },
     {
       id: 'gallery-shirt-5',
@@ -88,6 +100,12 @@ export const productImages: TProductImage[][] = [
       priceInVND: 240000,
       // Không giảm giá (20% sản phẩm không có field này)
       category: 'shirt',
+      printArea: {
+        print_x: 25,
+        print_y: 20,
+        print_w: 50,
+        print_h: 40,
+      },
     },
   ],
   [
@@ -105,10 +123,12 @@ export const productImages: TProductImage[][] = [
       priceInVND: 200000,
       priceAfterDiscount: 160000,
       category: 'totebag',
-      print_x: 20,
-      print_y: 30,
-      print_w: 60,
-      print_h: 35,
+      printArea: {
+        print_x: 20,
+        print_y: 30,
+        print_w: 60,
+        print_h: 35,
+      },
     },
     {
       id: 'gallery-totebag-2',
@@ -124,6 +144,12 @@ export const productImages: TProductImage[][] = [
       priceInVND: 180000,
       priceAfterDiscount: 144000,
       category: 'totebag',
+      printArea: {
+        print_x: 20,
+        print_y: 30,
+        print_w: 60,
+        print_h: 35,
+      },
     },
     {
       id: 'gallery-totebag-3',
@@ -139,6 +165,12 @@ export const productImages: TProductImage[][] = [
       priceInVND: 220000,
       priceAfterDiscount: 176000,
       category: 'totebag',
+      printArea: {
+        print_x: 20,
+        print_y: 30,
+        print_w: 60,
+        print_h: 35,
+      },
     },
   ],
   [
@@ -156,10 +188,12 @@ export const productImages: TProductImage[][] = [
       priceInVND: 120000,
       priceAfterDiscount: 96000,
       category: 'cup',
-      print_x: 30,
-      print_y: 25,
-      print_w: 40,
-      print_h: 35,
+      printArea: {
+        print_x: 30,
+        print_y: 25,
+        print_w: 40,
+        print_h: 35,
+      },
     },
     {
       id: 'gallery-cup-2',
@@ -175,6 +209,12 @@ export const productImages: TProductImage[][] = [
       priceInVND: 110000,
       priceAfterDiscount: 88000,
       category: 'cup',
+      printArea: {
+        print_x: 30,
+        print_y: 25,
+        print_w: 40,
+        print_h: 35,
+      },
     },
     {
       id: 'gallery-cup-3',
@@ -190,6 +230,12 @@ export const productImages: TProductImage[][] = [
       priceInVND: 115000,
       priceAfterDiscount: 92000,
       category: 'cup',
+      printArea: {
+        print_x: 30,
+        print_y: 25,
+        print_w: 40,
+        print_h: 35,
+      },
     },
     {
       id: 'gallery-cup-4',
@@ -205,6 +251,12 @@ export const productImages: TProductImage[][] = [
       priceInVND: 125000,
       // Không giảm giá
       category: 'cup',
+      printArea: {
+        print_x: 30,
+        print_y: 25,
+        print_w: 40,
+        print_h: 35,
+      },
     },
     {
       id: 'gallery-cup-5',
@@ -220,6 +272,12 @@ export const productImages: TProductImage[][] = [
       priceInVND: 130000,
       priceAfterDiscount: 104000,
       category: 'cup',
+      printArea: {
+        print_x: 30,
+        print_y: 25,
+        print_w: 40,
+        print_h: 35,
+      },
     },
   ],
   [
@@ -237,6 +295,12 @@ export const productImages: TProductImage[][] = [
       priceInVND: 180000,
       priceAfterDiscount: 144000,
       category: 'hat',
+      printArea: {
+        print_x: 30,
+        print_y: 35,
+        print_w: 40,
+        print_h: 30,
+      },
     },
     {
       id: 'gallery-hat-2',
@@ -252,6 +316,12 @@ export const productImages: TProductImage[][] = [
       priceInVND: 185000,
       priceAfterDiscount: 148000,
       category: 'hat',
+      printArea: {
+        print_x: 30,
+        print_y: 35,
+        print_w: 40,
+        print_h: 30,
+      },
     },
     {
       id: 'gallery-hat-3',
@@ -267,6 +337,12 @@ export const productImages: TProductImage[][] = [
       priceInVND: 190000,
       priceAfterDiscount: 152000,
       category: 'hat',
+      printArea: {
+        print_x: 30,
+        print_y: 35,
+        print_w: 40,
+        print_h: 30,
+      },
     },
     {
       id: 'gallery-hat-4',
@@ -282,6 +358,12 @@ export const productImages: TProductImage[][] = [
       priceInVND: 175000,
       // Không giảm giá
       category: 'hat',
+      printArea: {
+        print_x: 30,
+        print_y: 35,
+        print_w: 40,
+        print_h: 30,
+      },
     },
     {
       id: 'gallery-hat-5',
@@ -297,6 +379,12 @@ export const productImages: TProductImage[][] = [
       priceInVND: 200000,
       priceAfterDiscount: 160000,
       category: 'hat',
+      printArea: {
+        print_x: 30,
+        print_y: 35,
+        print_w: 40,
+        print_h: 30,
+      },
     },
   ],
   [
@@ -314,6 +402,12 @@ export const productImages: TProductImage[][] = [
       priceInVND: 50000,
       priceAfterDiscount: 40000,
       category: 'keychain',
+      printArea: {
+        print_x: 20,
+        print_y: 20,
+        print_w: 60,
+        print_h: 60,
+      },
     },
     {
       id: 'gallery-keychain-2',
@@ -329,6 +423,12 @@ export const productImages: TProductImage[][] = [
       priceInVND: 55000,
       priceAfterDiscount: 44000,
       category: 'keychain',
+      printArea: {
+        print_x: 20,
+        print_y: 20,
+        print_w: 60,
+        print_h: 60,
+      },
     },
     {
       id: 'gallery-keychain-3',
@@ -344,6 +444,12 @@ export const productImages: TProductImage[][] = [
       priceInVND: 60000,
       priceAfterDiscount: 48000,
       category: 'keychain',
+      printArea: {
+        print_x: 20,
+        print_y: 20,
+        print_w: 60,
+        print_h: 60,
+      },
     },
     {
       id: 'gallery-keychain-4',
@@ -359,6 +465,12 @@ export const productImages: TProductImage[][] = [
       priceInVND: 65000,
       // Không giảm giá
       category: 'keychain',
+      printArea: {
+        print_x: 20,
+        print_y: 20,
+        print_w: 60,
+        print_h: 60,
+      },
     },
     {
       id: 'gallery-keychain-5',
@@ -374,6 +486,12 @@ export const productImages: TProductImage[][] = [
       priceInVND: 70000,
       priceAfterDiscount: 56000,
       category: 'keychain',
+      printArea: {
+        print_x: 20,
+        print_y: 20,
+        print_w: 60,
+        print_h: 60,
+      },
     },
   ],
   [
@@ -391,6 +509,12 @@ export const productImages: TProductImage[][] = [
       priceInVND: 150000,
       priceAfterDiscount: 120000,
       category: 'phonecase',
+      printArea: {
+        print_x: 15,
+        print_y: 20,
+        print_w: 70,
+        print_h: 60,
+      },
     },
     {
       id: 'gallery-phonecase-2',
@@ -406,6 +530,12 @@ export const productImages: TProductImage[][] = [
       priceInVND: 160000,
       priceAfterDiscount: 128000,
       category: 'phonecase',
+      printArea: {
+        print_x: 15,
+        print_y: 20,
+        print_w: 70,
+        print_h: 60,
+      },
     },
     {
       id: 'gallery-phonecase-3',
@@ -421,6 +551,12 @@ export const productImages: TProductImage[][] = [
       priceInVND: 155000,
       priceAfterDiscount: 124000,
       category: 'phonecase',
+      printArea: {
+        print_x: 15,
+        print_y: 20,
+        print_w: 70,
+        print_h: 60,
+      },
     },
     {
       id: 'gallery-phonecase-4',
@@ -436,6 +572,12 @@ export const productImages: TProductImage[][] = [
       priceInVND: 150000,
       priceAfterDiscount: 120000,
       category: 'phonecase',
+      printArea: {
+        print_x: 15,
+        print_y: 20,
+        print_w: 70,
+        print_h: 60,
+      },
     },
     {
       id: 'gallery-phonecase-5',
@@ -451,6 +593,12 @@ export const productImages: TProductImage[][] = [
       priceInVND: 150000,
       priceAfterDiscount: 120000,
       category: 'phonecase',
+      printArea: {
+        print_x: 15,
+        print_y: 20,
+        print_w: 70,
+        print_h: 60,
+      },
     },
   ],
 
@@ -470,6 +618,13 @@ export const productImages: TProductImage[][] = [
       priceInVND: 300000,
       priceAfterDiscount: 240000,
       category: 'figurine',
+      printArea: {
+        // Figurine không có vùng in cụ thể (in toàn bộ)
+        print_x: 0,
+        print_y: 0,
+        print_w: 100,
+        print_h: 100,
+      },
     },
   ],
   [
@@ -487,6 +642,13 @@ export const productImages: TProductImage[][] = [
       priceInVND: 300000,
       priceAfterDiscount: 240000,
       category: 'figurine',
+      printArea: {
+        // Figurine không có vùng in cụ thể (in toàn bộ)
+        print_x: 0,
+        print_y: 0,
+        print_w: 100,
+        print_h: 100,
+      },
     },
   ],
 ]

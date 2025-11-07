@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Minus, Plus, Tag, Banknote, X, ArrowBigLeft, ArrowLeft } from 'lucide-react'
-import { formatNumberWithCommas, generateSessionId } from '@/utils/helpers'
+import { Minus, Plus, Banknote, X, ArrowBigLeft, ArrowLeft } from 'lucide-react'
+import { formatNumberWithCommas } from '@/utils/helpers'
 import { TProductImage } from '@/utils/types'
 import { PaymentModal } from '@/pages/payment/PaymentModal'
 import { useNavigate } from 'react-router-dom'
 import { createPortal } from 'react-dom'
 import { LocalStorageHelper } from '@/utils/localstorage'
 import { useGlobalContext, useProductImageContext } from '@/context/global-context'
+import { TVoucher } from '@/services/voucher.service'
+import { VoucherSection } from '@/pages/payment/Voucher'
 
 interface IPaymentModalProps {
   imgSrc?: string
@@ -45,13 +47,26 @@ type TProductItem = {
 const PaymentPage = () => {
   const { sessionId } = useGlobalContext()
   const [cartItems, setCartItems] = useState<TProductItem[]>([])
-  const [discountCode, setDiscountCode] = useState('')
-  const [discountApplied, setDiscountApplied] = useState(false)
-  const [discountMessage, setDiscountMessage] = useState('')
+  const [appliedVoucher, setAppliedVoucher] = useState<TVoucher | null>(null)
+  const [voucherDiscount, setVoucherDiscount] = useState(0)
   const [showModal, setShowModal] = useState(false)
   const navigate = useNavigate()
   const [selectedImage, setSelectedImage] = useState<string>()
   const { productImages } = useProductImageContext()
+
+  // Hàm tính subtotal (tổng tiền trước giảm giá voucher)
+  const calculateSubtotal = (): number => {
+    return cartItems.reduce(
+      (sum, item) => sum + (item.discountedPrice || item.originalPrice) * item.quantity,
+      0
+    )
+  }
+
+  // Handler khi voucher được apply/remove
+  const handleVoucherApplied = (voucher: TVoucher | null, discount: number) => {
+    setAppliedVoucher(voucher)
+    setVoucherDiscount(discount)
+  }
 
   const updateQuantity = (idAsImageDataURL: string, delta: number) => {
     setCartItems((items) =>
@@ -61,16 +76,6 @@ const PaymentPage = () => {
           : item
       )
     )
-  }
-
-  const applyDiscount = () => {
-    if (discountCode.toLowerCase() === 'save20') {
-      setDiscountApplied(true)
-      setDiscountMessage('✓ Mã giảm giá đã được áp dụng thành công! Giảm 20%')
-    } else {
-      setDiscountApplied(false)
-      setDiscountMessage('✗ Mã giảm giá không hợp lệ')
-    }
   }
 
   const findProductInfoInMainProducts = (id: string): TProductImage | null => {
@@ -136,14 +141,12 @@ const PaymentPage = () => {
     navigate('/edit')
   }
 
-  const subtotal = useMemo(() => {
-    return cartItems.reduce(
-      (sum, item) => sum + (item.discountedPrice || item.originalPrice) * item.quantity,
-      0
-    )
-  }, [cartItems])
-  const discount = discountApplied ? subtotal * 0.2 : 0
-  const total = subtotal - discount
+  const [subtotal, discount, total] = useMemo(() => {
+    const subtotalValue = calculateSubtotal()
+    const totalValue = subtotalValue - voucherDiscount
+
+    return [subtotalValue, voucherDiscount, totalValue]
+  }, [cartItems, voucherDiscount])
 
   useEffect(() => {
     document.body.style.overflow = showModal ? 'hidden' : 'auto'
@@ -273,32 +276,10 @@ const PaymentPage = () => {
         </section>
 
         {/* Discount Code Section */}
-        <section className="bg-white rounded-2xl shadow-sm p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <Tag size={18} className="text-pink-cl" />
-            <h2 className="font-semibold text-gray-900">Mã giảm giá</h2>
-          </div>
-          <div className="flex gap-2 w-full">
-            <input
-              type="text"
-              value={discountCode}
-              onChange={(e) => setDiscountCode(e.target.value)}
-              placeholder="Nhập mã khuyến mãi"
-              className="flex-1 h-[40px] w-[100px] px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-cl focus:border-transparent transition-all"
-            />
-            <button
-              onClick={applyDiscount}
-              className="h-[40px] px-6 bg-pink-cl text-white font-medium rounded-xl active:scale-95 transition shadow-sm w-max"
-            >
-              Áp dụng
-            </button>
-          </div>
-          {discountMessage && (
-            <p className={`mt-2 text-sm ${discountApplied ? 'text-green-600' : 'text-red-500'}`}>
-              {discountMessage}
-            </p>
-          )}
-        </section>
+        <VoucherSection
+          orderSubtotal={calculateSubtotal()}
+          onVoucherApplied={handleVoucherApplied}
+        />
 
         {/* Order Summary */}
         <section className="bg-white rounded-2xl shadow-sm p-4 space-y-2">
@@ -309,9 +290,9 @@ const PaymentPage = () => {
               <span> VND</span>
             </span>
           </div>
-          {discountApplied && (
+          {appliedVoucher && discount > 0 && (
             <div className="flex justify-between text-sm">
-              <span className="text-green-600">Giảm giá (20%)</span>
+              <span className="text-green-600">Giảm giá ({appliedVoucher.code})</span>
               <span className="font-medium text-green-600">
                 <span>-</span>
                 <span>{formatNumberWithCommas(discount)}</span>

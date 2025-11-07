@@ -16,11 +16,12 @@ type TUsePrintAreaReturn = {
   checkElementBounds: (
     elementRect: DOMRect | { left: number; top: number; right: number; bottom: number }
   ) => boolean
-  updatePrintArea: (product: TProductImage, containerRect: DOMRect | ClientRect) => void
+  updatePrintArea: (productPrintArea: TProductImage['printArea'], containerRect: DOMRect) => void
   initializePrintArea: (
-    product: TProductImage,
+    productPrintArea: TProductImage['printArea'],
     containerElement: HTMLElement
   ) => TPrintAreaBounds | null
+  checkIfAnyElementOutOfBounds: () => boolean
 }
 
 export const usePrintArea = (): TUsePrintAreaReturn => {
@@ -31,12 +32,12 @@ export const usePrintArea = (): TUsePrintAreaReturn => {
   const containerSizeRef = useRef<{ width: number; height: number } | null>(null)
 
   const calculatePrintAreaFromContainer = useCallback(
-    (product: TProductImage, containerElement: HTMLElement) => {
+    (productPrintArea: TProductImage['printArea'], containerElement: HTMLElement) => {
       if (
-        typeof product.print_x === 'number' &&
-        typeof product.print_y === 'number' &&
-        typeof product.print_w === 'number' &&
-        typeof product.print_h === 'number'
+        typeof productPrintArea.print_x === 'number' &&
+        typeof productPrintArea.print_y === 'number' &&
+        typeof productPrintArea.print_w === 'number' &&
+        typeof productPrintArea.print_h === 'number'
       ) {
         // Sử dụng offsetWidth/offsetHeight thay vì getBoundingClientRect để tránh layout shift
         const containerWidth = containerElement.offsetWidth
@@ -46,10 +47,10 @@ export const usePrintArea = (): TUsePrintAreaReturn => {
         containerSizeRef.current = { width: containerWidth, height: containerHeight }
 
         // Chuyển đổi từ phần trăm sang pixel
-        const x = (product.print_x / 100) * containerWidth
-        const y = (product.print_y / 100) * containerHeight
-        const width = (product.print_w / 100) * containerWidth
-        const height = (product.print_h / 100) * containerHeight
+        const x = (productPrintArea.print_x / 100) * containerWidth
+        const y = (productPrintArea.print_y / 100) * containerHeight
+        const width = (productPrintArea.print_w / 100) * containerWidth
+        const height = (productPrintArea.print_h / 100) * containerHeight
 
         const newBounds = { x, y, width, height }
         setPrintAreaBounds(newBounds)
@@ -73,7 +74,7 @@ export const usePrintArea = (): TUsePrintAreaReturn => {
   )
 
   const updatePrintArea = useCallback(
-    (product: TProductImage, containerRect: DOMRect | ClientRect) => {
+    (productPrintArea: TProductImage['printArea'], containerRect: DOMRect) => {
       // Chỉ update nếu kích thước container thực sự thay đổi
       if (
         !containerSizeRef.current ||
@@ -85,7 +86,7 @@ export const usePrintArea = (): TUsePrintAreaReturn => {
           '[data-edit-container="true"]'
         ) as HTMLElement
         if (containerElement) {
-          calculatePrintAreaFromContainer(product, containerElement)
+          calculatePrintAreaFromContainer(productPrintArea, containerElement)
         }
       }
     },
@@ -117,6 +118,36 @@ export const usePrintArea = (): TUsePrintAreaReturn => {
       overlayRef.current.style.pointerEvents = outOfBounds ? 'auto' : 'none'
     }
   }, [])
+
+  // Hàm kiểm tra xem có element nào đang nằm ngoài vùng in không
+  const checkIfAnyElementOutOfBounds = useCallback((): boolean => {
+    if (!printAreaBounds) return false
+
+    const editableElements = document.querySelectorAll('.NAME-root-element')
+    const editContainer = document.querySelector('[data-edit-container="true"]')
+
+    if (!editContainer) return false
+
+    const containerRect = editContainer.getBoundingClientRect()
+
+    for (const element of editableElements) {
+      const rect = element.getBoundingClientRect()
+
+      // Chuyển đổi tọa độ element về tọa độ tương đối với container
+      const relativeRect = {
+        left: rect.left - containerRect.left,
+        top: rect.top - containerRect.top,
+        right: rect.right - containerRect.left,
+        bottom: rect.bottom - containerRect.top,
+      }
+
+      if (!checkElementBounds(relativeRect as DOMRect)) {
+        return true // Có ít nhất 1 element nằm ngoài vùng in
+      }
+    }
+
+    return false // Tất cả elements đều nằm trong vùng in
+  }, [printAreaBounds, checkElementBounds])
 
   // Đơn giản hóa observer - chỉ check khi cần thiết
   useEffect(() => {
@@ -179,5 +210,6 @@ export const usePrintArea = (): TUsePrintAreaReturn => {
     checkElementBounds,
     updatePrintArea,
     initializePrintArea: calculatePrintAreaFromContainer,
+    checkIfAnyElementOutOfBounds,
   }
 }

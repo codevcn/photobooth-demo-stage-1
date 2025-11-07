@@ -16,10 +16,12 @@ export type TProductImage = {
   priceAfterDiscount?: number
   stock: number
   category: 'shirt' | 'hat' | 'cup' | 'keychain' | 'phonecase' | 'figurine' | 'totebag'
-  print_x?: number
-  print_y?: number
-  print_w?: number
-  print_h?: number
+  printArea: {
+    print_x?: number
+    print_y?: number
+    print_w?: number
+    print_h?: number
+  }
 }
 
 export type TTextElement = {

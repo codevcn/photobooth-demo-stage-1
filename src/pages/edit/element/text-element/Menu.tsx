@@ -13,19 +13,146 @@ import {
   X,
   Pencil,
   Layers2,
-  ChevronUp,
-  ChevronDown,
+  // ChevronUp,
+  // ChevronDown,
 } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { HexColorPicker } from 'react-colorful'
+import { HexColorPicker, } from 'react-colorful'
 import { createPortal } from 'react-dom'
 import { ELEMENT_ZINDEX_STEP } from '@/utils/contants'
+import { useDebounce } from '@/hooks/use-debounce'
 
 type TPropertyType = 'font-size' | 'angle' | 'posXY' | 'zindex-up' | 'zindex-down'
 
-interface TextFontPickerProps {
+interface ColorPickerModalProps {
   show: boolean
   onHideShow: (show: boolean) => void
+  onColorChange: (color: string) => void
+}
+
+const ColorPickerModal = ({ show, onHideShow, onColorChange }: ColorPickerModalProps) => {
+  const [currentColor, setCurrentColor] = useState<string>('#fe6e87')
+  const debounce = useDebounce()
+  const inputText = useRef<string>('Text để kiểm tra màu chữ')
+  const inputRef = useRef<HTMLInputElement | null>(null)
+
+  // Hàm convert tên màu CSS sang hex
+  const convertColorToHex = (color: string): string => {
+    // Tạo element tạm để browser convert màu
+    const tempElement = document.createElement('div')
+    tempElement.style.color = color
+    document.body.appendChild(tempElement)
+    
+    const computedColor = window.getComputedStyle(tempElement).color
+    document.body.removeChild(tempElement)
+    
+    // Convert rgb/rgba sang hex
+    const match = computedColor.match(/\d+/g)
+    if (match && match.length >= 3) {
+      const r = parseInt(match[0]).toString(16).padStart(2, '0')
+      const g = parseInt(match[1]).toString(16).padStart(2, '0')
+      const b = parseInt(match[2]).toString(16).padStart(2, '0')
+      return `#${r}${g}${b}`
+    }
+    
+    return color
+  }
+
+  const handleColorPickerChange = (color: string) => {
+    setCurrentColor(color)
+    onColorChange(color)
+    if (inputRef.current) {
+      inputRef.current.value = color
+    }
+  }
+
+  const validateColorValue = (value: string): boolean => {
+    const isValidHex = /^#[0-9A-F]{6}$/i.test(value)
+    const isValidShortHex = /^#[0-9A-F]{3}$/i.test(value)
+    const isNamedColor = /^[a-z]+$/i.test(value)
+    return isValidHex || isValidShortHex || isNamedColor
+  }
+
+  const handleInputChange = debounce((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.trim()
+    if (validateColorValue(value)) {
+      // Convert sang hex để HexColorPicker hiểu được
+      const hexColor = convertColorToHex(value)
+      setCurrentColor(hexColor)
+      onColorChange(value) // Gửi giá trị gốc (có thể là tên màu)
+    }
+  }, 300)
+
+  useEffect(() => {
+    const inputElement = inputRef.current
+    if (inputElement) {
+      inputElement.value = currentColor
+    }
+  }, [currentColor])
+
+  if (!show) return null
+
+  return (
+    <div className="NAME-color-picker-modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-4 w-full mx-4 shadow-2xl max-h-[95vh] overflow-y-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-bold text-gray-800">Chọn màu chữ</h3>
+          <button
+            onClick={() => onHideShow(false)}
+            className="text-gray-800 active:scale-90 w-8 h-8 flex items-center justify-center rounded-full transition"
+          >
+            <X size={20} strokeWidth={3} />
+          </button>
+        </div>
+
+        {/* Color Picker */}
+        <div className="flex justify-center mb-4">
+          <HexColorPicker
+            style={{ width: '100%' }}
+            color={currentColor}
+            onChange={handleColorPickerChange}
+          />
+        </div>
+
+        {/* Current Color Display */}
+        <div className="mb-4">
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Xem trước màu chữ:
+          </label>
+          <div className="flex items-center gap-3">
+            <div className="flex-1 bg-gray-50 rounded-lg border-2 border-gray-300 p-2 text-center">
+              <p className="text-3xl font-bold" style={{ color: currentColor }}>
+                {inputText.current}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Input Color */}
+        <div className="mb-4">
+          <label className="block text-sm font-semibold text-gray-700 mb-2">Nhập mã màu:</label>
+          <input
+            type="text"
+            ref={inputRef}
+            onChange={handleInputChange}
+            placeholder="Nhập tên màu (red / pink / ...) hoặc mã màu hex (#fe6e87)"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all"
+          />
+        </div>
+
+        {/* Footer */}
+        <div className="text-center">
+          <button
+            onClick={() => onHideShow(false)}
+            className="bg-pink-cl hover:opacity-90 active:scale-95 text-white font-semibold px-6 py-2 rounded-lg transition-all w-full"
+          >
+            Xong
+          </button>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 // Danh sách các font có sẵn từ fonts.css
@@ -40,6 +167,11 @@ const localFonts = [
   'Jersey 25 Charted',
   'Nosifer',
 ]
+
+interface TextFontPickerProps {
+  show: boolean
+  onHideShow: (show: boolean) => void
+}
 
 const TextFontPicker = ({ show, onHideShow }: TextFontPickerProps) => {
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
@@ -340,6 +472,27 @@ export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuPro
           <span className="text-white text-base font-bold">độ</span>
         </div>
       </div>
+      <div className="NAME-form-group NAME-form-zindex flex items-center justify-between bg-pink-cl rounded px-1 py-1 shadow w-full">
+        <div className="min-w-[22px]">
+          <Layers2 size={20} className="text-white" strokeWidth={3} />
+        </div>
+        <div className="flex gap-1 grow flex-wrap">
+          <button
+            onClick={() => onClickButton('zindex-up')}
+            className="bg-white border-2 grow text-pink-cl border-pink-cl rounded px-1.5 py-1 flex gap-0.5 items-center justify-center"
+          >
+            <span className="text-inherit text-base font-bold">Lên</span>
+            {/* <ChevronUp size={20} className="flex text-inherit" strokeWidth={3} /> */}
+          </button>
+          <button
+            onClick={() => onClickButton('zindex-down')}
+            className="bg-white border-2 grow text-pink-cl border-pink-cl rounded px-1.5 py-1 flex gap-0.5 items-center justify-center"
+          >
+            <span className="text-inherit text-base font-bold">Xuống</span>
+            {/* <ChevronDown size={20} className="flex text-inherit" strokeWidth={3} /> */}
+          </button>
+        </div>
+      </div>
       <div className="NAME-form-group NAME-form-position flex items-center bg-pink-cl rounded px-1 py-1 shadow w-full">
         <div className="min-w-[22px]">
           <Move size={20} className="text-white" strokeWidth={3} />
@@ -359,28 +512,7 @@ export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuPro
           />
         </div>
       </div>
-      <div className="NAME-form-group NAME-form-zindex flex items-center justify-between bg-pink-cl rounded px-1 py-1 shadow w-full">
-        <div className="min-w-[22px]">
-          <Layers2 size={20} className="text-white" strokeWidth={3} />
-        </div>
-        <div className="flex gap-1">
-          <button
-            onClick={() => onClickButton('zindex-up')}
-            className="bg-white border-2 text-pink-cl border-pink-cl rounded px-1.5 py-1 flex gap-0.5 items-center justify-center"
-          >
-            <span className="text-inherit text-base font-bold">Lên</span>
-            <ChevronUp size={20} className="flex text-inherit" strokeWidth={3} />
-          </button>
-          <button
-            onClick={() => onClickButton('zindex-down')}
-            className="bg-white border-2 text-pink-cl border-pink-cl rounded px-1.5 py-1 flex gap-0.5 items-center justify-center"
-          >
-            <span className="text-inherit text-base font-bold">Xuống</span>
-            <ChevronDown size={20} className="flex text-inherit" strokeWidth={3} />
-          </button>
-        </div>
-      </div>
-      <div className="NAME-form-group NAME-form-color flex items-stretch justify-center relative gap-1 rounded">
+      <div className="NAME-form-group NAME-form-color flex items-stretch justify-center gap-1 rounded">
         <div
           onClick={() => setShowColorPicker((pre) => !pre)}
           className="flex items-center justify-center cursor-pointer gap-1 active:scale-90 hover:scale-95 transition bg-pink-cl rounded shadow px-1 h-10 w-full"
@@ -394,13 +526,11 @@ export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuPro
             </div>
           </div>
         </div>
-        <div
-          className={`${
-            showColorPicker ? 'block' : 'hidden'
-          } NAME-color-picker bottom-[calc(100%+4px)] right-0 absolute z-10`}
-        >
-          <HexColorPicker onChange={handleAdjustColorOnElement} />
-        </div>
+        <ColorPickerModal
+          show={showColorPicker}
+          onHideShow={setShowColorPicker}
+          onColorChange={handleAdjustColorOnElement}
+        />
       </div>
       <div className="NAME-form-group NAME-form-font flex items-stretch justify-center gap-1 relative rounded w-full">
         <div

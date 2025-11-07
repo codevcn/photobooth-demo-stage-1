@@ -67,7 +67,6 @@ export const useElementControl = (
   const { initialPosX, initialPosY, maxZoom, minZoom, initialFontSize, maxFontSize, minFontSize } =
     initialParams || {}
   const { elementLayers, setElementLayers } = useContext(ElementLayerContext)
-  console.log('>>> element layers:', elementLayers)
   const [position, setPosition] = useState<TElementState['position']>({
     x: initialPosX || 0,
     y: initialPosY || 0,

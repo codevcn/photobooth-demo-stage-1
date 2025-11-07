@@ -3,7 +3,14 @@ import { ELEMENT_ZINDEX_STEP } from '@/utils/contants'
 import { EInternalEvents } from '@/utils/enums'
 import { eventEmitter } from '@/utils/events'
 import { TMenuState } from '@/utils/types'
-import { RefreshCw, Move, Check, Fullscreen, ChevronUp, ChevronDown, Layers2 } from 'lucide-react'
+import {
+  RefreshCw,
+  Move,
+  Check,
+  Fullscreen,
+  // ChevronUp, ChevronDown,
+  Layers2,
+} from 'lucide-react'
 import { useEffect, useRef } from 'react'
 
 type TPropertyType = 'scale' | 'angle' | 'posXY' | 'zindex-up' | 'zindex-down'
@@ -169,6 +176,27 @@ export const PrintedImageElementMenu = ({ elementId }: PrintedImageMenuProps) =>
           <span className="text-white text-base font-bold">độ</span>
         </div>
       </div>
+      <div className="NAME-form-group NAME-form-zindex flex items-center justify-between bg-pink-cl rounded px-1 py-1 shadow w-full">
+        <div className="min-w-[22px]">
+          <Layers2 size={20} className="text-white" strokeWidth={3} />
+        </div>
+        <div className="flex gap-1 grow flex-wrap">
+          <button
+            onClick={() => onClickButton('zindex-up')}
+            className="bg-white border-2 grow text-pink-cl border-pink-cl rounded px-1.5 py-1 flex gap-0.5 items-center justify-center"
+          >
+            <span className="text-inherit text-base font-bold">Lên</span>
+            {/* <ChevronUp size={20} className="flex text-inherit" strokeWidth={3} /> */}
+          </button>
+          <button
+            onClick={() => onClickButton('zindex-down')}
+            className="bg-white border-2 grow text-pink-cl border-pink-cl rounded px-1.5 py-1 flex gap-0.5 items-center justify-center"
+          >
+            <span className="text-inherit text-base font-bold">Xuống</span>
+            {/* <ChevronDown size={20} className="flex text-inherit" strokeWidth={3} /> */}
+          </button>
+        </div>
+      </div>
       <div className="NAME-form-group NAME-form-position flex items-center bg-pink-cl rounded px-1 py-1 shadow w-full">
         <div className="min-w-[22px]">
           <Move size={20} className="text-white" strokeWidth={3} />
@@ -186,27 +214,6 @@ export const PrintedImageElementMenu = ({ elementId }: PrintedImageMenuProps) =>
             onKeyDown={(e) => catchEnter(e, 'posXY')}
             className="border rounded px-1 py-0.5 text-base outline-none w-full"
           />
-        </div>
-      </div>
-      <div className="NAME-form-group NAME-form-zindex flex items-center justify-between bg-pink-cl rounded px-1 py-1 shadow w-full">
-        <div className="min-w-[22px]">
-          <Layers2 size={20} className="text-white" strokeWidth={3} />
-        </div>
-        <div className="flex gap-1">
-          <button
-            onClick={() => onClickButton('zindex-up')}
-            className="bg-white border-2 text-pink-cl border-pink-cl rounded px-1.5 py-1 flex gap-0.5 items-center justify-center"
-          >
-            <span className="text-inherit text-base font-bold">Lên</span>
-            <ChevronUp size={20} className="flex text-inherit" strokeWidth={3} />
-          </button>
-          <button
-            onClick={() => onClickButton('zindex-down')}
-            className="bg-white border-2 text-pink-cl border-pink-cl rounded px-1.5 py-1 flex gap-0.5 items-center justify-center"
-          >
-            <span className="text-inherit text-base font-bold">Xuống</span>
-            <ChevronDown size={20} className="flex text-inherit" strokeWidth={3} />
-          </button>
         </div>
       </div>
       <div className="NAME-form-group NAME-form-position col-span-2 flex items-center bg-pink-cl rounded px-1 py-1 shadow w-full">

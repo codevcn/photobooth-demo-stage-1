@@ -21,6 +21,7 @@ import { useElementControl } from '@/hooks/element/use-element-control'
 import { usePrintArea } from '@/hooks/use-print-area'
 import { PrintAreaOverlay } from '@/components/print-area/PrintAreaOverlay'
 import ActionBar from './ActionBar'
+import { toast } from 'react-toastify'
 
 const maxZoom: number = 3
 const minZoom: number = 0.3
@@ -68,8 +69,13 @@ const EditArea: React.FC<EditAreaProps> = ({
     handleSetElementState,
   } = useElementControl(crypto.randomUUID(), { maxZoom, minZoom })
 
-  const { printAreaRef, overlayRef, isOutOfBounds, printAreaBounds, initializePrintArea } =
-    usePrintArea()
+  const {
+    printAreaRef,
+    overlayRef,
+    isOutOfBounds,
+    initializePrintArea,
+    checkIfAnyElementOutOfBounds,
+  } = usePrintArea()
 
   const handleRemoveText = (id: string) => {
     onUpdateText(textElements.filter((el) => el.id !== id))
@@ -107,7 +113,8 @@ const EditArea: React.FC<EditAreaProps> = ({
       if (
         !target.closest('.NAME-root-element') &&
         !target.closest('.NAME-menu-section') &&
-        !target.closest('.NAME-text-font-picker')
+        !target.closest('.NAME-text-font-picker') &&
+        !target.closest('.NAME-color-picker-modal')
       ) {
         cancelSelectingElement()
       }
@@ -139,6 +146,10 @@ const EditArea: React.FC<EditAreaProps> = ({
   }
 
   const beforeAddToCart = () => {
+    if (checkIfAnyElementOutOfBounds()) {
+      toast.warning('Vui lòng đảm bảo tất cả phần tử nằm trong vùng in trước khi thêm vào giỏ hàng')
+      return
+    }
     cancelSelectingElement()
     setTimeout(() => {
       handleAddToCart()
@@ -166,13 +177,13 @@ const EditArea: React.FC<EditAreaProps> = ({
       const timeoutId = setTimeout(() => {
         if (htmlToCanvasEditorRef.current) {
           // Sử dụng initializePrintArea với container element thay vì getBoundingClientRect
-          initializePrintArea(editingProduct, htmlToCanvasEditorRef.current)
+          initializePrintArea(editingProduct.printArea, htmlToCanvasEditorRef.current)
         }
       }, 50)
 
       return () => clearTimeout(timeoutId)
     }
-  }, [editingProduct?.id, initializePrintArea]) // Sử dụng initializePrintArea thay vì updatePrintArea
+  }, [editingProduct?.id, initializePrintArea, editingProduct?.printArea]) // Sử dụng initializePrintArea thay vì updatePrintArea
 
   // Theo dõi resize của container
   useEffect(() => {
@@ -186,7 +197,7 @@ const EditArea: React.FC<EditAreaProps> = ({
           // Sử dụng initializePrintArea thay vì updatePrintArea để tránh getBoundingClientRect
           setTimeout(() => {
             if (htmlToCanvasEditorRef.current) {
-              initializePrintArea(editingProduct, htmlToCanvasEditorRef.current)
+              initializePrintArea(editingProduct.printArea, htmlToCanvasEditorRef.current)
             }
           }, 100)
         }

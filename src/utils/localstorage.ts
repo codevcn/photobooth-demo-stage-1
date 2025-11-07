@@ -8,7 +8,7 @@ export class LocalStorageHelper {
     return crypto.randomUUID()
   }
 
-  static saveMockupImageAsBase64(
+  static saveMockupImageAtLocal(
     productInfo: TProductInCart,
     imageDataUrl: string,
     sessionId: string

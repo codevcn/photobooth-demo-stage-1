@@ -26,13 +26,13 @@ import {
 } from '../../context/global-context'
 import { LocalStorageHelper } from '@/utils/localstorage'
 import { toast } from 'react-toastify'
-import { useHtmlToCanvas } from '@/hooks/use-html-to-canvas'
 import { ArrowLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { swapArrayItems } from '@/utils/helpers'
 import { INITIAL_TEXT_FONT_SIZE } from '@/utils/contants'
 import { productService } from '@/services/product.service'
 import { PageLoading } from '@/components/custom/Loading'
+import { useHtmlToCanvas } from '@/hooks/use-html-to-canvas'
 
 type TEditPageProps = {
   productImages: TProductImage[][]
@@ -122,10 +122,18 @@ const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
   const handleAddToCart = () => {
     if (!sessionId) return
     handleSaveHtmlAsImage(
-      { id: activeImageId, color: activeProduct.color, size: selectedSize },
-      sessionId,
-      () => {
+      (imageDataUrl) => {
+        LocalStorageHelper.saveMockupImageAtLocal(
+          { id: activeImageId, color: activeProduct.color, size: selectedSize },
+          imageDataUrl,
+          sessionId
+        )
         toast.success('Đã thêm vào giỏ hàng')
+        setCartCount(LocalStorageHelper.countSavedMockupImages())
+      },
+      (error) => {
+        console.error('Error saving mockup image:', error)
+        toast.warning(error.message || 'Không thể lưu mockup, không thể thêm sản phẩm vào giỏ hàng')
         setCartCount(LocalStorageHelper.countSavedMockupImages())
       }
     )

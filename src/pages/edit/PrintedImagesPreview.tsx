@@ -18,11 +18,11 @@ export const PrintedImagesPreview = ({
       className="flex justify-center min-w-[50px] rounded border-solid text-pink-cl bg-white active:scale-90 transition relative shadow"
     >
       {slicedImages.map((img) => (
-        <div key={img.id} className="h-[50px] overflow-hidden rounded">
+        <div key={img.id} className="flex items-center h-[50px] overflow-hidden rounded">
           <img
             src={img.url}
             alt="Printed image"
-            className={`h-max w-max max-h-[80px] max-w-[80px] object-cover rounded`}
+            className={`h-max w-max max-h-[50px] max-w-[80px] my-auto object-contain rounded`}
           />
         </div>
       ))}
