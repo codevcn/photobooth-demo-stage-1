@@ -1,3 +1,9 @@
+import { VisualStateManager } from '@/managers/visual-states.manager'
+
+export type IntersectSameFields<A, B> = {
+  [K in keyof A & keyof B as A[K] extends B[K] ? (B[K] extends A[K] ? K : never) : never]: A[K]
+}
+
 export type TProductSize = 'S' | 'M' | 'L' | 'XL' | '2XL' | '3XL'
 
 export type TProductColor = {
@@ -62,6 +68,7 @@ export type TGlobalContextValue = {
   pickedElementRoot: HTMLElement | null
   elementType: TElementType | null
   sessionId: string | null
+  visualStatesManager: VisualStateManager
 }
 
 export type TElementLayerContextValue = {
@@ -138,4 +145,22 @@ export type VoucherValidationResult = {
   success: boolean
   message: string
   voucher?: TVoucher
+}
+
+export type TElementVisualBaseState = {
+  position: {
+    x: number
+    y: number
+  }
+  scale: number
+  angle: number
+  zindex: number
+}
+
+export type TTextVisualState = TElementVisualBaseState & {
+  fontSize: number
+  textColor: string
+  content: string
+  fontFamily: string
+  fontWeight: number
 }

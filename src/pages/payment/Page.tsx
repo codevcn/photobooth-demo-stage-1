@@ -52,6 +52,7 @@ const PaymentPage = () => {
   const navigate = useNavigate()
   const [selectedImage, setSelectedImage] = useState<string>()
   const { productImages } = useProductImageContext()
+  const { visualStatesManager } = useGlobalContext()
 
   // Hàm tính subtotal (tổng tiền trước giảm giá voucher)
   const calculateSubtotal = (): number => {
@@ -153,6 +154,11 @@ const PaymentPage = () => {
 
   useEffect(() => {
     loadCartItems()
+    console.log('>>> visualStates:', {
+      text: visualStatesManager.getVisualStates().text,
+      sticker: visualStatesManager.getVisualStates().sticker,
+      printedImage: visualStatesManager.getVisualStates().printedImage,
+    })
   }, [])
 
   return cartItems && cartItems.length > 0 ? (

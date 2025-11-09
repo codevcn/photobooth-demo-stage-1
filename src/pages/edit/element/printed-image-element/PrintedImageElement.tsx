@@ -34,7 +34,7 @@ export const PrintedImageElement = ({
     forDrag: { ref: refForDrag },
     state: { position, angle, scale, zindex },
     handleSetElementState,
-  } = useElementControl(id, {
+  } = useElementControl(id, 'printedImage', {
     initialPosX: x,
     initialPosY: y,
     maxZoom: MAX_ZOOM,

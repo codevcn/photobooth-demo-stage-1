@@ -5,6 +5,7 @@ import { eventEmitter } from '@/utils/events'
 import { EInternalEvents } from '@/utils/enums'
 import { useElementControl } from '@/hooks/element/use-element-control'
 import { useElementLayerContext } from '@/context/global-context'
+import { useTextElementControl } from '@/hooks/element/use-text-element-control'
 
 const MAX_TEXT_FONT_SIZE: number = 1000
 const MIN_TEXT_FONT_SIZE: number = 5
@@ -24,41 +25,28 @@ export const TextElement = ({
   selectedElementId,
   canvasAreaRef,
 }: TextElementProps) => {
-  const { color, text, id, fontSize: initialFontSize } = element
+  const { color: initialColor, text, id, fontSize: initialFontSize } = element
   const isSelected = selectedElementId === id
   const {
     forPinch: { ref: refForPinch },
     forRotate: { ref: refForRotate, rotateButtonRef },
     forZoom: { ref: refForZoom, zoomButtonRef },
     forDrag: { ref: refForDrag },
-    state: { position, angle, zindex, fontSize },
+    state: { position, angle, zindex, fontSize, textColor, content },
     handleSetElementState,
-  } = useElementControl(
-    id,
-    { initialFontSize, maxFontSize: MAX_TEXT_FONT_SIZE, minFontSize: MIN_TEXT_FONT_SIZE },
-    true
-  )
+  } = useTextElementControl(id, {
+    initialFontSize,
+    maxFontSize: MAX_TEXT_FONT_SIZE,
+    minFontSize: MIN_TEXT_FONT_SIZE,
+    initialColor,
+    initialContent: text,
+  })
   const rootRef = useRef<HTMLElement | null>(null)
   const { addToElementLayers } = useElementLayerContext()
-  const contentTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   const pickElement = () => {
     eventEmitter.emit(EInternalEvents.PICK_ELEMENT, rootRef.current, 'text')
     onUpdateSelectedElementId(id)
-  }
-
-  const handleContentFieldChange = (newContent: string) => {
-    if (contentTimerRef.current) {
-      clearTimeout(contentTimerRef.current)
-    }
-    contentTimerRef.current = setTimeout(() => {
-      const displayedText = rootRef.current?.querySelector<HTMLElement>(
-        '.NAME-element-main-box .NAME-displayed-text-content'
-      )
-      if (displayedText) {
-        displayedText.innerText = newContent
-      }
-    }, 300)
   }
 
   const listenSubmitEleProps = (
@@ -68,22 +56,11 @@ export const TextElement = ({
     posX?: number,
     posY?: number,
     zindex?: number,
-    color?: string,
+    textColor?: string,
     content?: string
   ) => {
     if (elementId === id) {
-      handleSetElementState(posX, posY, undefined, angle, zindex, fontSize)
-    }
-    if (color) {
-      const mainBox = rootRef.current?.querySelector<HTMLElement>(
-        '.NAME-element-main-box .NAME-displayed-text-content'
-      )
-      if (mainBox) {
-        mainBox.style.color = color
-      }
-    }
-    if (content) {
-      handleContentFieldChange(content)
+      handleSetElementState(posX, posY, undefined, angle, zindex, fontSize, textColor, content)
     }
   }
 
@@ -147,7 +124,6 @@ export const TextElement = ({
         left: position.x,
         top: position.y,
         transform: `rotate(${angle}deg)`,
-        color,
         zIndex: zindex,
       }}
       className={`${
@@ -162,10 +138,11 @@ export const TextElement = ({
           <p
             style={{
               fontSize: `${fontSize}px`,
+              color: textColor || initialColor,
             }}
             className="NAME-displayed-text-content font-bold whitespace-nowrap select-none"
           >
-            {text}
+            {content}
           </p>
         </div>
         <div

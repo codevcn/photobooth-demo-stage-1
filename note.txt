@@ -1,2 +1,5 @@
 project_path:
 D:\D-Documents\Testing\photobooth\src
+
+canvas chatgpt plus:
+https://chatgpt.com/g/g-p-68e63a80d7d08191a57fda1c73e77563-codevcn/shared/c/6905c8a3-1978-8324-82f0-521e203cb630?owner_user_id=user-xUpHMCpOy6qgk8Djdi1fIMwP

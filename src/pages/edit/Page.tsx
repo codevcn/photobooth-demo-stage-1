@@ -135,7 +135,8 @@ const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
         console.error('Error saving mockup image:', error)
         toast.warning(error.message || 'Không thể lưu mockup, không thể thêm sản phẩm vào giỏ hàng')
         setCartCount(LocalStorageHelper.countSavedMockupImages())
-      }
+      },
+      (canvas) => {}
     )
   }
 

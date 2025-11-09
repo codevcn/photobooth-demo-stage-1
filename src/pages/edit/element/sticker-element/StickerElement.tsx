@@ -34,7 +34,7 @@ export const StickerElement = ({
     forDrag: { ref: refForDrag },
     state: { position, angle, scale, zindex },
     handleSetElementState,
-  } = useElementControl(id, {
+  } = useElementControl(id, 'sticker', {
     maxZoom: MAX_ZOOM,
     minZoom: MIN_ZOOM,
   })

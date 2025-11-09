@@ -1,25 +1,29 @@
 import { EditedImageContext, GlobalContext, ProductImageContext } from '@/context/global-context'
+import { VisualStateManager } from '@/managers/visual-states.manager'
 import { EInternalEvents } from '@/utils/enums'
 import { eventEmitter } from '@/utils/events'
 import { generateSessionId } from '@/utils/helpers'
 import { TEditedImage, TElementType, TGlobalContextValue, TProductImage } from '@/utils/types'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+
+type TGlobalState = Omit<TGlobalContextValue, 'visualStatesManager'>
 
 export const AppRootProvider = ({ children }: { children: React.ReactNode }) => {
   const [editedImages, setEditedImages] = useState<TEditedImage[]>([])
   const [productImages, setProductImages] = useState<TProductImage[][]>([])
-  const [providerState, setProviderState] = useState<TGlobalContextValue>({
+  const [globalState, setGlobalState] = useState<TGlobalState>({
     pickedElementRoot: null,
     elementType: null,
     sessionId: generateSessionId(),
   })
+  const visualStatesManager = useRef<VisualStateManager>(new VisualStateManager())
 
   const clearAllEditedImages = () => {
     setEditedImages([])
   }
 
   const listenPickElement = (element: HTMLElement | null, elementType: TElementType | null) => {
-    setProviderState((pre) => ({ ...pre, pickedElementRoot: element, elementType }))
+    setGlobalState((pre) => ({ ...pre, pickedElementRoot: element, elementType }))
   }
 
   useEffect(() => {
@@ -30,7 +34,12 @@ export const AppRootProvider = ({ children }: { children: React.ReactNode }) => 
   }, [])
 
   return (
-    <GlobalContext.Provider value={providerState}>
+    <GlobalContext.Provider
+      value={{
+        ...globalState,
+        visualStatesManager: visualStatesManager.current,
+      }}
+    >
       <EditedImageContext.Provider value={{ editedImages, setEditedImages, clearAllEditedImages }}>
         <ProductImageContext.Provider value={{ productImages, setProductImages }}>
           {children}

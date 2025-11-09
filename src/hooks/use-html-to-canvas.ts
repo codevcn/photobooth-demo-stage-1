@@ -6,24 +6,29 @@ export const useHtmlToCanvas = () => {
 
   const handleSaveHtmlAsImage = async (
     onSaved: (imgDataUrl: string) => void,
-    onError: (error: Error) => void
+    onError: (error: Error) => void,
+    onCanvas: (canvas: HTMLCanvasElement) => void
   ) => {
-    if (!editorRef.current) return
-
-    try {
-      const canvas = await domToCanvas(editorRef.current, {
-        scale: 4,
-        quality: 1,
-        type: 'image/webp',
-      })
-      onSaved(canvas.toDataURL('image/png'))
-
-      // if (blob) {
-      //   onSaved(URL.createObjectURL(blob))
-      // }
-    } catch (error) {
-      onError(error as Error)
-    }
+    requestIdleCallback(async () => {
+      const editor = editorRef.current
+      if (!editor) return
+      try {
+        const canvas = await domToCanvas(editor, {
+          scale: 3,
+          quality: 1,
+          type: 'image/webp',
+          width: editor.getBoundingClientRect().width,
+          height: editor.getBoundingClientRect().height,
+        })
+        onSaved(canvas.toDataURL('image/webp', 0.95))
+        onCanvas(canvas)
+        // if (blob) {
+        //   onSaved(URL.createObjectURL(blob))
+        // }
+      } catch (error) {
+        onError(error as Error)
+      }
+    })
   }
 
   return { editorRef, handleSaveHtmlAsImage }
