@@ -1,4 +1,4 @@
-import { TStickerElement, TMenuState } from '@/utils/types'
+import { TStickerVisualState } from '@/utils/types'
 import { X, RotateCw, Scaling } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 import { eventEmitter } from '@/utils/events'
@@ -11,11 +11,12 @@ const MAX_ZOOM: number = 3
 const MIN_ZOOM: number = 0.3
 
 interface StickerElementProps {
-  element: TStickerElement
+  element: TStickerVisualState
   onRemoveElement: (id: string) => void
   selectedElementId: string | null
   onUpdateSelectedElementId: (id: string | null) => void
   canvasAreaRef: React.MutableRefObject<HTMLDivElement | null>
+  mountType: 'new' | 'from-saved'
 }
 
 export const StickerElement = ({
@@ -24,6 +25,7 @@ export const StickerElement = ({
   onUpdateSelectedElementId,
   selectedElementId,
   canvasAreaRef,
+  mountType,
 }: StickerElementProps) => {
   const { path, id } = element
   const isSelected = selectedElementId === id
@@ -34,9 +36,13 @@ export const StickerElement = ({
     forDrag: { ref: refForDrag },
     state: { position, angle, scale, zindex },
     handleSetElementState,
-  } = useElementControl(id, 'sticker', {
+  } = useElementControl(id, {
     maxZoom: MAX_ZOOM,
     minZoom: MIN_ZOOM,
+    angle: element.angle,
+    scale: element.scale,
+    position: element.position,
+    zindex: element.zindex,
   })
   const rootRef = useRef<HTMLElement | null>(null)
   const { addToElementLayers } = useElementLayerContext()
@@ -102,6 +108,7 @@ export const StickerElement = ({
   }
 
   const initElement = () => {
+    if (mountType === 'from-saved') return
     requestAnimationFrame(() => {
       const root = rootRef.current
       if (!root) return
@@ -118,7 +125,7 @@ export const StickerElement = ({
 
   useEffect(() => {
     if (selectedElementId !== id) return
-    eventEmitter.emit(EInternalEvents.SYNC_ELEMENT_PROPS, id)
+    eventEmitter.emit(EInternalEvents.SYNC_ELEMENT_PROPS, id, 'sticker')
   }, [scale, angle, position, selectedElementId, id])
 
   useEffect(() => {
@@ -150,14 +157,18 @@ export const StickerElement = ({
       }}
       className={`${
         isSelected ? 'shadow-[0_0_0_2px_#d91670]' : ''
-      } NAME-root-element absolute h-fit w-fit touch-none bg-pink-400/20`}
+      } NAME-root-element NAME-element-type-sticker absolute h-fit w-fit touch-none bg-pink-400/20`}
       onClick={pickElement}
-      data-element-state={JSON.stringify({
-        posX: position.x,
-        posY: position.y,
-        angle,
-        scale,
-      } as TMenuState)}
+      data-visual-state={JSON.stringify(
+        typeToObject<TStickerVisualState>({
+          id,
+          path,
+          position,
+          scale,
+          angle,
+          zindex,
+        })
+      )}
     >
       <div
         className={`NAME-element-main-box select-none relative origin-center max-w-[200px] max-h-[300px]`}
@@ -168,7 +179,7 @@ export const StickerElement = ({
         <div
           className={`${
             isSelected ? 'block' : 'hidden'
-          } NAME-rotate-box absolute -top-7 -left-7 z-20`}
+          } NAME-rotate-box absolute -top-7 -left-7 z-[999]`}
         >
           <button
             ref={rotateButtonRef}
@@ -180,7 +191,7 @@ export const StickerElement = ({
         <div
           className={`${
             isSelected ? 'block' : 'hidden'
-          } NAME-remove-box absolute -bottom-7 -right-7 z-20`}
+          } NAME-remove-box absolute -bottom-7 -right-7 z-[999]`}
         >
           <button
             ref={zoomButtonRef}
@@ -193,7 +204,7 @@ export const StickerElement = ({
         <div
           className={`${
             isSelected ? 'block' : 'hidden'
-          } NAME-remove-box absolute -top-7 -right-7 z-20`}
+          } NAME-remove-box absolute -top-7 -right-7 z-[999]`}
         >
           <button
             onClick={() => onRemoveElement(id)}

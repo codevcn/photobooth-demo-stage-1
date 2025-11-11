@@ -25,16 +25,19 @@ export default function QRScanner({ onScanSuccess, showCropper }: QRScannerProps
           setIsScanning(true)
           qrScanner.stop()
           qrGetter
-            .handleImageData(result.data, (percentage, imageData, error) => {
+            .handleImageData(result.data, (percentage, images, error) => {
               setProgress(percentage)
               if (error) {
                 console.error('>>> Lỗi lấy dữ liệu mã QR:', error)
                 setError('Không thể lấy dữ liệu từ mã QR. Vui lòng thử lại.')
                 return
               }
-              if (imageData) {
+              if (images) {
                 onScanSuccess(
-                  imageData.map((img) => ({ ...img, url: URL.createObjectURL(img.blob) }))
+                  images.map((img) => ({
+                    ...img,
+                    url: img.isOriginalImageUrl ? img.url : URL.createObjectURL(img.blob),
+                  }))
                 )
               }
             })
@@ -95,15 +98,21 @@ export default function QRScanner({ onScanSuccess, showCropper }: QRScannerProps
   useEffect(() => {
     setTimeout(() => {
       qrGetter
-        .handleImageData('https://qr.seobuk.kr/s/8ijZsg_', (percentage, imageData, error) => {
+        .handleImageData('https://qr.seobuk.kr/s/8ijZsg_', (percentage, images, error) => {
           setProgress(percentage)
           if (error) {
             console.error('>>> Lỗi lấy dữ liệu mã QR:', error)
             setError('Không thể lấy dữ liệu từ mã QR. Vui lòng thử lại.')
             return
           }
-          if (imageData) {
-            onScanSuccess(imageData.map((img) => ({ ...img, url: URL.createObjectURL(img.blob) })))
+          if (images) {
+            console.log('>>> images:', images)
+            onScanSuccess(
+              images.map((img) => ({
+                ...img,
+                url: img.isOriginalImageUrl ? img.url : URL.createObjectURL(img.blob),
+              }))
+            )
           }
         })
         .catch((err) => {

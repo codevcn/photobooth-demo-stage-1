@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import {
   TProductImage,
-  TTextElement,
-  TStickerElement,
   TPrintedImage,
   TElementType,
+  TElementsVisualState,
+  TTextVisualState,
+  TStickerVisualState,
+  TPrintedImageVisualState,
 } from '@/utils/types'
 import { TextElement } from './element/text-element/TextElement'
 import { StickerElement } from './element/sticker-element/StickerElement'
@@ -15,38 +17,36 @@ import { TextElementMenu } from './element/text-element/Menu'
 import { StickerElementMenu } from './element/sticker-element/Menu'
 import { eventEmitter } from '@/utils/events'
 import { EInternalEvents } from '@/utils/enums'
-import { ProductImageElementMenu } from './product/product-image/Menu'
+// import { ProductImageElementMenu } from './product/product-image/Menu'
 import { PrintedImagesPreview } from './PrintedImagesPreview'
-import { useElementControl } from '@/hooks/element/use-element-control'
+// import { useElementControl } from '@/hooks/element/use-element-control'
 import { usePrintArea } from '@/hooks/use-print-area'
 import { PrintAreaOverlay } from '@/components/print-area/PrintAreaOverlay'
 import ActionBar from './ActionBar'
 import { toast } from 'react-toastify'
+import { useVisualStatesCollector } from '@/hooks/use-visual-states-collector'
 
-const maxZoom: number = 3
-const minZoom: number = 0.3
-
-type TSelectingType = TElementType | 'product-image' | null
+type TSelectingType = TElementType | null
 
 interface EditAreaProps {
   editingProduct?: TProductImage
-  color: string
-  textElements: TTextElement[]
-  stickerElements: TStickerElement[]
-  onUpdateText: (elements: TTextElement[]) => void
-  onUpdateStickers: (elements: TStickerElement[]) => void
+  textElements: TTextVisualState[]
+  stickerElements: TStickerVisualState[]
+  onUpdateText: (elements: TTextVisualState[]) => void
+  onUpdateStickers: (elements: TStickerVisualState[]) => void
   printedImages: TPrintedImage[]
-  printedImageElements: TPrintedImage[]
+  printedImageElements: TPrintedImageVisualState[]
   onAddPrintedImages: (elements: TPrintedImage[]) => void
   onRemovePrintedImages: (ids: string[]) => void
   htmlToCanvasEditorRef: React.RefObject<HTMLDivElement>
   cartCount: number
-  handleAddToCart: () => void
+  handleAddToCart: (elementsVisualState: TElementsVisualState) => void
+  mockupId: string | null
+  selectedColor: string
 }
 
 const EditArea: React.FC<EditAreaProps> = ({
   editingProduct,
-  color,
   printedImages,
   textElements,
   stickerElements,
@@ -58,16 +58,19 @@ const EditArea: React.FC<EditAreaProps> = ({
   htmlToCanvasEditorRef,
   cartCount,
   handleAddToCart,
+  mockupId,
+  selectedColor,
 }) => {
   const [showPrintedImagesModal, setShowPrintedImagesModal] = useState<boolean>(false)
   const editAreaContainerRef = useRef<HTMLDivElement>(null)
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null)
   const [selectingType, setSelectingType] = useState<TSelectingType>(null)
-  const {
-    forZoom: { ref: refForZoom },
-    state: { scale },
-    handleSetElementState,
-  } = useElementControl(crypto.randomUUID(), { maxZoom, minZoom })
+  const { collectMockupVisualStates } = useVisualStatesCollector()
+  // const {
+  //   forZoom: { ref: refForZoom },
+  //   state: { scale },
+  //   handleSetElementState,
+  // } = useElementControl(crypto.randomUUID(), { maxZoom, minZoom })
 
   const {
     printAreaRef,
@@ -121,29 +124,29 @@ const EditArea: React.FC<EditAreaProps> = ({
     }
   }
 
-  const handlePickProductImage = (e: React.MouseEvent) => {
-    if (editingProduct) {
-      const target = e.target as HTMLElement
-      if (target.classList.contains('NAME-product-image')) {
-        e.stopPropagation()
-        handleUpdateSelectedElementId(editingProduct.id, 'product-image')
-      }
-    }
-  }
+  // const handlePickProductImage = (e: React.MouseEvent) => {
+  //   if (editingProduct) {
+  //     const target = e.target as HTMLElement
+  //     if (target.classList.contains('NAME-product-image')) {
+  //       e.stopPropagation()
+  //       handleUpdateSelectedElementId(editingProduct.id, 'product-image')
+  //     }
+  //   }
+  // }
 
-  const listenSubmitEleProps = (elementId: string | null, scale?: number) => {
-    if (elementId === selectedElementId && selectingType === 'product-image') {
-      const root = editAreaContainerRef.current
-      if (root) {
-        const productImage = root.querySelector<HTMLDivElement>(`.NAME-product-image`)
-        if (productImage) {
-          if (scale) {
-            handleSetElementState(undefined, undefined, scale)
-          }
-        }
-      }
-    }
-  }
+  // const listenSubmitEleProps = (elementId: string | null, scale?: number) => {
+  //   if (elementId === selectedElementId && selectingType === 'product-image') {
+  //     const root = editAreaContainerRef.current
+  //     if (root) {
+  //       const productImage = root.querySelector<HTMLDivElement>(`.NAME-product-image`)
+  //       if (productImage) {
+  //         if (scale) {
+  //           handleSetElementState(undefined, undefined, scale)
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
 
   const beforeAddToCart = () => {
     if (checkIfAnyElementOutOfBounds()) {
@@ -152,16 +155,17 @@ const EditArea: React.FC<EditAreaProps> = ({
     }
     cancelSelectingElement()
     setTimeout(() => {
-      handleAddToCart()
+      // Thu thập visual states của tất cả elements
+      handleAddToCart(collectMockupVisualStates(htmlToCanvasEditorRef.current || undefined))
     }, 0)
   }
 
-  useEffect(() => {
-    eventEmitter.on(EInternalEvents.SUBMIT_PRODUCT_IMAGE_ELE_PROPS, listenSubmitEleProps)
-    return () => {
-      eventEmitter.off(EInternalEvents.SUBMIT_PRODUCT_IMAGE_ELE_PROPS, listenSubmitEleProps)
-    }
-  }, [selectedElementId, selectingType])
+  // useEffect(() => {
+  //   eventEmitter.on(EInternalEvents.SUBMIT_PRODUCT_IMAGE_ELE_PROPS, listenSubmitEleProps)
+  //   return () => {
+  //     eventEmitter.off(EInternalEvents.SUBMIT_PRODUCT_IMAGE_ELE_PROPS, listenSubmitEleProps)
+  //   }
+  // }, [selectedElementId, selectingType])
 
   useEffect(() => {
     eventEmitter.on(EInternalEvents.CLICK_ON_PAGE, listenClickOnPageEvent)
@@ -233,19 +237,12 @@ const EditArea: React.FC<EditAreaProps> = ({
         <div
           ref={htmlToCanvasEditorRef}
           data-edit-container="true"
-          className="relative z-0 w-full h-fit py-2 px-2 max-h-[500px] overflow-hidden"
+          className="NAME-canvas-editor relative z-0 w-full h-fit py-2 px-2 max-h-[500px] overflow-hidden"
         >
           <img
-            ref={(node) => {
-              refForZoom.current = node
-            }}
-            style={{
-              transform: `scale(${scale})`,
-            }}
             src={editingProduct?.url}
             alt={editingProduct?.name}
             className="NAME-product-image touch-none w-full h-full max-h-[calc(500px-8px)] object-contain"
-            onClick={handlePickProductImage}
           />
 
           {/* Print Area Overlay */}
@@ -253,46 +250,53 @@ const EditArea: React.FC<EditAreaProps> = ({
             overlayRef={overlayRef}
             printAreaRef={printAreaRef}
             isOutOfBounds={isOutOfBounds}
+            selectedColor={selectedColor}
           />
 
           <div className="absolute z-20 top-0 left-0 w-full h-full">
             {/* Text Elements */}
-            {textElements.map((textEl) => (
-              <TextElement
-                key={textEl.id}
-                element={textEl}
-                onRemoveElement={handleRemoveText}
-                onUpdateSelectedElementId={(id) => handleUpdateSelectedElementId(id, 'text')}
-                selectedElementId={selectedElementId}
-                canvasAreaRef={htmlToCanvasEditorRef}
-              />
-            ))}
+            {textElements.length > 0 &&
+              textElements.map((textEl) => (
+                <TextElement
+                  key={textEl.id}
+                  element={textEl}
+                  onRemoveElement={handleRemoveText}
+                  onUpdateSelectedElementId={(id) => handleUpdateSelectedElementId(id, 'text')}
+                  selectedElementId={selectedElementId}
+                  canvasAreaRef={htmlToCanvasEditorRef}
+                  mountType={mockupId ? 'from-saved' : 'new'}
+                />
+              ))}
 
             {/* Sticker Elements */}
-            {stickerElements.map((sticker) => (
-              <StickerElement
-                key={sticker.id}
-                element={sticker}
-                onRemoveElement={handleRemoveSticker}
-                onUpdateSelectedElementId={(id) => handleUpdateSelectedElementId(id, 'sticker')}
-                selectedElementId={selectedElementId}
-                canvasAreaRef={htmlToCanvasEditorRef}
-              />
-            ))}
+            {stickerElements.length > 0 &&
+              stickerElements.map((sticker) => (
+                <StickerElement
+                  key={sticker.id}
+                  element={sticker}
+                  onRemoveElement={handleRemoveSticker}
+                  onUpdateSelectedElementId={(id) => handleUpdateSelectedElementId(id, 'sticker')}
+                  selectedElementId={selectedElementId}
+                  canvasAreaRef={htmlToCanvasEditorRef}
+                  mountType={mockupId ? 'from-saved' : 'new'}
+                />
+              ))}
 
             {/* Printed Image Elements */}
-            {printedImageElements.map((img) => (
-              <PrintedImageElement
-                key={img.id}
-                element={img}
-                onRemoveElement={handleRemovePrintedImage}
-                onUpdateSelectedElementId={(id) =>
-                  handleUpdateSelectedElementId(id, 'printed-image')
-                }
-                selectedElementId={selectedElementId}
-                canvasAreaRef={htmlToCanvasEditorRef}
-              />
-            ))}
+            {printedImageElements.length > 0 &&
+              printedImageElements.map((img) => (
+                <PrintedImageElement
+                  key={img.id}
+                  element={img}
+                  onRemoveElement={handleRemovePrintedImage}
+                  onUpdateSelectedElementId={(id) =>
+                    handleUpdateSelectedElementId(id, 'printed-image')
+                  }
+                  selectedElementId={selectedElementId}
+                  canvasAreaRef={htmlToCanvasEditorRef}
+                  mountType={mockupId ? 'from-saved' : 'new'}
+                />
+              ))}
           </div>
         </div>
       </div>
@@ -305,8 +309,6 @@ const EditArea: React.FC<EditAreaProps> = ({
             <StickerElementMenu elementId={selectedElementId} />
           ) : selectingType === 'printed-image' ? (
             <PrintedImageElementMenu elementId={selectedElementId} />
-          ) : selectingType === 'product-image' ? (
-            <ProductImageElementMenu elementId={selectedElementId} />
           ) : (
             <></>
           )}

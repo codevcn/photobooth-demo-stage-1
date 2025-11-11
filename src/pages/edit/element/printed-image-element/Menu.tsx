@@ -1,8 +1,8 @@
 import { useGlobalContext } from '@/context/global-context'
-import { ELEMENT_ZINDEX_STEP } from '@/utils/contants'
+import { getInitialContants } from '@/utils/contants'
 import { EInternalEvents } from '@/utils/enums'
 import { eventEmitter } from '@/utils/events'
-import { TMenuState } from '@/utils/types'
+import { TElementType, TPrintedImageVisualState } from '@/utils/types'
 import {
   RefreshCw,
   Move,
@@ -84,9 +84,21 @@ export const PrintedImageElementMenu = ({ elementId }: PrintedImageMenuProps) =>
 
   const onClickButton = (type: TPropertyType) => {
     if (type === 'zindex-down') {
-      handleChangeProperties(undefined, undefined, undefined, undefined, -ELEMENT_ZINDEX_STEP)
+      handleChangeProperties(
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        -getInitialContants<number>('ELEMENT_ZINDEX_STEP')
+      )
     } else if (type === 'zindex-up') {
-      handleChangeProperties(undefined, undefined, undefined, undefined, ELEMENT_ZINDEX_STEP)
+      handleChangeProperties(
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        getInitialContants<number>('ELEMENT_ZINDEX_STEP')
+      )
     }
   }
 
@@ -108,10 +120,11 @@ export const PrintedImageElementMenu = ({ elementId }: PrintedImageMenuProps) =>
     )
   }
 
-  const listenElementProps = (idOfElement: string | null) => {
-    if (elementId !== idOfElement) return
-    const dataset = JSON.parse(pickedElementRoot?.getAttribute('data-element-state') || '{}')
-    const { scale, angle, posX, posY } = dataset as TMenuState
+  const listenElementProps = (idOfElement: string | null, type: TElementType) => {
+    if (type !== 'printed-image' || elementId !== idOfElement) return
+    const dataset = JSON.parse(pickedElementRoot?.getAttribute('data-visual-state') || '{}')
+    const { scale, angle, position } = dataset as TPrintedImageVisualState
+    const { x: posX, y: posY } = position || {}
     const menuSection = menuRef.current
     if (scale) {
       const scaleInput = menuSection?.querySelector<HTMLInputElement>('.NAME-form-scale input')
@@ -136,7 +149,7 @@ export const PrintedImageElementMenu = ({ elementId }: PrintedImageMenuProps) =>
   }
 
   useEffect(() => {
-    listenElementProps(elementId)
+    listenElementProps(elementId, 'printed-image')
   }, [elementId])
 
   useEffect(() => {
@@ -185,15 +198,41 @@ export const PrintedImageElementMenu = ({ elementId }: PrintedImageMenuProps) =>
             onClick={() => onClickButton('zindex-up')}
             className="bg-white border-2 grow text-pink-cl border-pink-cl rounded px-1.5 py-1 flex gap-0.5 items-center justify-center"
           >
-            <span className="text-inherit text-base font-bold">Lên</span>
-            {/* <ChevronUp size={20} className="flex text-inherit" strokeWidth={3} /> */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="lucide lucide-arrow-up-icon lucide-arrow-up"
+            >
+              <path d="m5 12 7-7 7 7" />
+              <path d="M12 19V5" />
+            </svg>
           </button>
           <button
             onClick={() => onClickButton('zindex-down')}
             className="bg-white border-2 grow text-pink-cl border-pink-cl rounded px-1.5 py-1 flex gap-0.5 items-center justify-center"
           >
-            <span className="text-inherit text-base font-bold">Xuống</span>
-            {/* <ChevronDown size={20} className="flex text-inherit" strokeWidth={3} /> */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="lucide lucide-arrow-down-icon lucide-arrow-down"
+            >
+              <path d="M12 5v14" />
+              <path d="m19 12-7 7-7-7" />
+            </svg>
           </button>
         </div>
       </div>

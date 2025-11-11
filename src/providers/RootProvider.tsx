@@ -1,10 +1,9 @@
 import { EditedImageContext, GlobalContext, ProductImageContext } from '@/context/global-context'
-import { VisualStateManager } from '@/managers/visual-states.manager'
 import { EInternalEvents } from '@/utils/enums'
 import { eventEmitter } from '@/utils/events'
 import { generateSessionId } from '@/utils/helpers'
 import { TEditedImage, TElementType, TGlobalContextValue, TProductImage } from '@/utils/types'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 type TGlobalState = Omit<TGlobalContextValue, 'visualStatesManager'>
 
@@ -16,7 +15,6 @@ export const AppRootProvider = ({ children }: { children: React.ReactNode }) => 
     elementType: null,
     sessionId: generateSessionId(),
   })
-  const visualStatesManager = useRef<VisualStateManager>(new VisualStateManager())
 
   const clearAllEditedImages = () => {
     setEditedImages([])
@@ -34,12 +32,7 @@ export const AppRootProvider = ({ children }: { children: React.ReactNode }) => 
   }, [])
 
   return (
-    <GlobalContext.Provider
-      value={{
-        ...globalState,
-        visualStatesManager: visualStatesManager.current,
-      }}
-    >
+    <GlobalContext.Provider value={globalState}>
       <EditedImageContext.Provider value={{ editedImages, setEditedImages, clearAllEditedImages }}>
         <ProductImageContext.Provider value={{ productImages, setProductImages }}>
           {children}

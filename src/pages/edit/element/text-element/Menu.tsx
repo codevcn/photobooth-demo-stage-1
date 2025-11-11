@@ -2,7 +2,7 @@ import useGoogleFont from '@/hooks/use-load-font'
 import { useGlobalContext } from '@/context/global-context'
 import { EInternalEvents } from '@/utils/enums'
 import { eventEmitter } from '@/utils/events'
-import { TTextElement } from '@/utils/types'
+import { TElementType, TTextVisualState } from '@/utils/types'
 import {
   RefreshCw,
   Move,
@@ -17,10 +17,10 @@ import {
   // ChevronDown,
 } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { HexColorPicker, } from 'react-colorful'
+import { HexColorPicker } from 'react-colorful'
 import { createPortal } from 'react-dom'
-import { ELEMENT_ZINDEX_STEP } from '@/utils/contants'
 import { useDebounce } from '@/hooks/use-debounce'
+import { getInitialContants } from '@/utils/contants'
 
 type TPropertyType = 'font-size' | 'angle' | 'posXY' | 'zindex-up' | 'zindex-down'
 
@@ -42,10 +42,10 @@ const ColorPickerModal = ({ show, onHideShow, onColorChange }: ColorPickerModalP
     const tempElement = document.createElement('div')
     tempElement.style.color = color
     document.body.appendChild(tempElement)
-    
+
     const computedColor = window.getComputedStyle(tempElement).color
     document.body.removeChild(tempElement)
-    
+
     // Convert rgb/rgba sang hex
     const match = computedColor.match(/\d+/g)
     if (match && match.length >= 3) {
@@ -54,7 +54,7 @@ const ColorPickerModal = ({ show, onHideShow, onColorChange }: ColorPickerModalP
       const b = parseInt(match[2]).toString(16).padStart(2, '0')
       return `#${r}${g}${b}`
     }
-    
+
     return color
   }
 
@@ -171,14 +171,14 @@ const localFonts = [
 interface TextFontPickerProps {
   show: boolean
   onHideShow: (show: boolean) => void
+  onSelectFont: (fontFamily: string) => void
 }
 
-const TextFontPicker = ({ show, onHideShow }: TextFontPickerProps) => {
+const TextFontPicker = ({ show, onHideShow, onSelectFont }: TextFontPickerProps) => {
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
   const { loadFont } = useGoogleFont()
   const [searchKeyword, setSearchKeyword] = useState<string>('')
   const [loadedGoogleFonts, setLoadedGoogleFonts] = useState<string[]>([])
-  const { pickedElementRoot, elementType } = useGlobalContext()
 
   const searchFont = (keyword: string) => {
     if (!keyword) return
@@ -201,12 +201,7 @@ const TextFontPicker = ({ show, onHideShow }: TextFontPickerProps) => {
   }
 
   const handleSelectFont = (fontFamily: string) => {
-    if (pickedElementRoot && elementType === 'text') {
-      const textElement = pickedElementRoot.querySelector<HTMLElement>('.NAME-element-main-box')
-      if (textElement) {
-        textElement.style.fontFamily = `'${fontFamily}', sans-serif`
-      }
-    }
+    onSelectFont(fontFamily)
     onHideShow(false)
   }
 
@@ -288,13 +283,14 @@ const TextFontPicker = ({ show, onHideShow }: TextFontPickerProps) => {
 
 interface PrintedImageMenuProps {
   elementId: string
-  textElements: TTextElement[]
+  textElements: TTextVisualState[]
 }
 
 export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuProps) => {
   const [showColorPicker, setShowColorPicker] = useState<boolean>(false)
   const [showTextFontPicker, setShowTextFontPicker] = useState<boolean>(false)
-  const menuSectionRef = useRef<HTMLDivElement | null>(null)
+  const { pickedElementRoot } = useGlobalContext()
+  const menuRef = useRef<HTMLDivElement | null>(null)
 
   const validateInputsPositiveNumber = (
     inputs: HTMLInputElement[],
@@ -316,7 +312,8 @@ export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuPro
     posY?: number,
     zindex?: number,
     color?: string,
-    content?: string
+    content?: string,
+    fontFamily?: string
   ) => {
     eventEmitter.emit(
       EInternalEvents.SUBMIT_TEXT_ELE_PROPS,
@@ -327,7 +324,8 @@ export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuPro
       posY,
       zindex,
       color,
-      content
+      content,
+      fontFamily
     )
   }
 
@@ -392,7 +390,7 @@ export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuPro
   const initContentField = () => {
     const textElement = textElements.find((el) => el.id === elementId)
     if (textElement) {
-      const contentInput = menuSectionRef.current?.querySelector<HTMLInputElement>(
+      const contentInput = menuRef.current?.querySelector<HTMLInputElement>(
         '.NAME-form-content input'
       )
       if (contentInput) {
@@ -413,24 +411,85 @@ export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuPro
     )
   }
 
+  const handleSelectFont = (fontFamily: string) => {
+    handleChangeProperties(
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      fontFamily
+    )
+  }
+
   const onClickButton = (type: TPropertyType) => {
     if (type === 'zindex-down') {
-      handleChangeProperties(undefined, undefined, undefined, undefined, -ELEMENT_ZINDEX_STEP)
+      handleChangeProperties(
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        -getInitialContants<number>('ELEMENT_ZINDEX_STEP')
+      )
     } else if (type === 'zindex-up') {
-      handleChangeProperties(undefined, undefined, undefined, undefined, ELEMENT_ZINDEX_STEP)
+      handleChangeProperties(
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        getInitialContants<number>('ELEMENT_ZINDEX_STEP')
+      )
+    }
+  }
+
+  const listenElementProps = (idOfElement: string | null, type: TElementType) => {
+    if (type !== 'text' || elementId !== idOfElement) return
+    const dataset = JSON.parse(pickedElementRoot?.getAttribute('data-visual-state') || '{}')
+    const { fontSize, angle, position } = dataset as TTextVisualState
+    const { x: posX, y: posY } = position || {}
+    const menuSection = menuRef.current
+    if (fontSize) {
+      const fontSizeInput = menuSection?.querySelector<HTMLInputElement>(
+        '.NAME-form-fontSize input'
+      )
+      if (fontSizeInput) fontSizeInput.value = fontSize.toFixed(0)
+    }
+    if (angle || angle === 0) {
+      const angleInput = menuSection?.querySelector<HTMLInputElement>('.NAME-form-angle input')
+      if (angleInput) angleInput.value = angle.toFixed(0)
+    }
+    if (posX || posX === 0) {
+      const posXYInputs = menuSection?.querySelectorAll<HTMLInputElement>(
+        '.NAME-form-position input'
+      )
+      if (posXYInputs) posXYInputs[0].value = posX.toFixed(0)
+    }
+    if (posY || posY === 0) {
+      const posXYInputs = menuSection?.querySelectorAll<HTMLInputElement>(
+        '.NAME-form-position input'
+      )
+      if (posXYInputs) posXYInputs[1].value = posY.toFixed(0)
     }
   }
 
   useEffect(() => {
+    listenElementProps(elementId, 'text')
+  }, [elementId])
+
+  useEffect(() => {
     eventEmitter.on(EInternalEvents.CLICK_ON_PAGE, listenClickOnPage)
+    eventEmitter.on(EInternalEvents.SYNC_ELEMENT_PROPS, listenElementProps)
     initContentField()
     return () => {
       eventEmitter.off(EInternalEvents.CLICK_ON_PAGE, listenClickOnPage)
+      eventEmitter.off(EInternalEvents.SYNC_ELEMENT_PROPS, listenElementProps)
     }
   }, [])
 
   return (
-    <div ref={menuSectionRef} className="NAME-menu-section grid grid-cols-2 gap-x-1 gap-y-2">
+    <div ref={menuRef} className="NAME-menu-section grid grid-cols-2 gap-x-1 gap-y-2">
       <div className="NAME-form-group NAME-form-content col-span-2 flex items-center bg-pink-cl rounded px-1 py-1 shadow w-full">
         <div className="min-w-[22px]">
           <Pencil size={20} className="text-white" strokeWidth={3} />
@@ -547,7 +606,11 @@ export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuPro
           </div>
         </div>
         {createPortal(
-          <TextFontPicker show={showTextFontPicker} onHideShow={setShowTextFontPicker} />,
+          <TextFontPicker
+            show={showTextFontPicker}
+            onHideShow={setShowTextFontPicker}
+            onSelectFont={handleSelectFont}
+          />,
           document.body
         )}
       </div>

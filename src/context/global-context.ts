@@ -10,8 +10,6 @@ export const GlobalContext = createContext<TGlobalContextValue>({
   pickedElementRoot: null,
   elementType: null,
   sessionId: null,
-  elementVisualStates: {},
-  updateElementVisualStates: () => {},
 })
 
 export const useGlobalContext = () => useContext(GlobalContext)

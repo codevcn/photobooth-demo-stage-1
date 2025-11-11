@@ -1,21 +1,22 @@
-import { TTextElement } from '@/utils/types'
+import { TTextVisualState } from '@/utils/types'
 import { X, RotateCw, Scaling } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 import { eventEmitter } from '@/utils/events'
 import { EInternalEvents } from '@/utils/enums'
-import { useElementControl } from '@/hooks/element/use-element-control'
 import { useElementLayerContext } from '@/context/global-context'
 import { useTextElementControl } from '@/hooks/element/use-text-element-control'
+import { typeToObject } from '@/utils/helpers'
 
 const MAX_TEXT_FONT_SIZE: number = 1000
 const MIN_TEXT_FONT_SIZE: number = 5
 
 interface TextElementProps {
-  element: TTextElement
+  element: TTextVisualState
   onRemoveElement: (id: string) => void
   selectedElementId: string | null
   onUpdateSelectedElementId: (id: string | null) => void
   canvasAreaRef: React.MutableRefObject<HTMLDivElement | null>
+  mountType: 'new' | 'from-saved'
 }
 
 export const TextElement = ({
@@ -24,22 +25,28 @@ export const TextElement = ({
   onUpdateSelectedElementId,
   selectedElementId,
   canvasAreaRef,
+  mountType,
 }: TextElementProps) => {
-  const { color: initialColor, text, id, fontSize: initialFontSize } = element
+  const { id } = element
   const isSelected = selectedElementId === id
   const {
     forPinch: { ref: refForPinch },
     forRotate: { ref: refForRotate, rotateButtonRef },
     forZoom: { ref: refForZoom, zoomButtonRef },
     forDrag: { ref: refForDrag },
-    state: { position, angle, zindex, fontSize, textColor, content },
+    state: { position, angle, zindex, fontSize, textColor, content, fontFamily, fontWeight },
     handleSetElementState,
   } = useTextElementControl(id, {
-    initialFontSize,
     maxFontSize: MAX_TEXT_FONT_SIZE,
     minFontSize: MIN_TEXT_FONT_SIZE,
-    initialColor,
-    initialContent: text,
+    position: element.position,
+    angle: element.angle,
+    fontSize: element.fontSize,
+    textColor: element.textColor,
+    content: element.content,
+    zindex: element.zindex,
+    fontFamily: element.fontFamily,
+    fontWeight: element.fontWeight,
   })
   const rootRef = useRef<HTMLElement | null>(null)
   const { addToElementLayers } = useElementLayerContext()
@@ -57,10 +64,21 @@ export const TextElement = ({
     posY?: number,
     zindex?: number,
     textColor?: string,
-    content?: string
+    content?: string,
+    fontFamily?: string
   ) => {
     if (elementId === id) {
-      handleSetElementState(posX, posY, undefined, angle, zindex, fontSize, textColor, content)
+      handleSetElementState(
+        posX,
+        posY,
+        undefined,
+        angle,
+        zindex,
+        fontSize,
+        textColor,
+        content,
+        fontFamily
+      )
     }
   }
 
@@ -85,6 +103,7 @@ export const TextElement = ({
   }
 
   const initElement = () => {
+    if (mountType === 'from-saved') return
     requestAnimationFrame(() => {
       const root = rootRef.current
       if (!root) return
@@ -103,6 +122,11 @@ export const TextElement = ({
     initElement()
     handleAddElementLayer()
   }, [])
+
+  useEffect(() => {
+    if (selectedElementId !== id) return
+    eventEmitter.emit(EInternalEvents.SYNC_ELEMENT_PROPS, id, 'text')
+  }, [fontSize, angle, position, selectedElementId, id])
 
   useEffect(() => {
     eventEmitter.on(EInternalEvents.SUBMIT_TEXT_ELE_PROPS, listenSubmitEleProps)
@@ -128,8 +152,21 @@ export const TextElement = ({
       }}
       className={`${
         isSelected ? 'shadow-[0_0_0_2px_#d91670]' : ''
-      } NAME-root-element absolute h-fit w-fit touch-none`}
+      } NAME-root-element NAME-element-type-text absolute h-fit w-fit touch-none`}
       onClick={pickElement}
+      data-visual-state={JSON.stringify(
+        typeToObject<TTextVisualState>({
+          id,
+          position,
+          angle,
+          zindex,
+          fontSize,
+          textColor,
+          content,
+          fontFamily,
+          fontWeight,
+        })
+      )}
     >
       <div
         className={`NAME-element-main-box relative origin-center text-inherit max-w-[200px] max-h-[300px]`}
@@ -138,7 +175,9 @@ export const TextElement = ({
           <p
             style={{
               fontSize: `${fontSize}px`,
-              color: textColor || initialColor,
+              color: textColor,
+              fontFamily,
+              fontWeight,
             }}
             className="NAME-displayed-text-content font-bold whitespace-nowrap select-none"
           >
@@ -148,7 +187,7 @@ export const TextElement = ({
         <div
           className={`${
             isSelected ? 'block' : 'hidden'
-          } NAME-rotate-box absolute -top-7 -left-7 z-20`}
+          } NAME-rotate-box absolute -top-7 -left-7 z-[999]`}
         >
           <button
             ref={rotateButtonRef}
@@ -160,7 +199,7 @@ export const TextElement = ({
         <div
           className={`${
             isSelected ? 'block' : 'hidden'
-          } NAME-remove-box absolute -bottom-7 -right-7 z-20`}
+          } NAME-remove-box absolute -bottom-7 -right-7 z-[999]`}
         >
           <button
             ref={zoomButtonRef}
@@ -173,7 +212,7 @@ export const TextElement = ({
         <div
           className={`${
             isSelected ? 'block' : 'hidden'
-          } NAME-remove-box absolute -top-7 -right-7 z-20`}
+          } NAME-remove-box absolute -top-7 -right-7 z-[999]`}
         >
           <button
             onClick={() => onRemoveElement(id)}

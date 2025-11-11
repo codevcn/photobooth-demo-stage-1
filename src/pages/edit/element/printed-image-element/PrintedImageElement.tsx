@@ -1,21 +1,22 @@
-import { TPrintedImage, TMenuState } from '@/utils/types'
+import { TPrintedImageVisualState } from '@/utils/types'
 import { X, RotateCw, Scaling } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 import { eventEmitter } from '@/utils/events'
 import { EInternalEvents } from '@/utils/enums'
 import { useElementControl } from '@/hooks/element/use-element-control'
-import { getNaturalSizeOfImage } from '@/utils/helpers'
+import { getNaturalSizeOfImage, typeToObject } from '@/utils/helpers'
 import { useElementLayerContext } from '@/context/global-context'
 
 const MAX_ZOOM: number = 3
 const MIN_ZOOM: number = 0.3
 
 interface PrintedImageElementProps {
-  element: TPrintedImage
+  element: TPrintedImageVisualState
   onRemoveElement: (id: string) => void
   selectedElementId: string | null
   onUpdateSelectedElementId: (id: string | null) => void
   canvasAreaRef: React.MutableRefObject<HTMLDivElement | null>
+  mountType: 'new' | 'from-saved'
 }
 
 export const PrintedImageElement = ({
@@ -24,8 +25,9 @@ export const PrintedImageElement = ({
   onUpdateSelectedElementId,
   selectedElementId,
   canvasAreaRef,
+  mountType,
 }: PrintedImageElementProps) => {
-  const { url, id, x, y } = element
+  const { url, id } = element
   const isSelected = selectedElementId === id
   const {
     forPinch: { ref: refForPinch },
@@ -34,12 +36,15 @@ export const PrintedImageElement = ({
     forDrag: { ref: refForDrag },
     state: { position, angle, scale, zindex },
     handleSetElementState,
-  } = useElementControl(id, 'printedImage', {
-    initialPosX: x,
-    initialPosY: y,
+  } = useElementControl(id, {
     maxZoom: MAX_ZOOM,
     minZoom: MIN_ZOOM,
+    position: element.position,
+    scale: element.scale,
+    angle: element.angle,
+    zindex: element.zindex,
   })
+  const { x, y } = position
   const rootRef = useRef<HTMLElement | null>(null)
   const { addToElementLayers } = useElementLayerContext()
 
@@ -99,18 +104,21 @@ export const PrintedImageElement = ({
         }
         display.src = url
       },
-      (error) => {}
+      () => {}
     )
   }
 
   const initElement = () => {
+    if (mountType === 'from-saved') return
     requestAnimationFrame(() => {
-      const root = rootRef.current
-      if (!root) return
-      const editContainer = canvasAreaRef.current
-      if (!editContainer) return
-      moveElementIntoCenter(root, editContainer)
-      initElementDisplaySize(root, editContainer)
+      requestAnimationFrame(() => {
+        const root = rootRef.current
+        if (!root) return
+        const editContainer = canvasAreaRef.current
+        if (!editContainer) return
+        moveElementIntoCenter(root, editContainer)
+        initElementDisplaySize(root, editContainer)
+      })
     })
   }
 
@@ -120,7 +128,7 @@ export const PrintedImageElement = ({
 
   useEffect(() => {
     if (selectedElementId !== id) return
-    eventEmitter.emit(EInternalEvents.SYNC_ELEMENT_PROPS, id)
+    eventEmitter.emit(EInternalEvents.SYNC_ELEMENT_PROPS, id, 'printed-image')
   }, [scale, angle, position, selectedElementId, id])
 
   useEffect(() => {
@@ -152,14 +160,21 @@ export const PrintedImageElement = ({
       }}
       className={`${
         isSelected ? 'shadow-[0_0_0_2px_#d91670]' : ''
-      } NAME-root-element absolute h-fit w-fit touch-none bg-pink-400/20`}
+      } NAME-root-element NAME-element-type-printed-image absolute h-fit w-fit touch-none bg-pink-400/20`}
       onClick={pickElement}
-      data-element-state={JSON.stringify({
-        posX: position.x,
-        posY: position.y,
-        angle,
-        scale,
-      } as TMenuState)}
+      data-visual-state={JSON.stringify(
+        typeToObject<TPrintedImageVisualState>({
+          id,
+          url,
+          position: {
+            x: position.x || x,
+            y: position.y || y,
+          },
+          scale,
+          angle,
+          zindex,
+        })
+      )}
     >
       <div
         className={`NAME-element-main-box select-none relative origin-center max-w-[200px] max-h-[300px]`}
@@ -170,7 +185,7 @@ export const PrintedImageElement = ({
         <div
           className={`${
             isSelected ? 'block' : 'hidden'
-          } NAME-rotate-box absolute -top-7 -left-7 z-20`}
+          } NAME-rotate-box absolute -top-7 -left-7 z-[999]`}
         >
           <button
             ref={rotateButtonRef}
@@ -182,7 +197,7 @@ export const PrintedImageElement = ({
         <div
           className={`${
             isSelected ? 'block' : 'hidden'
-          } NAME-remove-box absolute -bottom-7 -right-7 z-20`}
+          } NAME-remove-box absolute -bottom-7 -right-7 z-[999]`}
         >
           <button
             ref={zoomButtonRef}
@@ -195,7 +210,7 @@ export const PrintedImageElement = ({
         <div
           className={`${
             isSelected ? 'block' : 'hidden'
-          } NAME-remove-box absolute -top-7 -right-7 z-20`}
+          } NAME-remove-box absolute -top-7 -right-7 z-[999]`}
         >
           <button
             onClick={() => onRemoveElement(id)}

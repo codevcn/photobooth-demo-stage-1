@@ -27,14 +27,11 @@ interface IInternalEvents {
     posY?: number,
     zindex?: number,
     color?: string,
-    content?: string
-  ) => void
-  [EInternalEvents.SUBMIT_PRODUCT_IMAGE_ELE_PROPS]: (
-    elementId: string | null,
-    scale?: number
+    content?: string,
+    fontFamily?: string
   ) => void
   [EInternalEvents.PICK_ELEMENT]: (element: HTMLElement | null, elementType: TElementType) => void
-  [EInternalEvents.SYNC_ELEMENT_PROPS]: (elementId: string | null) => void
+  [EInternalEvents.SYNC_ELEMENT_PROPS]: (elementId: string | null, type: TElementType) => void
 }
 
 class EventEmitter<IEvents extends IInternalEvents> {

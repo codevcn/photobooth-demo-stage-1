@@ -1,5 +1,3 @@
-import { VisualStateManager } from '@/managers/visual-states.manager'
-
 export type IntersectSameFields<A, B> = {
   [K in keyof A & keyof B as A[K] extends B[K] ? (B[K] extends A[K] ? K : never) : never]: A[K]
 }
@@ -30,32 +28,9 @@ export type TProductImage = {
   }
 }
 
-export type TTextElement = {
-  id: string
-  text: string
-  x: number
-  y: number
-  fontSize: number
-  color: string
-  content: string
-}
-
-export type TStickerElement = {
-  id: string
-  path: string
-  x: number
-  y: number
-  height: number
-  width: number
-}
-
 export type TPrintedImage = {
   id: string
   url: string
-  x: number
-  y: number
-  width: number
-  height: number
 }
 
 export type TElementType = 'text' | 'sticker' | 'printed-image'
@@ -68,7 +43,6 @@ export type TGlobalContextValue = {
   pickedElementRoot: HTMLElement | null
   elementType: TElementType | null
   sessionId: string | null
-  visualStatesManager: VisualStateManager
 }
 
 export type TElementLayerContextValue = {
@@ -78,21 +52,11 @@ export type TElementLayerContextValue = {
   removeFromElementLayers: (elementId: string[]) => void
 }
 
-export type TMenuState = Partial<{
-  scale: number
-  angle: number
-  fontSize: number
-  posX: number
-  posY: number
-  textColor: string
-  textFont: string
-}>
-
 export type TDetectCollisionWithViewportEdgesResult = {
   collidedEdge: 'left' | 'right' | 'top' | 'bottom' | null
 }
 
-export type TProductInCart = {
+export type TProductInfo = {
   id: string
   color: {
     title: string
@@ -103,11 +67,7 @@ export type TProductInCart = {
 
 export type TSavedMockupData = {
   sessionId: string
-  productsInfo: (TProductInCart & {
-    mockupDataURLs: {
-      [key: string]: string
-    }
-  })[]
+  productsInCart: TProductInCart[]
 }
 
 export type TPaymentType = 'momo' | 'zalo' | 'cod'
@@ -117,6 +77,7 @@ export type TBrands = 'photoism'
 export type TUserInputImage = {
   url: string
   blob: Blob
+  isOriginalImageUrl?: boolean
 }
 
 export type TEditedImage = TPrintedImage
@@ -157,10 +118,37 @@ export type TElementVisualBaseState = {
   zindex: number
 }
 
-export type TTextVisualState = TElementVisualBaseState & {
+export type TTextVisualState = Omit<TElementVisualBaseState, 'scale'> & {
+  id: string
   fontSize: number
   textColor: string
   content: string
   fontFamily: string
   fontWeight: number
+}
+
+export type TStickerVisualState = TElementVisualBaseState & {
+  id: string
+  path: string
+}
+
+export type TPrintedImageVisualState = TElementVisualBaseState & {
+  id: string
+  url: string
+}
+
+export type TElementsVisualState = Partial<{
+  stickers: TStickerVisualState[]
+  printedImages: TPrintedImageVisualState[]
+  texts: TTextVisualState[]
+}>
+
+export type TMockupData = {
+  id: string
+  elementsVisualState: TElementsVisualState
+  dataURL: string
+}
+
+export type TProductInCart = TProductInfo & {
+  mockupDataList: TMockupData[]
 }

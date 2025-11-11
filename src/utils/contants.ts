@@ -1,3 +1,68 @@
-export const ELEMENT_ZINDEX_STEP: number = 10
-export const INITIAL_TEXT_FONT_SIZE: number = 24
-export const ROUND_ZOOMING_FIXED: number = 12
+type TInitialContentsType =
+  | 'ELEMENT_ZINDEX_STEP'
+  | 'ELEMENT_ZINDEX'
+  | 'ELEMENT_WIDTH'
+  | 'ELEMENT_HEIGHT'
+  | 'ELEMENT_X'
+  | 'ELEMENT_Y'
+  | 'ELEMENT_ROTATION'
+  | 'ELEMENT_ZOOM'
+  | 'ELEMENT_TEXT_FONT_SIZE'
+  | 'ELEMENT_TEXT_COLOR'
+  | 'ELEMENT_ROUND_ZOOMING_FIXED'
+  | 'ELEMENT_TEXT_FONT_WEIGHT'
+  | 'ELEMENT_TEXT_FONT_FAMILY'
+
+export const getInitialContants = <R>(type: TInitialContentsType): R => {
+  switch (type) {
+    case 'ELEMENT_ZINDEX_STEP':
+      return 10 as R
+    case 'ELEMENT_ZINDEX':
+      return 1 as R
+    case 'ELEMENT_WIDTH':
+      return 200 as R
+    case 'ELEMENT_HEIGHT':
+      return 200 as R
+    case 'ELEMENT_X':
+      return 0 as R
+    case 'ELEMENT_Y':
+      return 0 as R
+    case 'ELEMENT_ROTATION':
+      return 0 as R
+    case 'ELEMENT_ZOOM':
+      return 1 as R
+    case 'ELEMENT_TEXT_FONT_SIZE':
+      return 24 as R
+    case 'ELEMENT_TEXT_COLOR':
+      return '#000000' as R
+    case 'ELEMENT_ROUND_ZOOMING_FIXED':
+      return 12 as R
+    case 'ELEMENT_TEXT_FONT_WEIGHT':
+      return 400 as R
+    case 'ELEMENT_TEXT_FONT_FAMILY':
+      return 'Arial' as R
+    default:
+      return null as R
+  }
+}
+
+type TCommonContentsType =
+  | 'MAX_HEIGHT_CROP_DISPLAY'
+  | 'MAX_CROP_PREVIEWS_COUNT'
+  | 'MIN_CROP_SIZE_WIDTH'
+  | 'MIN_CROP_SIZE_HEIGHT'
+
+export const getCommonContants = <R>(type: TCommonContentsType): R => {
+  switch (type) {
+    case 'MAX_HEIGHT_CROP_DISPLAY':
+      return 250 as R
+    case 'MAX_CROP_PREVIEWS_COUNT':
+      return 6 as R
+    case 'MIN_CROP_SIZE_WIDTH':
+      return 50 as R
+    case 'MIN_CROP_SIZE_HEIGHT':
+      return 50 as R
+    default:
+      return null as R
+  }
+}

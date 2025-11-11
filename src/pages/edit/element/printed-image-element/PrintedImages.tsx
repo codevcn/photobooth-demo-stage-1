@@ -13,30 +13,19 @@ interface ImageProps {
 const Image = ({ img, index, imgsContainerRef, onAddImage }: ImageProps) => {
   const { url, id } = img
 
-  const handleAddImage = (e: React.MouseEvent<HTMLDivElement>) => {
-    const target = e.currentTarget
-    const imgInfo = target.getAttribute('data-img-info')
-    if (!imgInfo) return
-    const { naturalWidth, naturalHeight } = JSON.parse(imgInfo)
-    onAddImage({ ...img, width: naturalWidth, height: naturalHeight })
+  const handleAddImage = () => {
+    onAddImage({ ...img, id, url })
   }
 
   useEffect(() => {
     getNaturalSizeOfImage(
       url,
       (width, height) => {
-        const imgBox = imgsContainerRef.current?.querySelector<HTMLDivElement>(
-          `.NAME-image-box[data-img-box-id='${id}']`
+        const imgEle = imgsContainerRef.current?.querySelector<HTMLDivElement>(
+          `.NAME-image-box[data-img-box-id='${id}'] img`
         )
-        if (imgBox) {
-          imgBox.setAttribute(
-            'data-img-info',
-            JSON.stringify({ naturalWidth: width, naturalHeight: height })
-          )
-          const imgEle = imgBox.querySelector<HTMLImageElement>('img')
-          if (imgEle) {
-            imgEle.style.cssText = `width: ${width}px; aspect-ratio: ${width} / ${height};`
-          }
+        if (imgEle) {
+          imgEle.style.cssText = `width: ${width}px; aspect-ratio: ${width} / ${height};`
         }
       },
       (err) => {}
@@ -47,7 +36,6 @@ const Image = ({ img, index, imgsContainerRef, onAddImage }: ImageProps) => {
     <div
       onClick={handleAddImage}
       className="NAME-image-box cursor-pointer relative w-fit h-fit rounded-xl overflow-hidden border-2 border-border active:border-primary hover:border-primary transition-colors group"
-      data-img-info=""
       data-img-box-id={id}
     >
       <img

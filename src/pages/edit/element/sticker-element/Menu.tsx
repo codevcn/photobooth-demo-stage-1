@@ -1,8 +1,8 @@
 import { useGlobalContext } from '@/context/global-context'
-import { ELEMENT_ZINDEX_STEP } from '@/utils/contants'
+import { getInitialContants } from '@/utils/contants'
 import { EInternalEvents } from '@/utils/enums'
 import { eventEmitter } from '@/utils/events'
-import { TMenuState } from '@/utils/types'
+import { TElementType, TStickerVisualState } from '@/utils/types'
 import {
   RefreshCw,
   Move,
@@ -100,10 +100,11 @@ export const StickerElementMenu = ({ elementId }: Sticker) => {
     )
   }
 
-  const listenElementProps = (idOfElement: string | null) => {
-    if (elementId !== idOfElement) return
-    const dataset = JSON.parse(pickedElementRoot?.getAttribute('data-element-state') || '{}')
-    const { scale, angle, posX, posY } = dataset as TMenuState
+  const listenElementProps = (idOfElement: string | null, type: TElementType) => {
+    if (type !== 'sticker' || elementId !== idOfElement) return
+    const dataset = JSON.parse(pickedElementRoot?.getAttribute('data-visual-state') || '{}')
+    const { scale, angle, position } = dataset as TStickerVisualState
+    const { x: posX, y: posY } = position || {}
     const menuSection = menuRef.current
     if (scale) {
       const scaleInput = menuSection?.querySelector<HTMLInputElement>('.NAME-form-scale input')
@@ -129,11 +130,27 @@ export const StickerElementMenu = ({ elementId }: Sticker) => {
 
   const onClickButton = (type: TPropertyType) => {
     if (type === 'zindex-down') {
-      handleChangeProperties(undefined, undefined, undefined, undefined, -ELEMENT_ZINDEX_STEP)
+      handleChangeProperties(
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        -getInitialContants<number>('ELEMENT_ZINDEX_STEP')
+      )
     } else if (type === 'zindex-up') {
-      handleChangeProperties(undefined, undefined, undefined, undefined, ELEMENT_ZINDEX_STEP)
+      handleChangeProperties(
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        getInitialContants<number>('ELEMENT_ZINDEX_STEP')
+      )
     }
   }
+
+  useEffect(() => {
+    listenElementProps(elementId, 'sticker')
+  }, [elementId])
 
   useEffect(() => {
     eventEmitter.on(EInternalEvents.SYNC_ELEMENT_PROPS, listenElementProps)

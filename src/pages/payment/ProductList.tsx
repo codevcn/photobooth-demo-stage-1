@@ -1,0 +1,150 @@
+import { Minus, Plus, X } from 'lucide-react'
+import { formatNumberWithCommas } from '@/utils/helpers'
+import { TElementsVisualState } from '@/utils/types'
+
+type TProductItem = {
+  id: string
+  name: string
+  size: string
+  color: {
+    title: string
+    value: string
+  }
+  quantity: number
+  originalPrice: number
+  discountedPrice?: number
+  mockupData: {
+    id: string
+    image: string
+  }
+  elementsVisualState: TElementsVisualState
+}
+
+interface ProductListProps {
+  cartItems: TProductItem[]
+  onUpdateQuantity: (mockupDataId: string, delta: number) => void
+  onRemoveProduct: (mockupDataId: string, productId: string) => void
+  onShowProductImage: (imageUrl: string) => void
+  onEditMockup: (mockupDataId: string) => void
+}
+
+export const ProductList: React.FC<ProductListProps> = ({
+  cartItems,
+  onUpdateQuantity,
+  onRemoveProduct,
+  onShowProductImage,
+  onEditMockup,
+}) => {
+  return (
+    <section className="flex flex-col gap-2 mt-4">
+      {cartItems.map(
+        ({ id, mockupData, name, size, color, originalPrice, discountedPrice, quantity }) => (
+          <div
+            key={mockupData.id}
+            className="bg-white rounded-2xl shadow-sm py-4 px-2 transition-all duration-200"
+          >
+            <div className="flex gap-3">
+              {/* Product Image */}
+              <div
+                className="flex-shrink-0 cursor-pointer"
+                onClick={() => onShowProductImage(mockupData.image)}
+              >
+                <img
+                  src={mockupData.image}
+                  alt={name}
+                  className="w-[88px] h-20 rounded-xl object-contain"
+                />
+              </div>
+
+              {/* Product Details */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <h3 className="font-semibold text-gray-900 text-sm leading-tight">{name}</h3>
+                  <button
+                    onClick={() => onEditMockup(mockupData.id)}
+                    className="flex-shrink-0 p-1.5 text-gray-600 bg-gray-200 transition-colors rounded-lg active:scale-95"
+                    aria-label="Chỉnh sửa sản phẩm"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="lucide lucide-pen-icon lucide-pen"
+                    >
+                      <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
+                    </svg>
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
+                  <span className="bg-gray-100 px-2 py-1 rounded-md">{size}</span>
+                  <span className="bg-gray-100 px-2 py-1 rounded-md">{color.title}</span>
+                </div>
+
+                {/* Price and Quantity */}
+                <div className="flex flex-col gap-3">
+                  {discountedPrice ? (
+                    <div className="flex flex-col">
+                      <span className="text-xs text-gray-400 line-through">
+                        <span>{formatNumberWithCommas(originalPrice)}</span>
+                        <span> VND</span>
+                      </span>
+                      <span className="text-lg font-bold text-primary">
+                        <span>{formatNumberWithCommas(discountedPrice)}</span>
+                        <span> VND</span>
+                      </span>
+                    </div>
+                  ) : (
+                    <div>
+                      <span className="text-lg font-bold text-primary">
+                        <span>{formatNumberWithCommas(originalPrice)}</span>
+                        <span> VND</span>
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Quantity Controls */}
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 bg-gray-100 rounded-full p-1">
+                      <button
+                        onClick={() => onUpdateQuantity(mockupData.id, -1)}
+                        className="w-8 h-8 flex items-center justify-center rounded-full bg-white shadow-sm active:scale-75 transition-transform"
+                        aria-label="Giảm số lượng"
+                      >
+                        <Minus size={14} className="text-gray-600" />
+                      </button>
+                      <span className="w-8 text-center font-semibold text-sm">{quantity}</span>
+                      <button
+                        onClick={() => onUpdateQuantity(mockupData.id, 1)}
+                        className="w-8 h-8 flex items-center justify-center rounded-full bg-white shadow-sm active:scale-75 transition-transform"
+                        aria-label="Tăng số lượng"
+                      >
+                        <Plus size={14} className="text-gray-600" />
+                      </button>
+                    </div>
+                    <div>
+                      <button
+                        onClick={() => onRemoveProduct(mockupData.id, id)}
+                        className="p-1 rounded-full bg-red-600 hover:scale-90 transition"
+                      >
+                        <X size={22} strokeWidth={3} className="text-white" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      )}
+    </section>
+  )
+}
+
+export type { TProductItem }

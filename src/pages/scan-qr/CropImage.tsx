@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import ReactCrop, { type Crop } from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
 import { Loader2, X } from 'lucide-react'
@@ -11,15 +11,13 @@ import { toast } from 'react-toastify'
 import { CropPreview } from './CropPreview'
 import { getNaturalSizeOfImage } from '@/utils/helpers'
 import { SectionLoading } from '@/components/custom/Loading'
+import { getCommonContants } from '@/utils/contants'
 
 type TEditedImagesProps = {
   editedImages: TUserInputImage[]
   removeFromEditedImages: (image: TUserInputImage) => void
   onSetAsEditedImage: (image: TUserInputImage) => void
 }
-
-const MAX_HEIGHT_CROP_DISPLAY: number = 250
-const MAX_PREVIEWS_COUNT: number = 6
 
 const EditedImages = ({
   editedImages,
@@ -28,6 +26,9 @@ const EditedImages = ({
 }: TEditedImagesProps) => {
   const [pickedImage, setPickedImage] = useState<TUserInputImage>()
   const [toDelete, setToDelete] = useState<TUserInputImage>()
+  const MAX_PREVIEWS_COUNT = useMemo<number>(() => {
+    return getCommonContants<number>('MAX_CROP_PREVIEWS_COUNT')
+  }, [])
 
   const pickImage = (image: TUserInputImage) => {
     setPickedImage(image)
@@ -120,9 +121,6 @@ const EditedImages = ({
   )
 }
 
-const minCropSizeWidth: number = 50
-const minCropSizeHeight: number = 50
-
 type CropImageProps = {
   imageData?: TUserInputImage
   onCropComplete: (croppedImage: TUserInputImage | null, error: Error | null) => void
@@ -154,6 +152,12 @@ export const CropImage = ({
   const navigate = useNavigate()
   const cropImageContainerRef = useRef<HTMLDivElement>(null)
   const [rotatedImageUrl, setRotatedImageUrl] = useState<string | null>(null)
+  const [minCropSizeWidth, minCropSizeHeight] = useMemo<[number, number]>(() => {
+    return [
+      getCommonContants<number>('MIN_CROP_SIZE_WIDTH'),
+      getCommonContants<number>('MIN_CROP_SIZE_HEIGHT'),
+    ]
+  }, [])
 
   const handleCrop = useCallback(() => {
     const image = imgRef.current

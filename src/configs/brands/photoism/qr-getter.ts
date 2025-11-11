@@ -1,6 +1,6 @@
 import { TUserInputImage } from '@/utils/types'
 import { TGetCustomerMediaResponse } from './types'
-import { canvasToBlob, delay } from '@/utils/helpers'
+import { canvasToBlob } from '@/utils/helpers'
 
 type TGetImageDataProgressCallback = (
   percentage: number,
@@ -208,10 +208,10 @@ class QRGetter {
   }
 
   private async fetchImageData(
-    url: string,
+    imageUrl: string,
     onProgress: TGetImageDataProgressCallback
   ): Promise<void> {
-    const response = await fetch(url)
+    const response = await fetch(imageUrl)
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
@@ -244,8 +244,7 @@ class QRGetter {
     }
 
     // Ghép các chunks thành Blob
-    const blob = new Blob(chunks)
-    onProgress(75, [{ blob, url }], null)
+    onProgress(75, [{ blob: new Blob(chunks), url: imageUrl, isOriginalImageUrl: true }], null)
   }
 
   private async extractImageDataAtLocal(

@@ -3,23 +3,20 @@ import { usePinchElement } from '@/hooks/element/use-pinch-element'
 import { useZoomElement } from '@/hooks/element/use-zoom-element'
 import { useDragElement } from '@/hooks/element/use-drag-element'
 import { useContext, useEffect, useState } from 'react'
-import { ElementLayerContext, useGlobalContext } from '@/context/global-context'
+import { ElementLayerContext } from '@/context/global-context'
 import { swapArrayItems } from '@/utils/helpers'
-import { ELEMENT_ZINDEX_STEP } from '@/utils/contants'
+import { getInitialContants } from '@/utils/contants'
 import { TElementVisualBaseState } from '@/utils/types'
 
 const fixedMaxZoom: number = 2
 const fixedMinZoom: number = 0.3
-const initialZindex: number = 1
-const initialZoom: number = 1
-const initialAngle: number = 0
 
-type TInitialParams = Partial<{
-  initialPosX: number
-  initialPosY: number
-  maxZoom: number
-  minZoom: number
-}>
+type TInitialParams = Partial<
+  TElementVisualBaseState & {
+    maxZoom: number
+    minZoom: number
+  }
+>
 
 type TElementControlReturn = {
   forPinch: {
@@ -48,18 +45,25 @@ type TElementControlReturn = {
   ) => void
 }
 
-type TElementType = 'printedImage' | 'sticker'
-
 export const useElementControl = (
   elementId: string,
-  elementType: TElementType,
   initialParams?: TInitialParams
 ): TElementControlReturn => {
-  const { initialPosX, initialPosY, maxZoom, minZoom } = initialParams || {}
+  const {
+    position: { x: initialPosX, y: initialPosY } = {
+      x: getInitialContants<number>('ELEMENT_X'),
+      y: getInitialContants<number>('ELEMENT_Y'),
+    },
+    maxZoom,
+    minZoom,
+    angle: initialAngle = getInitialContants<number>('ELEMENT_ROTATION'),
+    scale: initialZoom = getInitialContants<number>('ELEMENT_ZOOM'),
+    zindex: initialZindex = getInitialContants<number>('ELEMENT_ZINDEX'),
+  } = initialParams || {}
   const { elementLayers, setElementLayers } = useContext(ElementLayerContext)
   const [position, setPosition] = useState<TElementVisualBaseState['position']>({
-    x: initialPosX || 0,
-    y: initialPosY || 0,
+    x: initialPosX !== undefined ? initialPosX : getInitialContants<number>('ELEMENT_X'),
+    y: initialPosY !== undefined ? initialPosY : getInitialContants<number>('ELEMENT_Y'),
   })
   const [scale, setScale] = useState<TElementVisualBaseState['scale']>(initialZoom)
   const [angle, setAngle] = useState<TElementVisualBaseState['angle']>(initialAngle)
@@ -97,7 +101,6 @@ export const useElementControl = (
     currentPosition: position,
     setCurrentPosition: setPosition,
   })
-  const { visualStatesManager } = useGlobalContext()
 
   const handleSetElementState = (
     posX?: number,
@@ -134,46 +137,15 @@ export const useElementControl = (
 
   const onElementLayersChange = () => {
     setZindex(
-      elementLayers.findIndex((layer) => layer.elementId === elementId) * ELEMENT_ZINDEX_STEP + 1
+      elementLayers.findIndex((layer) => layer.elementId === elementId) *
+        getInitialContants<number>('ELEMENT_ZINDEX_STEP') +
+        1
     )
   }
-
-  const handleUpdateElementVisualState = () => {
-    queueMicrotask(() => {
-      const visualStates: TElementVisualBaseState = {
-        position,
-        scale,
-        angle,
-        zindex,
-      }
-      switch (elementType) {
-        case 'printedImage': {
-          visualStatesManager.updateElementVisualStates({
-            printedImage: visualStates,
-          })
-          break
-        }
-        case 'sticker': {
-          visualStatesManager.updateElementVisualStates({
-            sticker: visualStates,
-          })
-          break
-        }
-      }
-    })
-  }
-
-  useEffect(() => {
-    handleUpdateElementVisualState()
-  }, [position, angle, zindex, scale])
 
   useEffect(() => {
     onElementLayersChange()
   }, [elementLayers])
-
-  useEffect(() => {
-    handleUpdateElementVisualState()
-  }, [scale])
 
   return {
     forPinch: {

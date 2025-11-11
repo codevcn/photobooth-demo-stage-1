@@ -9,11 +9,14 @@ import StickerPicker from './element/sticker-element/StickerPicker'
 import {
   TPrintedImage,
   TProductImage,
-  TStickerElement,
-  TTextElement,
   TElementLayerState,
   TElementType,
   TProductSize,
+  TElementsVisualState,
+  TProductInfo,
+  TTextVisualState,
+  TStickerVisualState,
+  TPrintedImageVisualState,
 } from '@/utils/types'
 import { eventEmitter } from '@/utils/events'
 import { EInternalEvents } from '@/utils/enums'
@@ -27,9 +30,9 @@ import {
 import { LocalStorageHelper } from '@/utils/localstorage'
 import { toast } from 'react-toastify'
 import { ArrowLeft } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { swapArrayItems } from '@/utils/helpers'
-import { INITIAL_TEXT_FONT_SIZE } from '@/utils/contants'
+import { getInitialContants } from '@/utils/contants'
 import { productService } from '@/services/product.service'
 import { PageLoading } from '@/components/custom/Loading'
 import { useHtmlToCanvas } from '@/hooks/use-html-to-canvas'
@@ -41,11 +44,16 @@ type TEditPageProps = {
 
 const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
   const { sessionId } = useGlobalContext()
-  const [galleryImages] = useState<TProductImage[][]>(productImages)
+  const mockupId = useSearchParams()[0].get('mockupId')
 
-  const [activeImageId, setActiveImageId] = useState<string>(galleryImages[0][0].id)
-  const [selectedColor, setSelectedColor] = useState<string>('')
-  const [selectedSize, setSelectedSize] = useState<TProductSize>('M')
+  const [galleryImages, firstImage] = useMemo<[TProductImage[][], TProductImage]>(
+    () => [productImages, productImages[0][0]],
+    [productImages]
+  )
+
+  const [activeImageId, setActiveImageId] = useState<string>(firstImage.id || '')
+  const [selectedColor, setSelectedColor] = useState<string>(firstImage.color.value || '')
+  const [selectedSize, setSelectedSize] = useState<TProductSize>(firstImage.size[0] || 'M')
   const [cartCount, setCartCount] = useState<number>(0)
 
   // Tool overlays
@@ -55,11 +63,9 @@ const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
   const [showStickerPicker, setShowStickerPicker] = useState(false)
 
   // Edit elements
-  const [textElements, setTextElements] = useState<TTextElement[]>([])
-  const [stickerElements, setStickerElements] = useState<TStickerElement[]>([])
-  const [printedImageElements, setPrintedImageElements] = useState<TPrintedImage[]>([
-    printedImages[0],
-  ])
+  const [textElements, setTextElements] = useState<TTextVisualState[]>([])
+  const [stickerElements, setStickerElements] = useState<TStickerVisualState[]>([])
+  const [printedImageElements, setPrintedImageElements] = useState<TPrintedImageVisualState[]>([])
   const { editorRef, handleSaveHtmlAsImage } = useHtmlToCanvas()
   const { removeFromElementLayers } = useElementLayerContext()
 
@@ -97,13 +103,25 @@ const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
   const handleAddPrintedElement = (type: TElementType, printedImageElements: TPrintedImage[]) => {
     if (type === 'printed-image' && printedImageElements.length > 0) {
       setPrintedImageElements((pre) => {
+        const printedElements: TPrintedImageVisualState[] = []
         for (const ele of printedImageElements) {
           const oldEleId = ele.id
           if (pre.some((e) => e.id === oldEleId)) {
             ele.id = `${oldEleId}-${crypto.randomUUID()}`
           }
+          printedElements.push({
+            id: ele.id,
+            url: ele.url,
+            position: {
+              x: getInitialContants<number>('ELEMENT_X'),
+              y: getInitialContants<number>('ELEMENT_Y'),
+            },
+            angle: getInitialContants<number>('ELEMENT_ROTATION'),
+            scale: getInitialContants<number>('ELEMENT_ZOOM'),
+            zindex: getInitialContants<number>('ELEMENT_ZINDEX'),
+          })
         }
-        return [...pre, ...printedImageElements]
+        return [...pre, ...printedElements]
       })
     }
   }
@@ -119,11 +137,12 @@ const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
     removeFromElementLayers(ids)
   }
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (elemtnsVisualState: TElementsVisualState) => {
     if (!sessionId) return
     handleSaveHtmlAsImage(
       (imageDataUrl) => {
         LocalStorageHelper.saveMockupImageAtLocal(
+          elemtnsVisualState,
           { id: activeImageId, color: activeProduct.color, size: selectedSize },
           imageDataUrl,
           sessionId
@@ -136,33 +155,45 @@ const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
         toast.warning(error.message || 'Không thể lưu mockup, không thể thêm sản phẩm vào giỏ hàng')
         setCartCount(LocalStorageHelper.countSavedMockupImages())
       },
-      (canvas) => {}
+      () => {}
     )
   }
 
   const handleAddText = (text: string) => {
-    const newText: TTextElement = {
-      id: Date.now().toString(),
-      text,
-      x: 50,
-      y: 50,
-      fontSize: INITIAL_TEXT_FONT_SIZE,
-      color: '#000000',
-      content: text,
-    }
-    setTextElements([...textElements, newText])
+    setTextElements([
+      ...textElements,
+      {
+        id: crypto.randomUUID(),
+        content: text,
+        angle: getInitialContants<number>('ELEMENT_ROTATION'),
+        position: {
+          x: getInitialContants<number>('ELEMENT_X'),
+          y: getInitialContants<number>('ELEMENT_Y'),
+        },
+        fontSize: getInitialContants<number>('ELEMENT_TEXT_FONT_SIZE'),
+        textColor: getInitialContants<string>('ELEMENT_TEXT_COLOR'),
+        fontFamily: getInitialContants<string>('ELEMENT_TEXT_FONT_FAMILY'),
+        fontWeight: getInitialContants<number>('ELEMENT_TEXT_FONT_WEIGHT'),
+        zindex: getInitialContants<number>('ELEMENT_ZINDEX'),
+      },
+    ])
   }
 
   const handleAddSticker = (path: string) => {
-    const newSticker: TStickerElement = {
-      id: crypto.randomUUID(),
-      path,
-      x: 50,
-      y: 50,
-      height: 150,
-      width: 150,
-    }
-    setStickerElements([...stickerElements, newSticker])
+    setStickerElements([
+      ...stickerElements,
+      {
+        id: crypto.randomUUID(),
+        path,
+        position: {
+          x: getInitialContants<number>('ELEMENT_X'),
+          y: getInitialContants<number>('ELEMENT_Y'),
+        },
+        angle: getInitialContants<number>('ELEMENT_ROTATION'),
+        scale: getInitialContants<number>('ELEMENT_ZOOM'),
+        zindex: getInitialContants<number>('ELEMENT_ZINDEX'),
+      },
+    ])
   }
 
   const handleSelectColor = (color: string, productId: string) => {
@@ -184,9 +215,82 @@ const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
     })
   }
 
+  const restoreMockupVisualStates = (mockupId: string, sessionId: string) => {
+    const savedMockup = LocalStorageHelper.getSavedMockupData()
+    if (!savedMockup || savedMockup.sessionId !== sessionId) {
+      return
+    }
+    const cartItems = savedMockup.productsInCart
+    let foundMockup: TElementsVisualState | null = null
+    let foundProductInfo: TProductInfo | null = null
+
+    // Search for the mockup in all cart items
+    for (const item of cartItems) {
+      const mockup = item.mockupDataList?.find((m) => m.id === mockupId)
+      if (mockup) {
+        foundMockup = mockup.elementsVisualState
+        foundProductInfo = {
+          id: item.id,
+          color: item.color,
+          size: item.size,
+        }
+        break
+      }
+    }
+
+    if (!foundMockup || !foundProductInfo) return
+
+    // Restore text elements
+    const restoredTextElements = foundMockup.texts || []
+    if (restoredTextElements.length > 0) {
+      setTextElements(restoredTextElements)
+    }
+
+    // Restore sticker elements
+    const restoredStickerElements = foundMockup.stickers || []
+    if (restoredStickerElements.length > 0) {
+      setStickerElements(restoredStickerElements)
+    }
+
+    // Restore printed image elements
+    const restoredPrintedImageElements = foundMockup.printedImages || []
+    if (restoredPrintedImageElements.length > 0) {
+      setPrintedImageElements(restoredPrintedImageElements)
+    }
+
+    // Restore product selection
+    setActiveImageId(foundProductInfo.id)
+    setSelectedColor(foundProductInfo.color.value)
+    setSelectedSize(foundProductInfo.size)
+  }
+
+  const initEditElement = () => {
+    if (mockupId && sessionId) {
+      restoreMockupVisualStates(mockupId, sessionId)
+    } else if (printedImages.length > 0) {
+      const firstImage = printedImages[0]
+      if (firstImage) {
+        setPrintedImageElements([
+          {
+            id: firstImage.id,
+            url: firstImage.url,
+            position: {
+              x: getInitialContants<number>('ELEMENT_X'),
+              y: getInitialContants<number>('ELEMENT_Y'),
+            },
+            angle: getInitialContants<number>('ELEMENT_ROTATION'),
+            scale: getInitialContants<number>('ELEMENT_ZOOM'),
+            zindex: getInitialContants<number>('ELEMENT_ZINDEX'),
+          },
+        ])
+      }
+    }
+  }
+
   useEffect(() => {
     initClickOnPageEvent()
     initCartCount()
+    initEditElement()
   }, [])
 
   return (
@@ -215,7 +319,6 @@ const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
           <div className="flex-1 px-2">
             <EditArea
               editingProduct={activeProduct}
-              color={selectedColor}
               textElements={textElements}
               stickerElements={stickerElements}
               onUpdateText={setTextElements}
@@ -227,6 +330,8 @@ const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
               htmlToCanvasEditorRef={editorRef}
               cartCount={cartCount}
               handleAddToCart={handleAddToCart}
+              mockupId={mockupId}
+              selectedColor={selectedColor}
             />
           </div>
 

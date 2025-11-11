@@ -1,4 +1,4 @@
-import { ROUND_ZOOMING_FIXED } from './contants'
+import { getInitialContants } from './contants'
 import { TPaymentType } from './types'
 
 export const getNaturalSizeOfImage = (
@@ -108,7 +108,7 @@ export const exitFullScreen = () => {
 }
 
 export const roundZooming = (zoomValue: number): number => {
-  return parseFloat(zoomValue.toFixed(ROUND_ZOOMING_FIXED))
+  return parseFloat(zoomValue.toFixed(getInitialContants<number>('ELEMENT_ROUND_ZOOMING_FIXED')))
 }
 
 export const typeToObject = <Type>(objectInput: Type): Type => objectInput
