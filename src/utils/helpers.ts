@@ -44,17 +44,6 @@ export function formatTime(countdownDuration: number): string {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`
 }
 
-export const getColorByPaymentMethod = (method: TPaymentType): string => {
-  switch (method) {
-    case 'momo':
-      return '#A50064'
-    case 'zalo':
-      return '#0144DB'
-    default:
-      return '#fff'
-  }
-}
-
 export const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 /**

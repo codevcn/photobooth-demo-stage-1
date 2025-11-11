@@ -12,6 +12,9 @@ type TInitialContentsType =
   | 'ELEMENT_ROUND_ZOOMING_FIXED'
   | 'ELEMENT_TEXT_FONT_WEIGHT'
   | 'ELEMENT_TEXT_FONT_FAMILY'
+  | 'PAYMENT_ZALO_COLOR'
+  | 'PAYMENT_MOMO_COLOR'
+  | 'PAYMENT_COD_COLOR'
 
 export const getInitialContants = <R>(type: TInitialContentsType): R => {
   switch (type) {
@@ -41,6 +44,10 @@ export const getInitialContants = <R>(type: TInitialContentsType): R => {
       return 400 as R
     case 'ELEMENT_TEXT_FONT_FAMILY':
       return 'Arial' as R
+    case 'PAYMENT_ZALO_COLOR':
+      return '#0144DB' as R
+    case 'PAYMENT_MOMO_COLOR':
+      return '#A50064' as R
     default:
       return null as R
   }
