@@ -1,0 +1,1567 @@
+{
+  "info": {
+    "_postman_id": "f19c0d1e-8655-4b53-a5ad-08d5c0e3812b",
+    "name": "Photobooth API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Demo collection covering every REST endpoint. Set base_url and jwt variables before sending secured requests."
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"admin@demo.local\",\"password\":\"123456\"}"
+            }
+          }
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Self",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Updated Admin\",\"password\":\"newpass123\"}"
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "List Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"newuser@demo.local\",\"name\":\"Demo User\",\"password\":\"123456\",\"role\":\"customer\"}"
+            }
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/3",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "3"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Renamed\",\"role\":\"customer\"}"
+            }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/3",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "3"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Partners",
+      "item": [
+        {
+          "name": "List Partners",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/partners",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "partners"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Partner",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/partners",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "partners"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"code\":\"demo-partner\",\"name\":\"Demo Partner\",\"status\":\"active\",\"contact_email\":\"partner@demo.local\",\"contact_phone\":\"+84-888-000-111\"}"
+            }
+          }
+        },
+        {
+          "name": "Partner Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/partners/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "partners",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Partner",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/partners/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "partners",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Photoism Vietnam Updated\"}"
+            }
+          }
+        },
+        {
+          "name": "Domains",
+          "item": [
+            {
+              "name": "List Domains",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{jwt}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/partners/1/domains",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "partners",
+                    "1",
+                    "domains"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Domain",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{jwt}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/partners/1/domains",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "partners",
+                    "1",
+                    "domains"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"subdomain\":\"new.photoism.demo\",\"is_primary\":false,\"ssl_enabled\":true}"
+                }
+              }
+            },
+            {
+              "name": "Update Domain",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{jwt}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/partner-domains/1",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "partner-domains",
+                    "1"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"is_primary\":true}"
+                }
+              }
+            },
+            {
+              "name": "Delete Domain",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{jwt}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/partner-domains/1",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "partner-domains",
+                    "1"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Partner Users",
+          "item": [
+            {
+              "name": "List Partner Users",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{jwt}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/partners/1/users",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "partners",
+                    "1",
+                    "users"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Add Partner User",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{jwt}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/partners/1/users",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "partners",
+                    "1",
+                    "users"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"email\":\"staff.one@demo.local\",\"role\":\"staff\"}"
+                }
+              }
+            },
+            {
+              "name": "Update Partner User",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{jwt}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/partner-users/1",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "partner-users",
+                    "1"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"role\":\"owner\"}"
+                }
+              }
+            },
+            {
+              "name": "Delete Partner User",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{jwt}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/partner-users/1",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "partner-users",
+                    "1"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Stores",
+      "item": [
+        {
+          "name": "List Stores",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/partners/1/stores",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "partners",
+                "1",
+                "stores"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Store",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/partners/1/stores",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "partners",
+                "1",
+                "stores"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"code\":\"demo-store\",\"name\":\"Demo Store\",\"status\":\"active\",\"phone\":\"+84-111-222-333\",\"email\":\"demo@store.vn\",\"address_line1\":\"123 Demo St\",\"city\":\"Hanoi\",\"state\":\"HN\",\"postal_code\":\"100000\",\"country_code\":\"VN\"}"
+            }
+          }
+        },
+        {
+          "name": "Store Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/stores/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "stores",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Store",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/stores/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "stores",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Photoism Hanoi Flagship\"}"
+            }
+          }
+        },
+        {
+          "name": "Delete Store",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/stores/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "stores",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Store Routes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/stores/1/routes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "stores",
+                "1",
+                "routes"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Store Route",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/stores/1/routes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "stores",
+                "1",
+                "routes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"path_alias\":\"/s/demo-store\",\"custom_domain\":\"demo.photoism.vn\",\"is_primary\":false}"
+            }
+          }
+        },
+        {
+          "name": "Update Store Route",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/store-routes/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "store-routes",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"is_primary\":true}"
+            }
+          }
+        },
+        {
+          "name": "Delete Store Route",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/store-routes/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "store-routes",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "List Products",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Premium Mug\",\"slug\":\"premium-mug\",\"base_image_url\":\"https://cdn.demo.local/premium-mug.png\",\"description\":\"Premium photobooth mug\",\"status\":\"active\"}"
+            }
+          }
+        },
+        {
+          "name": "Product Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/products/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Product",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/products/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"description\":\"Updated description\"}"
+            }
+          }
+        },
+        {
+          "name": "Delete Product",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/products/999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Variants",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/products/1/variants",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "1",
+                "variants"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Variant",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/products/1/variants",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "1",
+                "variants"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"sku\":\"MUG-BLACK-11OZ\",\"size\":\"11oz\",\"color\":\"black\",\"price_amount_oneside\":170000,\"price_amount_bothside\":200000,\"currency\":\"VND\",\"stock_qty\":50}"
+            }
+          }
+        },
+        {
+          "name": "Update Variant",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/variants/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "variants",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"price_amount_oneside\":180000}"
+            }
+          }
+        },
+        {
+          "name": "Delete Variant",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/variants/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "variants",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Surfaces",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/products/1/surfaces",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "1",
+                "surfaces"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Surface",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/products/1/surfaces",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "1",
+                "surfaces"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"code\":\"handle\",\"display_name\":\"Handle\",\"order_index\":2}"
+            }
+          }
+        },
+        {
+          "name": "Update Surface",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/surfaces/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "surfaces",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"display_name\":\"Front Surface\"}"
+            }
+          }
+        },
+        {
+          "name": "Delete Surface",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/surfaces/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "surfaces",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Print Area",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/surfaces/1/print-area",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "surfaces",
+                "1",
+                "print-area"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Upsert Print Area",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/surfaces/1/print-area",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "surfaces",
+                "1",
+                "print-area"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"width_px\":2000,\"height_px\":1400,\"x_px\":100,\"y_px\":150,\"width_real_px\":2000,\"height_real_px\":1400}"
+            }
+          }
+        },
+        {
+          "name": "List Mockups",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/products/1/mockups",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "1",
+                "mockups"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Upsert Mockup",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/variants/1/surfaces/1/mockup",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "variants",
+                "1",
+                "surfaces",
+                "1",
+                "mockup"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"mockup_url\":\"https://cdn.demo.local/mockups/mug-front.png\",\"transform_json\":{\"scale\":1},\"zindex_json\":{\"layers\":[\"base\",\"print\"]}}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Create Order (public)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/orders",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "orders"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"store_code\":\"photoism-hn\",\"variant_id\":1,\"surface_id\":1,\"quantity\":1,\"editor_state_json\":{\"text\":\"Hello\"},\"file_url\":\"https://cdn.demo.local/designs/preview.png\",\"shipping_amount\":30000,\"customer\":{\"name\":\"Demo Customer\",\"email\":\"customer@example.com\",\"phone\":\"+84-900-111-222\"},\"shipping_address\":{\"address1\":\"456 Test St\",\"city\":\"Hanoi\",\"province\":\"HN\",\"postcode\":\"100000\",\"country\":\"VN\"},\"voucher_code\":\"\",\"note\":\"Handle with care\",\"domain_snapshot\":\"photoism.demo.local\"}"
+            }
+          }
+        },
+        {
+          "name": "Get Order by Hash",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/orders/hash/{{order_hash}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "orders",
+                "hash",
+                "{{order_hash}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/orders",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "orders"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Order Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/orders/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "orders",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Order Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/orders/1/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "orders",
+                "1",
+                "status"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\":\"paid\"}"
+            }
+          }
+        },
+        {
+          "name": "Delete Order",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/orders/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "orders",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Vouchers",
+      "item": [
+        {
+          "name": "List Vouchers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/vouchers?search=&type=&partner_id=",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "vouchers"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "type",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "partner_id",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Voucher Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/vouchers/{{voucher_id}}/orders",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "vouchers",
+                "{{voucher_id}}",
+                "orders"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Voucher Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/vouchers/stats",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "vouchers",
+                "stats"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "item": [
+        {
+          "name": "Revenue",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/analytics/revenue?from=2024-01-01&to=2024-12-31&partner_id=1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analytics",
+                "revenue?from=2024-01-01&to=2024-12-31&partner_id=1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Assets",
+      "item": [
+        {
+          "name": "Photobooth Asset",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/photobooth-assets/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "photobooth-assets",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Design Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/designs/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "designs",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000/api"
+    },
+    {
+      "key": "jwt",
+      "value": ""
+    },
+    {
+      "key": "order_hash",
+      "value": "XXXXXX1234"
+    },
+    {
+      "key": "voucher_id",
+      "value": "1"
+    }
+  ]
+}

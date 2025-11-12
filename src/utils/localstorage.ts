@@ -1,8 +1,7 @@
 import { TElementsVisualState, TMockupData, TProductInfo, TSavedMockupData } from './types'
 
 export class LocalStorageHelper {
-  static menuStateName = 'menu-state'
-  static mockupImageName = 'mockup-image'
+  private static mockupImageName = 'mockup-data'
 
   private static generateMockupId(): string {
     return crypto.randomUUID()

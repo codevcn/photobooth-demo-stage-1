@@ -1,8 +1,8 @@
 import { orderService } from '@/services/order.service'
+import { paymentService } from '@/services/payment.service'
 import { getInitialContants } from '@/utils/contants'
 import {
   capitalizeFirstLetter,
-  delay,
   formatNumberWithCommas,
   formatTime,
   isValidEmail,
@@ -14,6 +14,7 @@ import { useRef, useState, useEffect } from 'react'
 import { toast } from 'react-toastify'
 import { PaymentMethodSelector } from './PaymentMethod'
 import { ShippingInfoForm, TFormErrors } from './ShippingInfo'
+import { LocalStorageHelper } from '@/utils/localstorage'
 
 const getColorByPaymentMethod = (method: TPaymentType): string => {
   switch (method) {
@@ -88,17 +89,6 @@ export const EndOfPayment: React.FC<EndOfPaymentProps> = ({
   const backToEditPage = () => {
     window.location.href = '/edit'
   }
-
-  const handlePaymentStatusChange = () => {
-    orderService
-      .submitOrder()
-      .then(() => {})
-      .catch(() => {})
-  }
-
-  useEffect(() => {
-    handlePaymentStatusChange()
-  }, [paymentStatus])
 
   useEffect(() => {
     return countdownHandler()
@@ -218,12 +208,14 @@ interface PaymentModalProps {
     total: number
   }
   onHideShow: (show: boolean) => void
+  voucherCode?: string
 }
 
-export const PaymentModal = ({ show, paymentInfo, onHideShow }: PaymentModalProps) => {
+export const PaymentModal = ({ show, paymentInfo, onHideShow, voucherCode }: PaymentModalProps) => {
   const { total } = paymentInfo
   const [paymentMethod, setPaymentMethod] = useState<TPaymentType>('momo')
   const [confirming, setConfirming] = useState<boolean>(false)
+  const [confirmingMessage, setConfirmingMessage] = useState<string>('Đang xử lý...')
   const [endOfPayment, setEndOfPayment] = useState<TEndOfPaymentData>()
   const formRef = useRef<HTMLFormElement>(null)
   const [errors, setErrors] = useState<TFormErrors>({})
@@ -266,34 +258,88 @@ export const PaymentModal = ({ show, paymentInfo, onHideShow }: PaymentModalProp
     return isValid
   }
 
-  const handleConfirmPayment = () => {
+  const handleConfirmPayment = async () => {
     const form = formRef.current
     if (!form) return
+
+    // Validate form
     if (!validateForm(form)) {
       toast.error('Vui lòng kiểm tra lại thông tin giao hàng')
       return
     }
+
+    // Get form data
+    const formData = new FormData(form)
+    const shippingInfo = {
+      name: formData.get('fullName')?.toString().trim() || '',
+      phone: formData.get('phone')?.toString().trim() || '',
+      email: formData.get('email')?.toString().trim() || '',
+      province: formData.get('province')?.toString().trim() || '',
+      city: formData.get('city')?.toString().trim() || '',
+      address: formData.get('address')?.toString().trim() || '',
+      message: formData.get('message')?.toString().trim(),
+    }
+
+    // Get cart items from LocalStorage
+    const savedData = LocalStorageHelper.getSavedMockupData()
+    if (!savedData || savedData.productsInCart.length === 0) {
+      toast.error('Giỏ hàng trống')
+      return
+    }
+
     setConfirming(true)
-    delay(2000)
-      .then(() => {
-        setEndOfPayment({ countdownDuration: 600, QRCodeURL: '/images/QR.png' })
-      })
-      .finally(() => {
-        setConfirming(false)
-      })
+
+    try {
+      // Step 1: Create order
+      setConfirmingMessage('Đang tạo đơn hàng...')
+      const orderResponse = await orderService.createOrder(
+        savedData.productsInCart,
+        shippingInfo,
+        paymentMethod,
+        voucherCode
+      )
+
+      toast.success(`Đơn hàng ${orderResponse.order_number} đã được tạo`)
+
+      // Step 2: Get payment QR (only for Momo/Zalo)
+      if (paymentMethod === 'momo' || paymentMethod === 'zalo') {
+        setConfirmingMessage('Đang tạo mã QR thanh toán...')
+        const qrResponse = await paymentService.getPaymentQR(
+          orderResponse.order_number,
+          paymentMethod,
+          total
+        )
+
+        setEndOfPayment({
+          countdownDuration: qrResponse.expires_in,
+          QRCodeURL: qrResponse.qr_code_url,
+        })
+      } else {
+        // COD: No QR needed, just show success
+        setEndOfPayment({
+          countdownDuration: 0,
+          QRCodeURL: '',
+        })
+      }
+    } catch (error) {
+      console.error('Payment error:', error)
+      toast.error(error instanceof Error ? error.message : 'Có lỗi xảy ra khi xử lý thanh toán')
+    } finally {
+      setConfirming(false)
+    }
   }
 
   return (
     <div
       style={{ display: show ? 'flex' : 'none' }}
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-end sm:items-center z-50 animate-in fade-in duration-200"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-end z-50 animate-in fade-in duration-200"
     >
       <div className="flex flex-col pt-12 bg-white rounded-2xl overflow-hidden relative shadow-2xl w-full max-w-[420px] max-h-[85vh] animate-in slide-in-from-bottom duration-200">
         {confirming && (
           <div className="absolute w-full h-full top-0 text-white left-0 bg-black/50 z-20">
             <div className="flex flex-col items-center justify-center absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-              <div className="animate-spin border-t-4 border-white rounded-full h-12 w-12"></div>
-              <p className="mt-2 font-bold">Đang tải...</p>
+              <div className="animate-spin border-t-4 border-pink-cl rounded-full h-12 w-12"></div>
+              <p className="mt-2 font-bold">{confirmingMessage}</p>
             </div>
           </div>
         )}

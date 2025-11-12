@@ -1,0 +1,44 @@
+/* Small Phones */
+@media screen and (max-width: 375px) {
+  /* CSS cho điện thoại nhỏ */
+}
+
+/* Medium Phones */
+@media screen and (min-width: 376px) and (max-width: 480px) {
+  /* CSS cho điện thoại trung bình */
+}
+
+/* Large Phones / Phablet */
+@media screen and (min-width: 481px) and (max-width: 600px) {
+  /* CSS cho điện thoại lớn hoặc phablet */
+}
+
+/* Tablet portrait (iPad Air) */
+@media screen and (min-width: 601px) and (max-width: 900px) {
+  /* CSS cho máy tính bảng dọc */
+}
+
+/* Tablet landscape (Surface Duo hoặc iPad ngang) */
+@media screen and (min-width: 901px) and (max-width: 1024px) {
+  /* CSS cho máy tính bảng ngang */
+}
+
+/* Laptop */
+@media screen and (min-width: 1025px) and (max-width: 1200px) {
+  /* CSS cho laptop */
+}
+
+/* Laptop */
+@media screen and (min-width: 1201px) and (max-width: 1440px) {
+  /* CSS cho laptop và desktop nhỏ */
+}
+
+/* Desktop lớn / Wide screens */
+@media screen and (min-width: 1441px) and (max-width: 1600px) {
+  /* CSS cho màn hình lớn */
+}
+
+/* Desktop lớn (Full HD trở lên) */
+@media screen and (min-width: 1601px) {
+  /* CSS cho desktop hoặc màn hình siêu rộng */
+}

@@ -27,3 +27,8 @@ dist-ssr
 
 *.tsbuildinfo
 .eslintcache
+
+# Environment variables
+.env
+.env.local
+.env.*.local

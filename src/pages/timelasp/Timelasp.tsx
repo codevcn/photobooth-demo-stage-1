@@ -73,11 +73,11 @@ export default function TimelapsePage() {
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
       {/* Header */}
-      <header className="flex items-center justify-between p-6 md:p-8">
-        <h1 onClick={toggleFullscreen} className="text-2xl md:text-3xl font-serif select-none">
+      <header className="flex items-center justify-between p-6">
+        <h1 onClick={toggleFullscreen} className="text-2xl font-serif select-none">
           photoism
         </h1>
-        <button className="flex items-center gap-2 text-sm md:text-base hover:opacity-80 transition-opacity">
+        <button className="flex items-center gap-2 text-sm hover:opacity-80 transition-opacity">
           <Trash2Icon className="w-5 h-5" />
           <span>Xóa ảnh đã chụp</span>
         </button>
@@ -110,13 +110,13 @@ export default function TimelapsePage() {
       </div>
 
       {/* Bottom Buttons */}
-      <div className="grid grid-cols-2 gap-4 p-6 md:p-8 max-w-6xl mx-auto w-full">
-        <button className="px-4 py-3 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white flex flex-col items-center justify-center gap-2 text-base md:text-lg">
+      <div className="grid grid-cols-2 gap-4 p-6 max-w-6xl mx-auto w-full">
+        <button className="px-4 py-3 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white flex flex-col items-center justify-center gap-2 text-base">
           <ImageIcon className="w-6 h-6" />
           <span className="text-sm text-gray-200">Tải xuống ảnh</span>
         </button>
 
-        <button className="px-4 py-3 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white flex flex-col items-center justify-center gap-2 text-base md:text-lg">
+        <button className="px-4 py-3 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white flex flex-col items-center justify-center gap-2 text-base">
           <PlayIcon className="w-6 h-6" />
           <span className="text-sm text-gray-200">Tải xuống video</span>
         </button>

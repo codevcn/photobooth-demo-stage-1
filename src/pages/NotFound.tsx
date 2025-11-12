@@ -14,14 +14,12 @@ export default function NotFound() {
       <div className="relative z-10 max-w-2xl w-full">
         {/* 404 Number */}
         <div className="text-center mb-8">
-          <h1 className="text-[12rem] md:text-[16rem] font-black leading-none bg-gradient-to-br from-pink-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent drop-shadow-2xl animate-pulse-slow select-none">
+          <h1 className="text-[12rem] font-black leading-none bg-gradient-to-br from-pink-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent drop-shadow-2xl animate-pulse-slow select-none">
             404
           </h1>
           <div className="relative -mt-20">
             <div className="relative bg-white/60 backdrop-blur-sm p-8 rounded-3xl shadow-2xl border border-white/20">
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-3">
-                Oops! Trang không tồn tại
-              </h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-3">Oops! Trang không tồn tại</h2>
               <p className="text-gray-600 text-lg mb-8 leading-relaxed">
                 Có vẻ như bạn đã đi lạc rồi... 🤔
                 <br />
@@ -29,7 +27,7 @@ export default function NotFound() {
               </p>
 
               {/* Action buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <div className="flex flex-col gap-4 justify-center">
                 <button
                   onClick={() => window.history.back()}
                   className="group flex items-center justify-center gap-2 px-8 py-4 bg-white text-gray-800 font-bold rounded-xl shadow-lg hover:shadow-xl border-2 border-gray-200 hover:border-pink-300 transform hover:scale-105 transition-all duration-200 active:scale-95"

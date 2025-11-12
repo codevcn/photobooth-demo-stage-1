@@ -88,7 +88,7 @@ export default function QRScanner({ onScanSuccess, showCropper }: QRScannerProps
     if (showCropper) {
       stopCamera()
     } else if (!error) {
-      initializeScanner()
+      // initializeScanner()
     }
     if (error) {
       stopCamera()

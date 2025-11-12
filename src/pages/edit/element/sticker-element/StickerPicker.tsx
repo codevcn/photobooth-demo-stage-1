@@ -49,7 +49,7 @@ const StickerPicker: React.FC<StickerPickerProps> = ({ onAddSticker, onClose, sh
           </button>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-8 gap-2 overflow-y-auto px-4 w-full">
+        <div className="grid grid-cols-2 gap-2 overflow-y-auto px-4 w-full">
           {stickers.map(({ path, size }, index) => (
             <button
               key={index}

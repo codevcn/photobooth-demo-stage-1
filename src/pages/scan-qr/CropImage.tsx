@@ -531,6 +531,7 @@ export const CropImage = ({
                   className="flex items-center justify-center gap-2 w-full h-10 flex-1 px-4 rounded bg-pink-cl text-white font-bold active:scale-90 transition-colors disabled:opacity-50"
                   onClick={navToEditPage}
                   disabled={!completedCrop || isCropping}
+                  type="button"
                 >
                   <span>Lưu giữ kỷ niệm</span>
                 </button>

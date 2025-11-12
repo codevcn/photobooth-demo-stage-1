@@ -236,6 +236,7 @@ const PaymentPage = () => {
           total,
         }}
         onHideShow={setShowModal}
+        voucherCode={appliedVoucher?.code}
       />
 
       {createPortal(
