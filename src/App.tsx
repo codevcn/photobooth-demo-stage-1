@@ -15,10 +15,10 @@ function App() {
   const { clearAllEditedImages } = useEditedImageContext()
 
   useEffect(() => {
-    LocalStorageHelper.clearAllMockupImages()
-    return () => {
-      clearAllEditedImages()
-    }
+    // LocalStorageHelper.clearAllMockupImages()
+    // return () => {
+    //   clearAllEditedImages()
+    // }
   }, [])
 
   return (

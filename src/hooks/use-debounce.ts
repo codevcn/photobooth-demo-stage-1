@@ -1,27 +1,30 @@
-import { useRef } from 'react'
+import { useRef, useCallback, useEffect } from 'react'
 
-export const useDebounce = () => {
-  const timer = useRef<NodeJS.Timeout>(undefined)
-  return <P extends any[]>(handler: (...args: P) => void, delayInMs: number) => {
-    return (...args: Parameters<typeof handler>) => {
-      clearTimeout(timer.current)
-      timer.current = setTimeout(() => {
-        handler(...args)
-      }, delayInMs)
-    }
-  }
-}
+export const useDebouncedCallback = <T extends (...args: any[]) => any>(
+  callback: T,
+  delay: number
+): ((...args: Parameters<T>) => void) => {
+  const timeoutRef = useRef<NodeJS.Timeout>()
+  const callbackRef = useRef(callback)
 
-export const useDebounceLeading = () => {
-  const timer = useRef<NodeJS.Timeout>(undefined)
-  return <P extends any[]>(handler: (...params: P) => void, delayInMs: number) =>
-    (...args: Parameters<typeof handler>) => {
-      if (!timer.current) {
-        handler(...args)
-      }
-      clearTimeout(timer.current)
-      timer.current = setTimeout(() => {
-        timer.current = undefined
-      }, delayInMs)
+  // Luôn giữ callback mới nhất mà KHÔNG tạo lại debounced function
+  useEffect(() => {
+    callbackRef.current = callback
+  }, [callback])
+
+  useEffect(() => {
+    return () => {
+      clearTimeout(timeoutRef.current)
     }
+  }, [])
+
+  return useCallback(
+    (...args: Parameters<T>) => {
+      clearTimeout(timeoutRef.current)
+      timeoutRef.current = setTimeout(() => {
+        callbackRef.current(...args) // ← Luôn gọi callback MỚI NHẤT
+      }, delay)
+    },
+    [delay] // ← Chỉ có delay, không có callback
+  )
 }

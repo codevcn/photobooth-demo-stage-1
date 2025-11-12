@@ -17,7 +17,7 @@ export const PaymentMethodSelector = ({
       <div className="space-y-2">
         {/* Momo */}
         {selectedMethod === 'momo' ? (
-          <div className="bg-gradient-to-r from-pink-50 to-purple-50 border-2 border-pink-200 rounded-xl p-4">
+          <div className="bg-gradient-to-r from-pink-50 to-purple-50 border-2 border-pink-200 rounded-xl px-3 py-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="bg-[#A50064] rounded-lg p-2">
@@ -45,7 +45,7 @@ export const PaymentMethodSelector = ({
 
         {/* Zalo */}
         {selectedMethod === 'zalo' ? (
-          <div className="bg-gradient-to-r from-pink-50 to-purple-50 border-2 border-pink-200 rounded-xl p-4">
+          <div className="bg-gradient-to-r from-pink-50 to-purple-50 border-2 border-pink-200 rounded-xl px-3 py-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="bg-[#0144DB] rounded-lg p-2">
@@ -73,7 +73,7 @@ export const PaymentMethodSelector = ({
 
         {/* Cash on Delivery */}
         {selectedMethod === 'cod' ? (
-          <div className="bg-gradient-to-r from-pink-50 to-purple-50 border-2 border-pink-200 rounded-xl p-4">
+          <div className="bg-gradient-to-r from-pink-50 to-purple-50 border-2 border-pink-200 rounded-xl px-3 py-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="bg-green-600 rounded-lg p-2">

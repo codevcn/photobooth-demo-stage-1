@@ -19,7 +19,7 @@ import {
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { HexColorPicker } from 'react-colorful'
 import { createPortal } from 'react-dom'
-import { useDebounce } from '@/hooks/use-debounce'
+import { useDebouncedCallback } from '@/hooks/use-debounce'
 import { getInitialContants } from '@/utils/contants'
 
 type TPropertyType = 'font-size' | 'angle' | 'posXY' | 'zindex-up' | 'zindex-down'
@@ -32,7 +32,6 @@ interface ColorPickerModalProps {
 
 const ColorPickerModal = ({ show, onHideShow, onColorChange }: ColorPickerModalProps) => {
   const [currentColor, setCurrentColor] = useState<string>('#fe6e87')
-  const debounce = useDebounce()
   const inputText = useRef<string>('Text để kiểm tra màu chữ')
   const inputRef = useRef<HTMLInputElement | null>(null)
 
@@ -73,7 +72,7 @@ const ColorPickerModal = ({ show, onHideShow, onColorChange }: ColorPickerModalP
     return isValidHex || isValidShortHex || isNamedColor
   }
 
-  const handleInputChange = debounce((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = useDebouncedCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.trim()
     if (validateColorValue(value)) {
       // Convert sang hex để HexColorPicker hiểu được

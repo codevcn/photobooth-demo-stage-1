@@ -332,9 +332,10 @@ export const PaymentModal = ({ show, paymentInfo, onHideShow, voucherCode }: Pay
   return (
     <div
       style={{ display: show ? 'flex' : 'none' }}
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-end z-50 animate-in fade-in duration-200"
+      className="fixed inset-0 flex items-center justify-center z-50 animate-pop-in p-4"
     >
-      <div className="flex flex-col pt-12 bg-white rounded-2xl overflow-hidden relative shadow-2xl w-full max-w-[420px] max-h-[85vh] animate-in slide-in-from-bottom duration-200">
+      <div onClick={() => onHideShow(false)} className="bg-black/50 absolute inset-0 z-10"></div>
+      <div className="flex flex-col pt-12 bg-white rounded-2xl z-20 overflow-hidden relative shadow-2xl w-full max-w-[420px] max-h-[90vh] animate-in slide-in-from-bottom duration-200">
         {confirming && (
           <div className="absolute w-full h-full top-0 text-white left-0 bg-black/50 z-20">
             <div className="flex flex-col items-center justify-center absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">

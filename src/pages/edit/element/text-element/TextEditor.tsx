@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Plus } from 'lucide-react'
-import { useDebounce } from '@/hooks/use-debounce'
+import { useDebouncedCallback } from '@/hooks/use-debounce'
 
 interface TextEditorProps {
   onAddText: (text: string) => void
@@ -9,7 +9,6 @@ interface TextEditorProps {
 
 const TextEditor: React.FC<TextEditorProps> = ({ onAddText, onClose }) => {
   const [text, setText] = useState<string>('')
-  const debounce = useDebounce()
 
   const handleAdd = () => {
     if (text.trim()) {
@@ -19,7 +18,7 @@ const TextEditor: React.FC<TextEditorProps> = ({ onAddText, onClose }) => {
     }
   }
 
-  const handleEdit = debounce((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleEdit = useDebouncedCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setText(e.target.value)
   }, 300)
 

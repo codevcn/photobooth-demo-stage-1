@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Banknote, ArrowBigLeft, ArrowLeft } from 'lucide-react'
 import { formatNumberWithCommas } from '@/utils/helpers'
 import { TProductImage, TVoucher } from '@/utils/types'
 import { PaymentModal } from '@/pages/payment/PaymentModal'
@@ -9,6 +8,7 @@ import { LocalStorageHelper } from '@/utils/localstorage'
 import { useGlobalContext, useProductImageContext } from '@/context/global-context'
 import { VoucherSection } from '@/pages/payment/Voucher'
 import { ProductList, TProductItem } from '@/pages/payment/ProductList'
+import { productImages as productImagesDev } from '@/dev/storage'
 
 interface IPaymentModalProps {
   imgSrc?: string
@@ -35,7 +35,8 @@ const PaymentPage = () => {
   const [showModal, setShowModal] = useState(false)
   const navigate = useNavigate()
   const [selectedImage, setSelectedImage] = useState<string>()
-  const { productImages } = useProductImageContext()
+  // const { productImages } = useProductImageContext()
+  const productImages = productImagesDev
 
   // Hàm tính subtotal (tổng tiền trước giảm giá voucher)
   const calculateSubtotal = (): number => {
@@ -72,6 +73,7 @@ const PaymentPage = () => {
 
   const loadCartItems = () => {
     const savedItems = LocalStorageHelper.getSavedMockupData()
+    console.log('>>> saved items:', savedItems)
     if (savedItems) {
       const productItems: TProductItem[] = []
       for (const product of savedItems.productsInCart) {
@@ -165,7 +167,21 @@ const PaymentPage = () => {
             onClick={backToEditPage}
             className="flex items-center gap-2 py-1 px-2 text-sm bg-pink-cl rounded-md text-white font-bold active:scale-95 transition"
           >
-            <ArrowLeft size={20} color="currentColor" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="lucide lucide-arrow-left-icon lucide-arrow-left"
+            >
+              <path d="m12 19-7-7 7-7" />
+              <path d="M19 12H5" />
+            </svg>
             <span>Quay về</span>
           </button>
         </div>
@@ -223,7 +239,22 @@ const PaymentPage = () => {
             onClick={() => setShowModal(true)}
             className="flex items-center justify-center gap-2 w-full h-[45px] bg-pink-cl text-white font-bold text-lg rounded-xl shadow-lg active:scale-95 transition duration-200"
           >
-            <Banknote size={28} className="text-white" strokeWidth={2} />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              className="lucide lucide-banknote-icon lucide-banknote"
+            >
+              <rect width="20" height="12" x="2" y="6" rx="2" />
+              <circle cx="12" cy="12" r="2" />
+              <path d="M6 12h.01M18 12h.01" />
+            </svg>
             <span>Tiến hành thanh toán</span>
           </button>
         </div>
@@ -245,21 +276,72 @@ const PaymentPage = () => {
       )}
     </div>
   ) : (
-    <div className="max-w-md mx-auto min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 pb-12">
-      <header className="bg-white shadow-sm top-0 z-10">
-        <div className="px-4 py-2">
-          <h1 className="text-2xl font-bold text-gray-900">Thanh toán</h1>
-          <p className="text-sm text-gray-500 mt-1">{cartItems.length} sản phẩm trong giỏ hàng</p>
+    <div className="min-h-screen flex flex-col">
+      {/* Header */}
+      <header className="bg-white/80 backdrop-blur-sm shadow-sm">
+        <div className="max-w-md mx-auto px-4 py-3">
+          <h1 className="text-2xl font-bold text-gray-900">Giỏ hàng</h1>
+          <p className="text-sm text-gray-500 mt-1">Chưa có sản phẩm nào</p>
         </div>
       </header>
-      <div className="flex justify-center w-full pt-4">
-        <button
-          onClick={() => navigate('/edit')}
-          className="flex justify-center items-center bg-pink-cl rounded-md p-2 active:scale-95 transition text-white font-bold"
-        >
-          <ArrowBigLeft size={24} color="currentColor" strokeWidth={3} />
-          <span>Quay về trang chỉnh sửa</span>
-        </button>
+
+      {/* Empty State Content */}
+      <div className="flex-1 flex items-center justify-center px-4 pb-20">
+        <div className="max-w-sm w-full text-center">
+          {/* Icon */}
+          <div className="relative mb-8">
+            <div className="relative bg-white rounded-full p-8 shadow-md mx-auto w-40 h-40 flex items-center justify-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="80"
+                height="80"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="text-gray-300"
+              >
+                <circle cx="8" cy="21" r="1" />
+                <circle cx="19" cy="21" r="1" />
+                <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+              </svg>
+            </div>
+          </div>
+
+          {/* Text */}
+          <h2 className="text-2xl font-bold text-gray-800 mb-3">Giỏ hàng trống</h2>
+          <p className="text-gray-500 mb-8 leading-relaxed">
+            Hãy quay lại trang chỉnh sửa để tạo và thêm sản phẩm yêu thích của bạn vào giỏ hàng nhé!
+          </p>
+
+          {/* Action Button */}
+          <button
+            onClick={() => navigate('/edit')}
+            className="group relative w-full bg-pink-cl hover:bg-dark-pink-cl text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl active:scale-95 transition-all duration-200 overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity"></div>
+            <div className="relative flex items-center justify-center gap-3">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="group-hover:-translate-x-1 transition-transform"
+              >
+                <path d="m12 19-7-7 7-7" />
+                <path d="M19 12H5" />
+              </svg>
+              <span className="text-lg">Quay lại trang chỉnh sửa</span>
+            </div>
+          </button>
+        </div>
       </div>
     </div>
   )

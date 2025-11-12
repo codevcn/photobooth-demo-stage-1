@@ -71,7 +71,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
         opacity: show ? 1 : 0,
         pointerEvents: show ? 'auto' : 'none',
       }}
-      className="fixed inset-0 transition duration-200 max-w-md min-h-screen z-[999] mx-auto"
+      className="fixed inset-0 transition duration-200 min-h-screen z-[999] mx-auto"
     >
       <div className="bg-black/50 absolute inset-0 z-10" onClick={() => onHideShow(false)}></div>
       <div className="bg-white overflow-y-auto rounded-lg relative z-20 w-[90%] h-full max-h-[75vh] top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2">

@@ -4,12 +4,11 @@ import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import ReactCrop, { type Crop } from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
 import { Loader2, X } from 'lucide-react'
-import { useDebounce } from '@/hooks/use-debounce'
+import { useDebouncedCallback } from '@/hooks/use-debounce'
 import { TUserInputImage } from '@/utils/types'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { CropPreview } from './CropPreview'
-import { getNaturalSizeOfImage } from '@/utils/helpers'
 import { SectionLoading } from '@/components/custom/Loading'
 import { getCommonContants } from '@/utils/contants'
 
@@ -109,9 +108,23 @@ const EditedImages = ({
               </button>
               <button
                 onClick={confirmDelete}
-                className="py-2 px-4 font-bold rounded bg-pink-cl text-white"
+                className="flex items-center justify-center gap-1.5 py-2 px-4 font-bold rounded bg-pink-cl text-white"
               >
-                Xác nhận
+                <span>Xác nhận</span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="lucide lucide-check-icon lucide-check"
+                >
+                  <path d="M20 6 9 17l-5-5" />
+                </svg>
               </button>
             </div>
           </div>
@@ -147,7 +160,6 @@ export const CropImage = ({
   const [customWidth, setCustomWidth] = useState<number>(0)
   const [customHeight, setCustomHeight] = useState<number>(0)
   const imgRef = useRef<HTMLImageElement>(null)
-  const debounce = useDebounce()
   const inputsContainerRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
   const cropImageContainerRef = useRef<HTMLDivElement>(null)
@@ -158,6 +170,8 @@ export const CropImage = ({
       getCommonContants<number>('MIN_CROP_SIZE_HEIGHT'),
     ]
   }, [])
+  const [maxCropSizeHeight, setMaxCropSizeHeight] = useState<number>(0)
+  const cropRef = useRef(crop)
 
   const handleCrop = useCallback(() => {
     const image = imgRef.current
@@ -239,51 +253,47 @@ export const CropImage = ({
     setCompletedCrop(c)
   }, [])
 
-  const handleWidthChange = useCallback(
-    debounce((e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value
-      const width = parseFloat(value)
-      if (isNaN(width) || !imgRef.current || !crop) return
+  const handleWidthChange = useDebouncedCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    const width = parseFloat(value)
+    if (isNaN(width) || !imgRef.current || !cropRef.current) return
 
-      const image = imgRef.current
-      const maxWidth = image.getBoundingClientRect().width
-      const constrainedWidth = Math.min(Math.max(width, minCropSizeWidth), maxWidth)
+    const image = imgRef.current
+    const currentCrop = cropRef.current // ← Luôn lấy giá trị mới nhất
+    const maxWidth = image.getBoundingClientRect().width
+    const constrainedWidth = Math.min(Math.max(width, minCropSizeWidth), maxWidth)
 
-      const newCrop: Crop = {
-        ...crop,
-        width: constrainedWidth,
-        x: Math.min(crop.x, maxWidth - constrainedWidth),
-      }
+    const newCrop: Crop = {
+      ...currentCrop,
+      width: constrainedWidth,
+      x: Math.min(currentCrop.x, maxWidth - constrainedWidth),
+    }
 
-      setCrop(newCrop)
-      setCompletedCrop(newCrop)
-      setCustomWidth(Math.round(constrainedWidth))
-    }, 300),
-    [crop]
-  )
+    setCrop(newCrop)
+    setCompletedCrop(newCrop)
+    setCustomWidth(Math.round(constrainedWidth))
+  }, 300)
 
-  const handleHeightChange = useCallback(
-    debounce((e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value
-      const height = parseFloat(value)
-      if (isNaN(height) || !imgRef.current || !crop) return
+  const handleHeightChange = useDebouncedCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    const height = parseFloat(value)
+    if (isNaN(height) || !imgRef.current || !cropRef.current) return
 
-      const image = imgRef.current
-      const maxHeight = image.getBoundingClientRect().height
-      const constrainedHeight = Math.min(Math.max(height, minCropSizeHeight), maxHeight)
+    const image = imgRef.current
+    const currentCrop = cropRef.current // ← Luôn lấy giá trị mới nhất
+    const maxHeight = image.getBoundingClientRect().height
+    const constrainedHeight = Math.min(Math.max(height, minCropSizeHeight), maxHeight)
 
-      const newCrop: Crop = {
-        ...crop,
-        height: constrainedHeight,
-        y: Math.min(crop.y, maxHeight - constrainedHeight),
-      }
+    const newCrop: Crop = {
+      ...currentCrop,
+      height: constrainedHeight,
+      y: Math.min(currentCrop.y, maxHeight - constrainedHeight),
+    }
 
-      setCrop(newCrop)
-      setCompletedCrop(newCrop)
-      setCustomHeight(Math.round(constrainedHeight))
-    }, 300),
-    [crop]
-  )
+    setCrop(newCrop)
+    setCompletedCrop(newCrop)
+    setCustomHeight(Math.round(constrainedHeight))
+  }, 300)
 
   const navToEditPage = useCallback(() => {
     if (editedImages.length === 0) {
@@ -375,7 +385,29 @@ export const CropImage = ({
 
   useEffect(() => {
     adjustUIBasedOnImage()
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = 'auto'
+    }
   }, [imageData])
+
+  useEffect(() => {
+    cropRef.current = crop
+  }, [crop])
+
+  useEffect(() => {
+    // Cập nhật kích thước crop tối đa khi cửa sổ thay đổi kích thước
+    const updateMaxCropSize = () => {
+      requestAnimationFrame(() => {
+        setMaxCropSizeHeight(window.innerHeight * 0.9 - 32) // trừ đi padding
+      })
+    }
+    updateMaxCropSize()
+    window.addEventListener('resize', updateMaxCropSize)
+    return () => {
+      window.removeEventListener('resize', updateMaxCropSize)
+    }
+  }, [])
 
   return (
     <div
@@ -385,9 +417,9 @@ export const CropImage = ({
     >
       <div className="absolute inset-0 bg-black/50 z-10"></div>
       <div className="relative z-20 w-full">
-        <div className="flex gap-2.5 items-start max-h-[90vh] pr-2 bg-gray-100 rounded-lg px-6 py-4 overflow-y-auto overflow-x-hidden w-full">
-          <div className="flex items-center justify-center w-1/2 h-[70vh]">
-            <div className="flex items-center justify-center w-full h-full overflow-hidden">
+        <div className="flex gap-2.5 items-stretch max-h-[90vh] pr-2 bg-gray-100 rounded-lg px-6 py-4 overflow-y-auto overflow-x-hidden w-full">
+          <div className="flex items-center justify-center w-1/2 max-w-1/2 h-[calc(90vh-32px)]">
+            <div className="flex items-start justify-center w-full h-full overflow-hidden">
               {rotatedImageUrl ? (
                 <ReactCrop
                   crop={crop}
@@ -402,13 +434,14 @@ export const CropImage = ({
                     src={rotatedImageUrl}
                     onLoad={onImageLoad}
                     className="object-contain max-h-full max-w-full"
+                    style={{ maxHeight: maxCropSizeHeight }}
                     crossOrigin="anonymous"
                   />
                 </ReactCrop>
               ) : (
                 <SectionLoading
                   classNames={{
-                    container: 'w-fit',
+                    container: 'w-fit h-full',
                   }}
                   message="Đang tải ảnh..."
                 />
@@ -416,42 +449,37 @@ export const CropImage = ({
             </div>
           </div>
 
-          {/* <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-            <h3 className="text-sm font-semibold text-gray-800">Kích thước vùng cắt</h3>
-            <p className="text-xs italic">
-              <span>Chiều rộng và chiều cao của vùng cắt không được nhỏ hơn lần lượt</span>
-              <span> </span>
-              <span>{minCropSizeWidth}</span>px và <span>{minCropSizeHeight}</span>px.
-            </p>
-            <div ref={inputsContainerRef} className="grid grid-cols-2 gap-3 mt-2">
-              <div>
-                <label className="block text-xs text-gray-800 mb-1">Chiều rộng (px)</label>
-                <input
-                  type="number"
-                  onChange={handleWidthChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none"
-                  min="50"
-                  step="1"
-                  name={EInputNames.CUSTOM_WIDTH}
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-gray-800 mb-1">Chiều cao (px)</label>
-                <input
-                  type="number"
-                  onChange={handleHeightChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none"
-                  min="50"
-                  step="1"
-                  name={EInputNames.CUSTOM_HEIGHT}
-                />
+          <div className="min-w-[200px] flex flex-col items-stretch w-1/2 max-h-[calc(90vh-0px)] overflow-y-auto p-3 bg-white rounded-lg text-gray-600">
+            <div className="p-2 bg-gray-100 rounded-lg">
+              <h3 className="text-sm font-semibold text-gray-800">Kích thước vùng cắt</h3>
+              <div ref={inputsContainerRef} className="grid grid-cols-2 gap-3 mt-2">
+                <div>
+                  <label className="block text-xs text-gray-800 mb-1">Chiều rộng (px)</label>
+                  <input
+                    type="number"
+                    onChange={handleWidthChange}
+                    className="xs:py-1 w-full px-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none"
+                    min="50"
+                    step="1"
+                    name={EInputNames.CUSTOM_WIDTH}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-800 mb-1">Chiều cao (px)</label>
+                  <input
+                    type="number"
+                    onChange={handleHeightChange}
+                    className="xs:py-1 w-full px-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none"
+                    min="50"
+                    step="1"
+                    name={EInputNames.CUSTOM_HEIGHT}
+                  />
+                </div>
               </div>
             </div>
-          </div> */}
 
-          <div className="min-w-[200px] flex flex-col items-stretch w-1/2 h-[70vh] p-3 bg-white rounded-lg text-gray-600">
-            <div>
-              <p className="font-bold text-sm text-center">Ảnh bạn cắt sẽ xuất hiện ở đây</p>
+            <div className="md:py-3">
+              <p className="font-bold text-xs text-center mt-4">Ảnh bạn cắt sẽ xuất hiện ở đây</p>
               {editedImages.length > 0 ? (
                 <EditedImages
                   editedImages={editedImages}
@@ -483,14 +511,14 @@ export const CropImage = ({
             <div className="mt-4">
               <div className="flex gap-y-2 gap-x-2 flex-col">
                 <button
-                  className="w-full h-10 rounded text-white bg-gray-400 font-bold hover:bg-gray-500 transition-colors disabled:opacity-50"
+                  className="w-full h-8 rounded text-white bg-gray-400 font-bold hover:bg-gray-500 transition-colors disabled:opacity-50"
                   onClick={onClose}
                   disabled={!completedCrop || isCropping}
                 >
                   Hủy
                 </button>
                 <button
-                  className="flex items-center justify-center gap-2 w-full h-10 rounded bg-pink-cl text-white font-bold active:scale-90 transition-colors disabled:opacity-50"
+                  className="flex items-center justify-center gap-2 w-full h-8 rounded bg-pink-cl text-white font-bold active:scale-90 transition-colors disabled:opacity-50"
                   onClick={handleCrop}
                   disabled={!completedCrop || isCropping}
                 >
@@ -528,7 +556,7 @@ export const CropImage = ({
               </div>
               <div className="w-full pt-1 mt-2">
                 <button
-                  className="flex items-center justify-center gap-2 w-full h-10 flex-1 px-4 rounded bg-pink-cl text-white font-bold active:scale-90 transition-colors disabled:opacity-50"
+                  className="flex items-center justify-center gap-2 w-full h-8 flex-1 px-4 rounded bg-pink-cl text-white font-bold active:scale-90 transition-colors disabled:opacity-50"
                   onClick={navToEditPage}
                   disabled={!completedCrop || isCropping}
                   type="button"

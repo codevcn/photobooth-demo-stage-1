@@ -410,7 +410,13 @@ const ElementLayerProvider = ({ children }: { children: React.ReactNode }) => {
 const PageWrapper = () => {
   const [error, setError] = useState<string | null>(null)
   const { productImages, setProductImages } = useProductImageContext()
-  const { editedImages: printedImages } = useEditedImageContext()
+  // const { editedImages: printedImages } = useEditedImageContext()
+  const printedImages: TPrintedImage[] = [
+    {
+      id: 'https://photobooth-public.s3.ap-southeast-1.amazonaws.com/Pic+(1).jpg',
+      url: 'https://photobooth-public.s3.ap-southeast-1.amazonaws.com/Pic+(1).jpg',
+    },
+  ]
   const [fetched, setFetched] = useState<boolean>(false)
   const navigate = useNavigate()
 

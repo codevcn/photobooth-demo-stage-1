@@ -64,7 +64,7 @@ export const getCommonContants = <R>(type: TCommonContentsType): R => {
     case 'MAX_HEIGHT_CROP_DISPLAY':
       return 250 as R
     case 'MAX_CROP_PREVIEWS_COUNT':
-      return 6 as R
+      return 4 as R
     case 'MIN_CROP_SIZE_WIDTH':
       return 50 as R
     case 'MIN_CROP_SIZE_HEIGHT':
