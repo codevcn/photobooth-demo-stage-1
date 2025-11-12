@@ -40,7 +40,11 @@ interface EditAreaProps {
   onRemovePrintedImages: (ids: string[]) => void
   htmlToCanvasEditorRef: React.RefObject<HTMLDivElement>
   cartCount: number
-  handleAddToCart: (elementsVisualState: TElementsVisualState) => void
+  handleAddToCart: (
+    elementsVisualState: TElementsVisualState,
+    onDoneAdd: () => void,
+    onError: (error: Error) => void
+  ) => void
   mockupId: string | null
   selectedColor: string
 }
@@ -148,7 +152,7 @@ const EditArea: React.FC<EditAreaProps> = ({
   //   }
   // }
 
-  const beforeAddToCart = () => {
+  const beforeAddToCart = (onDoneAdd: () => void, onError: (error: Error) => void) => {
     if (checkIfAnyElementOutOfBounds()) {
       toast.warning('Vui lòng đảm bảo tất cả phần tử nằm trong vùng in trước khi thêm vào giỏ hàng')
       return
@@ -156,7 +160,11 @@ const EditArea: React.FC<EditAreaProps> = ({
     cancelSelectingElement()
     setTimeout(() => {
       // Thu thập visual states của tất cả elements
-      handleAddToCart(collectMockupVisualStates(htmlToCanvasEditorRef.current || undefined))
+      handleAddToCart(
+        collectMockupVisualStates(htmlToCanvasEditorRef.current || undefined),
+        onDoneAdd,
+        onError
+      )
     }, 0)
   }
 

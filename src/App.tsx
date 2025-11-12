@@ -15,10 +15,10 @@ function App() {
   const { clearAllEditedImages } = useEditedImageContext()
 
   useEffect(() => {
-    // LocalStorageHelper.clearAllMockupImages()
-    // return () => {
-    //   clearAllEditedImages()
-    // }
+    LocalStorageHelper.clearAllMockupImages()
+    return () => {
+      clearAllEditedImages()
+    }
   }, [])
 
   return (
@@ -33,7 +33,7 @@ function App() {
           pauseOnHover
           draggable
           theme="colored" // "light" | "dark" | "colored"
-          toastStyle={{ color: '#000' }}
+          toastStyle={{ color: '#fff', fontWeight: 'bold' }}
         />
         <Routes>
           <Route path="/" element={<ScanQRPage />} />

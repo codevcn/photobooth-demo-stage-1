@@ -1,25 +1,48 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { ShoppingCart, Check } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { createPortal } from 'react-dom'
 
 interface ActionBarProps {
   cartCount: number
-  onAddToCart: () => void
+  onAddToCart: (onDoneAdd: () => void, onError: (error: Error) => void) => void
 }
 
 const ActionBar: React.FC<ActionBarProps> = ({ cartCount, onAddToCart }) => {
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const navigate = useNavigate()
+
+  const handleAddToCart = () => {
+    setIsLoading(true)
+    onAddToCart(
+      () => {
+        setIsLoading(false)
+      },
+      (error) => {
+        setIsLoading(false)
+      }
+    )
+  }
 
   return (
     <div className="flex items-center gap-3">
+      {isLoading &&
+        createPortal(
+          <div className="fixed inset-0 flex items-center justify-center z-50 animate-pop-in p-4">
+            <div className="bg-black/50 absolute inset-0 z-10"></div>
+            <video autoPlay loop muted playsInline className="z-20 relative">
+              <source src="/videos/add-to-cart-loading.webm" type="video/webm" />
+            </video>
+          </div>,
+          document.body
+        )}
       <button
-        onClick={onAddToCart}
+        onClick={handleAddToCart}
         className="flex-1 bg-pink-cl active:bg-pink-hover-cl text-white font-bold py-2 px-4 rounded-xl shadow-lg touch-target flex items-center justify-center gap-2 text-lg"
       >
         <Check size={24} strokeWidth={3} />
         <span>Thêm vào giỏ hàng</span>
       </button>
-
       <button
         onClick={() => navigate('/payment')}
         className="relative bg-white border-2 border-gray-200 p-2 rounded-xl shadow-md touch-target active:border-pink-cl transition-colors"

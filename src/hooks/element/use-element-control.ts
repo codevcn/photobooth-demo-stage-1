@@ -6,7 +6,7 @@ import { useContext, useEffect, useState } from 'react'
 import { ElementLayerContext } from '@/context/global-context'
 import { swapArrayItems } from '@/utils/helpers'
 import { getInitialContants } from '@/utils/contants'
-import { TElementVisualBaseState } from '@/utils/types'
+import { TElementLayerState, TElementVisualBaseState } from '@/utils/types'
 
 const fixedMaxZoom: number = 2
 const fixedMinZoom: number = 0.3
@@ -123,14 +123,30 @@ export const useElementControl = (
     }
     if (zindex) {
       setElementLayers((pre) => {
-        const copiedArray = [...pre]
-        const currentIndex = copiedArray.findIndex((item) => item.elementId === elementId)
+        // Tìm index hiện tại của element
+        const currentIndex = pre.findIndex((layer) => layer.elementId === elementId)
         if (currentIndex === -1) return pre
-        const isPositiveZindex = zindex > 0
-        if (isPositiveZindex && currentIndex === copiedArray.length - 1) return pre
-        if (!isPositiveZindex && currentIndex === 0) return pre
-        swapArrayItems(copiedArray, currentIndex, currentIndex + (isPositiveZindex ? 1 : -1))
-        return copiedArray
+
+        const isMovingUp = zindex > 0
+        
+        // Kiểm tra boundary
+        if (isMovingUp && currentIndex === pre.length - 1) return pre // Đã ở trên cùng
+        if (!isMovingUp && currentIndex === 0) return pre // Đã ở dưới cùng
+
+        // Tạo mảng mới và swap vị trí
+        const updatedLayers = [...pre]
+        const targetIndex = currentIndex + (isMovingUp ? 1 : -1)
+        
+        // Swap
+        const temp = updatedLayers[currentIndex]
+        updatedLayers[currentIndex] = updatedLayers[targetIndex]
+        updatedLayers[targetIndex] = temp
+
+        // Cập nhật lại index cho tất cả layers
+        return updatedLayers.map((layer, idx) => ({
+          ...layer,
+          index: idx * getInitialContants<number>('ELEMENT_ZINDEX_STEP') + 1,
+        }))
       })
     }
   }

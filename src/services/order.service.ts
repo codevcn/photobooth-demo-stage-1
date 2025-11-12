@@ -98,6 +98,17 @@ class OrderService {
     return response.data
   }
 
+  async mockCreateOrder(...p: any): Promise<CreateOrderResponse> {
+    await new Promise((resolve) => setTimeout(() => resolve(true), 500)) // Simulate delay
+    return {
+      id: 12345,
+      order_number: 'PSHOP-67890',
+      total_amount: 250000,
+      status: 'pending',
+      created_at: new Date().toISOString(),
+    }
+  }
+
   async submitOrder(): Promise<void> {
     return new Promise((resolve) => setTimeout(() => resolve(), 1000))
   }

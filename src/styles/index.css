@@ -199,7 +199,6 @@
 .STYLE-animation-loading-shapes {
   width: 40px;
   height: 40px;
-  color: var(--vcn-pink-cl);
   background: linear-gradient(currentColor 0 0), linear-gradient(currentColor 0 0),
     linear-gradient(currentColor 0 0), linear-gradient(currentColor 0 0);
   background-size: 21px 21px;

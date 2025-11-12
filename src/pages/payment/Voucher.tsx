@@ -8,10 +8,15 @@ interface VoucherSectionProps {
   onVoucherApplied: (voucher: TVoucher | null, discount: number) => void
 }
 
+type TDiscountMessage = {
+  message: string
+  status: 'success' | 'error'
+}
+
 export const VoucherSection = ({ orderSubtotal, onVoucherApplied }: VoucherSectionProps) => {
   const [discountCode, setDiscountCode] = useState('')
   const [appliedVoucher, setAppliedVoucher] = useState<TVoucher | null>(null)
-  const [discountMessage, setDiscountMessage] = useState('')
+  const [discountMessage, setDiscountMessage] = useState<TDiscountMessage>()
   const [isApplyingVoucher, setIsApplyingVoucher] = useState(false)
   const [isFetchingVouchers, setIsFetchingVouchers] = useState(false)
   const [availableVouchers, setAvailableVouchers] = useState<TVoucher[]>([])
@@ -33,31 +38,31 @@ export const VoucherSection = ({ orderSubtotal, onVoucherApplied }: VoucherSecti
   // Hàm áp dụng voucher
   const applyVoucher = async () => {
     if (!discountCode.trim()) {
-      setDiscountMessage('✗ Vui lòng nhập mã giảm giá')
+      setDiscountMessage({ message: 'Vui lòng nhập mã giảm giá', status: 'error' })
       return
     }
 
     setIsApplyingVoucher(true)
-    setDiscountMessage('')
+    setDiscountMessage(undefined)
 
     try {
       const result = await voucherService.checkVoucherValidity(discountCode.trim(), orderSubtotal)
 
       if (result.success && result.voucher) {
         setAppliedVoucher(result.voucher)
-        setDiscountMessage(result.message)
+        setDiscountMessage({ message: result.message, status: 'success' })
 
         // Tính discount và notify parent component
         const discount = voucherService.calculateDiscount(orderSubtotal, result.voucher)
         onVoucherApplied(result.voucher, discount)
       } else {
         setAppliedVoucher(null)
-        setDiscountMessage(result.message)
+        setDiscountMessage({ message: result.message, status: 'error' })
         onVoucherApplied(null, 0)
       }
     } catch (error) {
       setAppliedVoucher(null)
-      setDiscountMessage('✗ Có lỗi xảy ra khi kiểm tra mã giảm giá')
+      setDiscountMessage({ message: 'Có lỗi xảy ra khi kiểm tra mã giảm giá', status: 'error' })
       onVoucherApplied(null, 0)
     } finally {
       setIsApplyingVoucher(false)
@@ -68,7 +73,7 @@ export const VoucherSection = ({ orderSubtotal, onVoucherApplied }: VoucherSecti
   const removeVoucher = () => {
     setAppliedVoucher(null)
     setDiscountCode('')
-    setDiscountMessage('')
+    setDiscountMessage(undefined)
     onVoucherApplied(null, 0)
   }
 
@@ -115,7 +120,7 @@ export const VoucherSection = ({ orderSubtotal, onVoucherApplied }: VoucherSecti
         </div>
       )}
 
-      <div className="flex gap-2 w-full">
+      <div className="flex gap-2 w-full md:flex-col md:items-end">
         <input
           type="text"
           value={discountCode}
@@ -123,7 +128,7 @@ export const VoucherSection = ({ orderSubtotal, onVoucherApplied }: VoucherSecti
           onKeyDown={(e) => e.key === 'Enter' && !isApplyingVoucher && applyVoucher()}
           placeholder="Nhập mã khuyến mãi"
           disabled={!!appliedVoucher || isApplyingVoucher}
-          className="flex-1 h-[40px] w-[100px] px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-cl focus:border-transparent transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
+          className="flex-1 h-[40px] w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-cl focus:border-transparent transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
         />
         <button
           onClick={applyVoucher}
@@ -142,11 +147,45 @@ export const VoucherSection = ({ orderSubtotal, onVoucherApplied }: VoucherSecti
       </div>
       {discountMessage && !appliedVoucher && (
         <p
-          className={`mt-2 text-sm ${
-            discountMessage.startsWith('✓') ? 'text-green-600' : 'text-red-500'
+          className={`mt-2 text-sm flex items-center gap-1 ${
+            discountMessage.status === 'success' ? 'text-green-600' : 'text-red-500'
           }`}
         >
-          {discountMessage}
+          {discountMessage.status === 'success' ? (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="lucide lucide-check-circle-icon lucide-check-circle"
+            >
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <path d="m9 11 3 3L22 4" />
+            </svg>
+          ) : (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="lucide lucide-triangle-alert-icon lucide-triangle-alert"
+            >
+              <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
+              <path d="M12 9v4" />
+              <path d="M12 17h.01" />
+            </svg>
+          )}
+          <span>{discountMessage.message}</span>
         </p>
       )}
 

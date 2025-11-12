@@ -35,8 +35,7 @@ const PaymentPage = () => {
   const [showModal, setShowModal] = useState(false)
   const navigate = useNavigate()
   const [selectedImage, setSelectedImage] = useState<string>()
-  // const { productImages } = useProductImageContext()
-  const productImages = productImagesDev
+  const { productImages } = useProductImageContext()
 
   // Hàm tính subtotal (tổng tiền trước giảm giá voucher)
   const calculateSubtotal = (): number => {
@@ -73,7 +72,6 @@ const PaymentPage = () => {
 
   const loadCartItems = () => {
     const savedItems = LocalStorageHelper.getSavedMockupData()
-    console.log('>>> saved items:', savedItems)
     if (savedItems) {
       const productItems: TProductItem[] = []
       for (const product of savedItems.productsInCart) {
@@ -151,21 +149,23 @@ const PaymentPage = () => {
   }, [])
 
   return cartItems && cartItems.length > 0 ? (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 pb-12">
+    <div className="min-h-screen pb-12 md:pb-6">
       {/* Header */}
       <header className="bg-white shadow-sm top-0 z-10">
-        <div className="max-w-md mx-auto px-4 py-2">
-          <h1 className="text-2xl font-bold text-gray-900">Thanh toán</h1>
-          <p className="text-sm text-gray-500 mt-1">{cartItems.length} sản phẩm trong giỏ hàng</p>
+        <div className="max-w-4xl mx-auto px-4 md:px-6 lg:px-8 py-2 md:py-4">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Thanh toán</h1>
+          <p className="text-sm md:text-base text-gray-500 mt-1">
+            {cartItems.length} sản phẩm trong giỏ hàng
+          </p>
         </div>
       </header>
 
       {/* Main Content */}
-      <div className="flex flex-col gap-2 max-w-md mx-auto px-2 pt-2 pb-6">
+      <div className="flex flex-col gap-2 md:gap-4 max-w-6xl mx-auto px-2 md:px-6 lg:px-8 pt-2 md:pt-4 pb-6 md:pb-8">
         <div>
           <button
             onClick={backToEditPage}
-            className="flex items-center gap-2 py-1 px-2 text-sm bg-pink-cl rounded-md text-white font-bold active:scale-95 transition"
+            className="flex items-center gap-2 py-1 md:py-2 px-2 md:px-4 text-sm md:text-base bg-pink-cl rounded-md text-white font-bold active:scale-95 transition"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -177,7 +177,7 @@ const PaymentPage = () => {
               strokeWidth="3"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="lucide lucide-arrow-left-icon lucide-arrow-left"
+              className="lucide lucide-arrow-left-icon lucide-arrow-left md:w-5 md:h-5"
             >
               <path d="m12 19-7-7 7-7" />
               <path d="M19 12H5" />
@@ -186,54 +186,103 @@ const PaymentPage = () => {
           </button>
         </div>
 
-        {/* Product List */}
-        <ProductList
-          cartItems={cartItems}
-          onUpdateQuantity={updateQuantity}
-          onRemoveProduct={removeProductFromCart}
-          onShowProductImage={handleShowProductImageModal}
-          onEditMockup={handleEditMockup}
-        />
+        {/* Layout: 2 columns on medium+ screens */}
+        <div className="flex flex-col md:flex-row gap-2">
+          {/* Left Column: Product List */}
+          <div className="md:w-[55%] w-full">
+            <ProductList
+              cartItems={cartItems}
+              onUpdateQuantity={updateQuantity}
+              onRemoveProduct={removeProductFromCart}
+              onShowProductImage={handleShowProductImageModal}
+              onEditMockup={handleEditMockup}
+            />
 
-        {/* Discount Code Section */}
-        <VoucherSection
-          orderSubtotal={calculateSubtotal()}
-          onVoucherApplied={handleVoucherApplied}
-        />
-
-        {/* Order Summary */}
-        <section className="bg-white rounded-2xl shadow-sm p-4 space-y-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Tạm tính</span>
-            <span className="font-medium text-gray-900">
-              <span>{formatNumberWithCommas(subtotal)}</span>
-              <span> VND</span>
-            </span>
-          </div>
-          {appliedVoucher && discount > 0 && (
-            <div className="flex justify-between text-sm">
-              <span className="text-green-600">Giảm giá ({appliedVoucher.code})</span>
-              <span className="font-medium text-green-600">
-                <span>-</span>
-                <span>{formatNumberWithCommas(discount)}</span>
-                <span> VND</span>
-              </span>
-            </div>
-          )}
-          <div className="border-t border-gray-200 pt-2 mt-2">
-            <div className="flex justify-between">
-              <span className="font-semibold text-gray-900">Tổng cộng</span>
-              <span className="text-xl font-bold text-primary">
-                <span>{formatNumberWithCommas(total)}</span>
-                <span> VND</span>
-              </span>
+            {/* Discount Code Section - Mobile */}
+            <div className="md:hidden mt-2">
+              <VoucherSection
+                orderSubtotal={calculateSubtotal()}
+                onVoucherApplied={handleVoucherApplied}
+              />
             </div>
           </div>
-        </section>
+
+          {/* Right Column: Summary & Voucher (Sticky on large screens) */}
+          <div className="md:w-[45%] w-full flex flex-col gap-2 md:gap-4">
+            {/* Discount Code Section - Desktop */}
+            <div className="hidden md:block">
+              <VoucherSection
+                orderSubtotal={calculateSubtotal()}
+                onVoucherApplied={handleVoucherApplied}
+              />
+            </div>
+
+            {/* Order Summary */}
+            <section className="bg-white rounded-2xl shadow-sm p-4 md:p-5 space-y-2 md:sticky md:top-4">
+              <h3 className="text-base md:text-lg font-bold text-gray-900 mb-2 md:mb-3">
+                Tổng đơn hàng
+              </h3>
+              <div className="flex justify-between text-xs md:text-sm">
+                <span className="text-gray-600">Tạm tính</span>
+                <span className="font-medium text-gray-900">
+                  <span>{formatNumberWithCommas(subtotal)}</span>
+                  <span> VND</span>
+                </span>
+              </div>
+              {appliedVoucher && discount > 0 && (
+                <div className="flex justify-between text-xs md:text-sm">
+                  <span className="text-green-600">Giảm giá ({appliedVoucher.code})</span>
+                  <span className="font-medium text-green-600">
+                    <span>-</span>
+                    <span>{formatNumberWithCommas(discount)}</span>
+                    <span> VND</span>
+                  </span>
+                </div>
+              )}
+              <div className="border-t border-gray-200 pt-2 mt-2">
+                <div className="flex justify-between">
+                  <span className="font-semibold text-gray-900 text-sm md:text-base">
+                    Tổng cộng
+                  </span>
+                  <span className="text-lg md:text-xl font-bold text-primary">
+                    <span>{formatNumberWithCommas(total)}</span>
+                    <span> VND</span>
+                  </span>
+                </div>
+              </div>
+
+              {/* Checkout Button - Desktop (in summary) */}
+              <div className="hidden md:block mt-3 md:mt-4">
+                <button
+                  onClick={() => setShowModal(true)}
+                  className="flex items-center justify-center gap-2 w-full mt-4 h-[44px] bg-pink-cl hover:scale-95 text-white font-bold text-base rounded-xl shadow-lg hover:shadow-xl active:scale-95 transition duration-200"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="lucide lucide-banknote-icon lucide-banknote"
+                  >
+                    <rect width="20" height="12" x="2" y="6" rx="2" />
+                    <circle cx="12" cy="12" r="2" />
+                    <path d="M6 12h.01M18 12h.01" />
+                  </svg>
+                  <span>Tiến hành thanh toán</span>
+                </button>
+              </div>
+            </section>
+          </div>
+        </div>
       </div>
 
-      {/* Fixed Checkout Button */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg px-2">
+      {/* Fixed Checkout Button - Mobile only */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg px-2">
         <div className="w-full mx-auto px-2 py-2">
           <button
             onClick={() => setShowModal(true)}
@@ -246,9 +295,9 @@ const PaymentPage = () => {
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
               className="lucide lucide-banknote-icon lucide-banknote"
             >
               <rect width="20" height="12" x="2" y="6" rx="2" />
@@ -279,18 +328,18 @@ const PaymentPage = () => {
     <div className="min-h-screen flex flex-col">
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-sm shadow-sm">
-        <div className="max-w-md mx-auto px-4 py-3">
-          <h1 className="text-2xl font-bold text-gray-900">Giỏ hàng</h1>
-          <p className="text-sm text-gray-500 mt-1">Chưa có sản phẩm nào</p>
+        <div className="max-w-4xl mx-auto px-4 md:px-6 lg:px-8 py-3 md:py-4">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Giỏ hàng</h1>
+          <p className="text-sm md:text-base text-gray-500 mt-1">Chưa có sản phẩm nào</p>
         </div>
       </header>
 
       {/* Empty State Content */}
-      <div className="flex-1 flex items-center justify-center px-4 pb-20">
-        <div className="max-w-sm w-full text-center">
+      <div className="flex-1 flex items-center justify-center px-4 md:px-6 lg:px-8 pb-20 md:pb-10">
+        <div className="max-w-sm md:max-w-md lg:max-w-lg w-full text-center">
           {/* Icon */}
-          <div className="relative mb-8">
-            <div className="relative bg-white rounded-full p-8 shadow-md mx-auto w-40 h-40 flex items-center justify-center">
+          <div className="relative mb-8 md:mb-10 lg:mb-12">
+            <div className="relative bg-white rounded-full p-8 md:p-10 lg:p-12 shadow-md md:shadow-lg mx-auto w-40 h-40 md:w-48 md:h-48 lg:w-56 lg:h-56 flex items-center justify-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="80"
@@ -301,7 +350,7 @@ const PaymentPage = () => {
                 strokeWidth="1.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="text-gray-300"
+                className="text-gray-300 md:w-24 md:h-24 lg:w-28 lg:h-28"
               >
                 <circle cx="8" cy="21" r="1" />
                 <circle cx="19" cy="21" r="1" />
@@ -311,18 +360,20 @@ const PaymentPage = () => {
           </div>
 
           {/* Text */}
-          <h2 className="text-2xl font-bold text-gray-800 mb-3">Giỏ hàng trống</h2>
-          <p className="text-gray-500 mb-8 leading-relaxed">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-800 mb-3 md:mb-4">
+            Giỏ hàng trống
+          </h2>
+          <p className="text-gray-500 md:text-lg mb-8 md:mb-10 lg:mb-12 leading-relaxed px-4">
             Hãy quay lại trang chỉnh sửa để tạo và thêm sản phẩm yêu thích của bạn vào giỏ hàng nhé!
           </p>
 
           {/* Action Button */}
           <button
             onClick={() => navigate('/edit')}
-            className="group relative w-full bg-pink-cl hover:bg-dark-pink-cl text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl active:scale-95 transition-all duration-200 overflow-hidden"
+            className="group relative w-full md:max-w-md lg:max-w-lg mx-auto bg-pink-cl hover:bg-dark-pink-cl text-white font-bold py-4 md:py-5 px-8 md:px-10 rounded-xl shadow-lg hover:shadow-xl active:scale-95 transition-all duration-200 overflow-hidden"
           >
             <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity"></div>
-            <div className="relative flex items-center justify-center gap-3">
+            <div className="relative flex items-center justify-center gap-3 md:gap-4">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -333,12 +384,12 @@ const PaymentPage = () => {
                 strokeWidth="2.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="group-hover:-translate-x-1 transition-transform"
+                className="group-hover:-translate-x-1 transition-transform md:w-6 md:h-6"
               >
                 <path d="m12 19-7-7 7-7" />
                 <path d="M19 12H5" />
               </svg>
-              <span className="text-lg">Quay lại trang chỉnh sửa</span>
+              <span className="text-lg md:text-xl">Quay lại trang chỉnh sửa</span>
             </div>
           </button>
         </div>

@@ -15,6 +15,7 @@ import { toast } from 'react-toastify'
 import { PaymentMethodSelector } from './PaymentMethod'
 import { ShippingInfoForm, TFormErrors } from './ShippingInfo'
 import { LocalStorageHelper } from '@/utils/localstorage'
+import { SectionLoading } from '@/components/custom/Loading'
 
 const getColorByPaymentMethod = (method: TPaymentType): string => {
   switch (method) {
@@ -32,22 +33,22 @@ type TPaymentStatus = {
   reason?: string
 }
 
-interface EndOfPaymentProps {
-  total: number
+type TEndOfPaymentData = {
   countdownDuration: number
   QRCodeURL: string
   paymentMethod: {
     method: TPaymentType
     title: string
   }
+  total: number
 }
 
-export const EndOfPayment: React.FC<EndOfPaymentProps> = ({
-  total,
-  countdownDuration,
-  QRCodeURL,
-  paymentMethod,
-}) => {
+interface EndOfPaymentProps {
+  data: TEndOfPaymentData
+}
+
+export const EndOfPayment: React.FC<EndOfPaymentProps> = ({ data }) => {
+  const { total, countdownDuration, QRCodeURL, paymentMethod } = data
   const { method, title } = paymentMethod
   const colorByPaymentMethod = getColorByPaymentMethod(method)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -97,7 +98,7 @@ export const EndOfPayment: React.FC<EndOfPaymentProps> = ({
   return (
     <div ref={containerRef} className="flex flex-col items-center justify-center px-6 py-6">
       <div className="relative bg-white rounded-2xl shadow flex flex-col items-center w-full p-4 border-2 border-gray-200">
-        <div className="flex gap-2 justify-between items-start w-full">
+        <div className="flex gap-2 justify-between items-start w-full min-w-[280px]">
           <p className="text-base text-gray-800 font-bold mb-4">Tổng tiền</p>
           <p className="text-3xl font-bold text-red-600 mb-1">
             <span>{formatNumberWithCommas(total)}</span>
@@ -197,11 +198,6 @@ export const EndOfPayment: React.FC<EndOfPaymentProps> = ({
   )
 }
 
-type TEndOfPaymentData = {
-  countdownDuration: number
-  QRCodeURL: string
-}
-
 interface PaymentModalProps {
   show: boolean
   paymentInfo: {
@@ -292,7 +288,7 @@ export const PaymentModal = ({ show, paymentInfo, onHideShow, voucherCode }: Pay
     try {
       // Step 1: Create order
       setConfirmingMessage('Đang tạo đơn hàng...')
-      const orderResponse = await orderService.createOrder(
+      const orderResponse = await orderService.mockCreateOrder(
         savedData.productsInCart,
         shippingInfo,
         paymentMethod,
@@ -313,12 +309,22 @@ export const PaymentModal = ({ show, paymentInfo, onHideShow, voucherCode }: Pay
         setEndOfPayment({
           countdownDuration: qrResponse.expires_in,
           QRCodeURL: qrResponse.qr_code_url,
+          paymentMethod: {
+            method: paymentMethod,
+            title: capitalizeFirstLetter(paymentMethod),
+          },
+          total,
         })
       } else {
         // COD: No QR needed, just show success
         setEndOfPayment({
           countdownDuration: 0,
           QRCodeURL: '',
+          paymentMethod: {
+            method: paymentMethod,
+            title: capitalizeFirstLetter(paymentMethod),
+          },
+          total,
         })
       }
     } catch (error) {
@@ -335,13 +341,17 @@ export const PaymentModal = ({ show, paymentInfo, onHideShow, voucherCode }: Pay
       className="fixed inset-0 flex items-center justify-center z-50 animate-pop-in p-4"
     >
       <div onClick={() => onHideShow(false)} className="bg-black/50 absolute inset-0 z-10"></div>
-      <div className="flex flex-col pt-12 bg-white rounded-2xl z-20 overflow-hidden relative shadow-2xl w-full max-w-[420px] max-h-[90vh] animate-in slide-in-from-bottom duration-200">
+      <div className="flex flex-col pt-12 bg-white rounded-2xl z-20 overflow-hidden relative shadow-2xl w-fit max-w-[90vw] max-h-[90vh] animate-in slide-in-from-bottom duration-200">
         {confirming && (
-          <div className="absolute w-full h-full top-0 text-white left-0 bg-black/50 z-20">
-            <div className="flex flex-col items-center justify-center absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-              <div className="animate-spin border-t-4 border-pink-cl rounded-full h-12 w-12"></div>
-              <p className="mt-2 font-bold">{confirmingMessage}</p>
-            </div>
+          <div className="absolute flex justify-center items-center w-full h-full top-0 text-white left-0 bg-black/50 z-30">
+            <SectionLoading
+              message={confirmingMessage}
+              classNames={{
+                container: 'text-white',
+                message: 'text-white',
+                shapesContainer: 'text-white',
+              }}
+            />
           </div>
         )}
 
@@ -397,15 +407,7 @@ export const PaymentModal = ({ show, paymentInfo, onHideShow, voucherCode }: Pay
             </button>
           </div>
         </div>
-
-        <div style={{ display: endOfPayment ? 'block' : 'none' }}>
-          <EndOfPayment
-            total={total}
-            countdownDuration={endOfPayment?.countdownDuration || 0}
-            QRCodeURL={endOfPayment?.QRCodeURL || ''}
-            paymentMethod={{ method: paymentMethod, title: capitalizeFirstLetter(paymentMethod) }}
-          />
-        </div>
+        {endOfPayment && <EndOfPayment data={endOfPayment} />}
       </div>
     </div>
   )

@@ -123,7 +123,7 @@ export const PrintedImageElement = ({
   }
 
   const handleAddElementLayer = () => {
-    addToElementLayers({ elementId: id })
+    addToElementLayers({ elementId: id, index: zindex })
   }
 
   useEffect(() => {

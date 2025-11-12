@@ -14,7 +14,7 @@ export const useHtmlToCanvas = () => {
       if (!editor) return
       try {
         const canvas = await domToCanvas(editor, {
-          scale: 3,
+          scale: 6,
           quality: 1,
           type: 'image/webp',
           width: editor.getBoundingClientRect().width,

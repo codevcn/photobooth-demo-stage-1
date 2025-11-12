@@ -70,30 +70,21 @@ const ScanQRPage = () => {
   }, [editedImages])
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white">
-      <div className="p-6">
-        <div className="max-w-md mx-auto">
-          <div className="flex items-center justify-center gap-3 mb-8 mt-4 animate-fade-in-down">
-            <div className="bg-pink-500 p-3 rounded-xl shadow-lg animate-float">
-              <Camera className="w-8 h-8 text-white" />
-            </div>
-            <h1 className="text-3xl font-bold text-gray-800">Quét mã QR</h1>
+    <div className="flex flex-col items-center h-screen p-4">
+      <div>
+        <div className="flex items-center justify-center gap-3 mt-4 animate-fade-in-down">
+          <div className="bg-pink-500 p-3 rounded-xl shadow-lg animate-float">
+            <Camera className="w-8 h-8 text-white" />
           </div>
+          <h1 className="text-3xl font-bold text-gray-800">Quét mã QR</h1>
+        </div>
 
-          <div className="animate-scale-in" style={{ animationDelay: '0.1s' }}>
-            <QRScanner onScanSuccess={handleData} showCropper={showCropper} />
-          </div>
+        <div className="animate-scale-in mt-4" style={{ animationDelay: '0.1s' }}>
+          <QRScanner onScanSuccess={handleData} showCropper={showCropper} />
+        </div>
 
-          <div className="animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-            <ImageSelector onImageSelect={handleData} />
-          </div>
-
-          <div
-            className="mt-8 text-center text-gray-600 text-sm animate-fade-in-up"
-            style={{ animationDelay: '0.5s' }}
-          >
-            <p>Quét mã QR hoặc chọn hình ảnh từ thiết bị</p>
-          </div>
+        <div className="animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+          <ImageSelector onImageSelect={handleData} />
         </div>
       </div>
 

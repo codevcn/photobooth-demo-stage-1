@@ -137,7 +137,11 @@ const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
     removeFromElementLayers(ids)
   }
 
-  const handleAddToCart = (elemtnsVisualState: TElementsVisualState) => {
+  const handleAddToCart = (
+    elemtnsVisualState: TElementsVisualState,
+    onDoneAdd: () => void,
+    onError: (error: Error) => void
+  ) => {
     if (!sessionId) return
     handleSaveHtmlAsImage(
       (imageDataUrl) => {
@@ -149,11 +153,13 @@ const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
         )
         toast.success('Đã thêm vào giỏ hàng')
         setCartCount(LocalStorageHelper.countSavedMockupImages())
+        onDoneAdd()
       },
       (error) => {
         console.error('Error saving mockup image:', error)
         toast.warning(error.message || 'Không thể lưu mockup, không thể thêm sản phẩm vào giỏ hàng')
         setCartCount(LocalStorageHelper.countSavedMockupImages())
+        onError(error)
       },
       () => {}
     )
@@ -217,7 +223,7 @@ const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
 
   const restoreMockupVisualStates = (mockupId: string, sessionId: string) => {
     const savedMockup = LocalStorageHelper.getSavedMockupData()
-    if (!savedMockup || savedMockup.sessionId !== sessionId) {
+    if (!savedMockup) {
       return
     }
     const cartItems = savedMockup.productsInCart
@@ -390,7 +396,9 @@ const ElementLayerProvider = ({ children }: { children: React.ReactNode }) => {
       if (prev.some((el) => el.elementId === elementLayer.elementId)) {
         return prev
       }
-      return [...prev, elementLayer]
+      const updatedLayers = [...prev, elementLayer]
+      updatedLayers.sort((a, b) => a.index - b.index)
+      return updatedLayers
     })
   }
 
@@ -410,13 +418,7 @@ const ElementLayerProvider = ({ children }: { children: React.ReactNode }) => {
 const PageWrapper = () => {
   const [error, setError] = useState<string | null>(null)
   const { productImages, setProductImages } = useProductImageContext()
-  // const { editedImages: printedImages } = useEditedImageContext()
-  const printedImages: TPrintedImage[] = [
-    {
-      id: 'https://photobooth-public.s3.ap-southeast-1.amazonaws.com/Pic+(1).jpg',
-      url: 'https://photobooth-public.s3.ap-southeast-1.amazonaws.com/Pic+(1).jpg',
-    },
-  ]
+  const { editedImages: printedImages } = useEditedImageContext()
   const [fetched, setFetched] = useState<boolean>(false)
   const navigate = useNavigate()
 

@@ -4,7 +4,6 @@ import './styles/theme.css'
 import './styles/index.css'
 import './styles/fonts.css'
 import './styles/animations.css'
-import './styles/responsive.css'
 import 'react-toastify/dist/ReactToastify.css'
 
 createRoot(document.getElementById('root')!).render(<App />)

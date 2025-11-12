@@ -115,7 +115,7 @@ export const TextElement = ({
   }
 
   const handleAddElementLayer = () => {
-    addToElementLayers({ elementId: id })
+    addToElementLayers({ elementId: id, index: zindex })
   }
 
   useEffect(() => {

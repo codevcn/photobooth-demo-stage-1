@@ -7,7 +7,8 @@ export default {
       screens: {
         xs: '376px', // Medium Phones
         sm: '481px', // Large Phones / Phablet
-        md: '601px', // Tablet portrait
+        smd: '590px', // Custom breakpoint
+        md: '671px', // Tablet portrait
         lg: '901px', // Tablet landscape
         xl: '1025px', // Laptop
         '2xl': '1201px', // Laptop & Desktop small

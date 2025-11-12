@@ -14,11 +14,11 @@ export const PaymentMethodSelector = ({
     <section className="flex flex-col gap-2">
       <h3 className="font-semibold text-gray-900 text-lg">Phương thức thanh toán</h3>
 
-      <div className="space-y-2">
+      <div className="grid-cols-1 grid smd:grid-cols-2 gap-x-2 gap-y-2 smd:gap-y-1">
         {/* Momo */}
         {selectedMethod === 'momo' ? (
-          <div className="bg-gradient-to-r from-pink-50 to-purple-50 border-2 border-pink-200 rounded-xl px-3 py-2">
-            <div className="flex items-center justify-between">
+          <div className="smd:row-span-2 flex items-center bg-gradient-to-r from-pink-50 to-purple-50 border-2 border-pink-200 rounded-xl px-3 py-2">
+            <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-3">
                 <div className="bg-[#A50064] rounded-lg p-2">
                   <img src="/images/logo/momo.png" alt="Momo" className="h-6 w-6" />
@@ -45,8 +45,8 @@ export const PaymentMethodSelector = ({
 
         {/* Zalo */}
         {selectedMethod === 'zalo' ? (
-          <div className="bg-gradient-to-r from-pink-50 to-purple-50 border-2 border-pink-200 rounded-xl px-3 py-2">
-            <div className="flex items-center justify-between">
+          <div className="smd:row-span-2 flex items-center bg-gradient-to-r from-pink-50 to-purple-50 border-2 border-pink-200 rounded-xl px-3 py-2">
+            <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-3">
                 <div className="bg-[#0144DB] rounded-lg p-2">
                   <img src="/images/logo/zalo.png" alt="Zalo" className="h-6 w-6" />
@@ -73,7 +73,7 @@ export const PaymentMethodSelector = ({
 
         {/* Cash on Delivery */}
         {selectedMethod === 'cod' ? (
-          <div className="bg-gradient-to-r from-pink-50 to-purple-50 border-2 border-pink-200 rounded-xl px-3 py-2">
+          <div className="smd:col-span-2 bg-gradient-to-r from-pink-50 to-purple-50 border-2 border-pink-200 rounded-xl px-3 py-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="bg-green-600 rounded-lg p-2">

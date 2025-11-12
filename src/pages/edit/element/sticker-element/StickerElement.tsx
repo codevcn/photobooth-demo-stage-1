@@ -120,7 +120,7 @@ export const StickerElement = ({
   }
 
   const handleAddElementLayer = () => {
-    addToElementLayers({ elementId: id })
+    addToElementLayers({ elementId: id, index: zindex })
   }
 
   useEffect(() => {

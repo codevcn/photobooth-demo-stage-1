@@ -36,7 +36,7 @@ export const ProductList: React.FC<ProductListProps> = ({
   onEditMockup,
 }) => {
   return (
-    <section className="flex flex-col gap-2 mt-4">
+    <section className="flex flex-col gap-2">
       {cartItems.map(
         ({ id, mockupData, name, size, color, originalPrice, discountedPrice, quantity }) => (
           <div

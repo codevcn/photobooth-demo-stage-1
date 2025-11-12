@@ -37,6 +37,7 @@ export type TElementType = 'text' | 'sticker' | 'printed-image'
 
 export type TElementLayerState = {
   elementId: string
+  index: number
 }
 
 export type TGlobalContextValue = {
