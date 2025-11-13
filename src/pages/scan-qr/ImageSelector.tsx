@@ -1,6 +1,6 @@
 import { useRef } from 'react'
 import { Upload } from 'lucide-react'
-import { TUserInputImage } from '@/utils/types'
+import { TUserInputImage } from '@/utils/types/global'
 
 interface ImageSelectorProps {
   onImageSelect: (imageData: TUserInputImage[]) => void

@@ -1,4 +1,4 @@
-import { TPrintedImage } from '@/utils/types'
+import { TPrintedImage } from '@/utils/types/global'
 import { useMemo } from 'react'
 
 interface PrintedImagesPreviewProps {

@@ -2,7 +2,7 @@ import useGoogleFont from '@/hooks/use-load-font'
 import { useGlobalContext } from '@/context/global-context'
 import { EInternalEvents } from '@/utils/enums'
 import { eventEmitter } from '@/utils/events'
-import { TElementType, TTextVisualState } from '@/utils/types'
+import { TElementType, TTextVisualState } from '@/utils/types/global'
 import {
   RefreshCw,
   Move,

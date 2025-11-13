@@ -1,4 +1,4 @@
-import { TPaymentType } from '@/utils/types'
+import { TPaymentType } from '@/utils/types/global'
 import { Banknote, Check } from 'lucide-react'
 
 interface PaymentMethodSelectorProps {

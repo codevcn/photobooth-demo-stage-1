@@ -2,7 +2,7 @@ import { useElementControl } from '@/hooks/element/use-element-control'
 import { useEffect, useState } from 'react'
 import { roundZooming } from '@/utils/helpers'
 import { getInitialContants } from '@/utils/contants'
-import { TTextVisualState } from '@/utils/types'
+import { TTextVisualState } from '@/utils/types/global'
 
 type TInitialTextParams = Partial<
   TTextVisualState & {

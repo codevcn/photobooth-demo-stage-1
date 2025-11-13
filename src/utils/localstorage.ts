@@ -1,4 +1,10 @@
-import { TElementsVisualState, TMockupData, TProductInfo, TSavedMockupData } from './types'
+import {
+  TElementsVisualState,
+  TMockupData,
+  TProductInfo,
+  TSavedMockupData,
+  TSurfaceType,
+} from './types/global'
 
 export class LocalStorageHelper {
   private static mockupImageName = 'mockup-data'
@@ -9,12 +15,14 @@ export class LocalStorageHelper {
 
   private static createMockupData(
     elementsVisualState: TElementsVisualState,
-    imageDataUrl: string
+    imageDataUrl: string,
+    surfaceType: TSurfaceType = 'front'
   ): TMockupData {
     return {
       id: this.generateMockupId(),
       elementsVisualState,
       dataURL: imageDataUrl,
+      surfaceType,
     }
   }
 
@@ -22,12 +30,13 @@ export class LocalStorageHelper {
     elementsVisualState: TElementsVisualState,
     productInfo: TProductInfo,
     imageDataUrl: string,
-    sessionId: string
+    sessionId: string,
+    surfaceType: TSurfaceType = 'front'
   ) {
     let existingData = this.getSavedMockupData()
 
     // Tạo mockup data mới
-    const newMockupData = this.createMockupData(elementsVisualState, imageDataUrl)
+    const newMockupData = this.createMockupData(elementsVisualState, imageDataUrl, surfaceType)
 
     if (existingData && existingData.sessionId === sessionId) {
       const productId = productInfo.id

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Type, Sticker, Palette, Ruler, Info } from 'lucide-react'
 import { ProductDetails } from './ProductDetails'
 import { createPortal } from 'react-dom'
-import { TProductImage } from '@/utils/types'
+import { TProductImage } from '@/utils/types/global'
 
 interface BottomMenuProps {
   onAddText: () => void
@@ -69,15 +69,16 @@ const BottomMenu: React.FC<BottomMenuProps> = ({
         </button>
       ))}
 
-      {createPortal(
-        <ProductDetails
-          show={showProductDetails}
-          onHideShow={setShowProductDetails}
-          productDetails={activeProduct}
-          peerProducts={peerProducts}
-        />,
-        document.body
-      )}
+      {showProductDetails &&
+        createPortal(
+          <ProductDetails
+            show={showProductDetails}
+            onHideShow={setShowProductDetails}
+            productDetails={activeProduct}
+            peerProducts={peerProducts}
+          />,
+          document.body
+        )}
     </div>
   )
 }

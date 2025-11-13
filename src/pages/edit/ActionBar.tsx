@@ -5,24 +5,12 @@ import { createPortal } from 'react-dom'
 
 interface ActionBarProps {
   cartCount: number
-  onAddToCart: (onDoneAdd: () => void, onError: (error: Error) => void) => void
+  isLoading: boolean
+  onAddToCart: () => void
 }
 
-const ActionBar: React.FC<ActionBarProps> = ({ cartCount, onAddToCart }) => {
-  const [isLoading, setIsLoading] = useState<boolean>(false)
+const ActionBar: React.FC<ActionBarProps> = ({ cartCount, isLoading, onAddToCart }) => {
   const navigate = useNavigate()
-
-  const handleAddToCart = () => {
-    setIsLoading(true)
-    onAddToCart(
-      () => {
-        setIsLoading(false)
-      },
-      (error) => {
-        setIsLoading(false)
-      }
-    )
-  }
 
   return (
     <div className="flex items-center gap-3">
@@ -37,7 +25,7 @@ const ActionBar: React.FC<ActionBarProps> = ({ cartCount, onAddToCart }) => {
           document.body
         )}
       <button
-        onClick={handleAddToCart}
+        onClick={onAddToCart}
         className="flex-1 bg-pink-cl active:bg-pink-hover-cl text-white font-bold py-2 px-4 rounded-xl shadow-lg touch-target flex items-center justify-center gap-2 text-lg"
       >
         <Check size={24} strokeWidth={3} />

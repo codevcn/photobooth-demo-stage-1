@@ -60,14 +60,14 @@ const TextEditor: React.FC<TextEditorProps> = ({ onAddText, onClose }) => {
             onChange={handleEdit}
             onKeyDown={catchEnterKey}
             placeholder="Nhập chữ tại đây..."
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-lg"
+            className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-lg"
             autoFocus
           />
 
           <button
             onClick={handleAdd}
             disabled={!text.trim()}
-            className="w-full bg-primary active:bg-primary/90 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-xl shadow-lg touch-target flex items-center justify-center gap-2 text-lg transition-colors"
+            className="text-base sm:text-lg w-full bg-primary active:scale-95 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded-xl shadow-lg touch-target flex items-center justify-center gap-2 transition"
           >
             <Plus size={24} />
             <span>Thêm chữ vào sản phẩm</span>

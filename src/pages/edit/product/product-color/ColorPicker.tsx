@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from 'react'
-import { TProductImage } from '@/utils/types'
+import { TProductImage } from '@/utils/types/global'
 
 interface ColorPickerProps {
   selectedColor: string
@@ -60,7 +60,7 @@ const ColorPicker: React.FC<ColorPickerProps> = ({
           </button>
         </div>
 
-        <div className="grid grid-cols-4 gap-3 mb-4 overflow-y-auto p-2">
+        <div className="grid grid-cols-4 gap-3 overflow-y-auto p-2">
           {colors.map(({ value, title, productId }) => {
             const isSelected = selectedColor === value
             return (
@@ -70,7 +70,7 @@ const ColorPicker: React.FC<ColorPickerProps> = ({
                 className="flex flex-col items-center gap-2 touch-target"
               >
                 <div
-                  className={`w-16 h-16 rounded-full border-4 border-gray-200 transition-all ${
+                  className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full border-4 border-gray-200 transition-all ${
                     isSelected ? 'outline-4 outline outline-primary border-transparent' : ''
                   }`}
                   style={{ backgroundColor: value }}

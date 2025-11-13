@@ -1,4 +1,4 @@
-import { TProductImage } from '@/utils/types'
+import { TProductImage } from '@/utils/types/global'
 
 export const productImages: TProductImage[][] = [
   [
@@ -22,6 +22,8 @@ export const productImages: TProductImage[][] = [
         print_w: 50,
         print_h: 40,
       },
+      frontImageUrl: '/images/products/shirt.png',
+      backImageUrl: '/images/products/shirt.png',
     },
     {
       id: 'gallery-shirt-2',
@@ -43,6 +45,8 @@ export const productImages: TProductImage[][] = [
         print_w: 50,
         print_h: 40,
       },
+      frontImageUrl: '/images/products/shirt-blue.png',
+      backImageUrl: '/images/products/shirt-blue.png',
     },
     {
       id: 'gallery-shirt-3',
@@ -64,6 +68,8 @@ export const productImages: TProductImage[][] = [
         print_w: 50,
         print_h: 40,
       },
+      frontImageUrl: '/images/products/shirt-pink.png',
+      backImageUrl: '/images/products/shirt-pink.png',
     },
     {
       id: 'gallery-shirt-4',
@@ -85,6 +91,8 @@ export const productImages: TProductImage[][] = [
         print_w: 50,
         print_h: 40,
       },
+      frontImageUrl: '/images/products/shirt-green.png',
+      backImageUrl: '/images/products/shirt-green.png',
     },
     {
       id: 'gallery-shirt-5',
@@ -106,7 +114,10 @@ export const productImages: TProductImage[][] = [
         print_w: 50,
         print_h: 40,
       },
+      frontImageUrl: '/images/products/shirt-yellow.png',
+      backImageUrl: '/images/products/shirt-yellow.png',
     },
+    // ...existing code...
   ],
   [
     {
@@ -129,6 +140,8 @@ export const productImages: TProductImage[][] = [
         print_w: 60,
         print_h: 35,
       },
+      frontImageUrl: '/images/products/totebag-yellow.png',
+      backImageUrl: '/images/products/totebag-yellow.png',
     },
     {
       id: 'gallery-totebag-2',
@@ -150,6 +163,8 @@ export const productImages: TProductImage[][] = [
         print_w: 60,
         print_h: 35,
       },
+      frontImageUrl: '/images/products/totebag-gray.png',
+      backImageUrl: '/images/products/totebag-gray.png',
     },
     {
       id: 'gallery-totebag-3',
@@ -171,6 +186,8 @@ export const productImages: TProductImage[][] = [
         print_w: 60,
         print_h: 35,
       },
+      frontImageUrl: '/images/products/totebag-green.png',
+      backImageUrl: '/images/products/totebag-green.png',
     },
   ],
   [
@@ -194,6 +211,8 @@ export const productImages: TProductImage[][] = [
         print_w: 40,
         print_h: 35,
       },
+      frontImageUrl: '/images/products/cup.png',
+      backImageUrl: '/images/products/cup.png',
     },
     {
       id: 'gallery-cup-2',
@@ -215,6 +234,8 @@ export const productImages: TProductImage[][] = [
         print_w: 40,
         print_h: 35,
       },
+      frontImageUrl: '/images/products/cup-pink.png',
+      backImageUrl: '/images/products/cup-pink.png',
     },
     {
       id: 'gallery-cup-3',
@@ -236,6 +257,8 @@ export const productImages: TProductImage[][] = [
         print_w: 40,
         print_h: 35,
       },
+      frontImageUrl: '/images/products/cup-aqua.png',
+      backImageUrl: '/images/products/cup-aqua.png',
     },
     {
       id: 'gallery-cup-4',
@@ -257,6 +280,8 @@ export const productImages: TProductImage[][] = [
         print_w: 40,
         print_h: 35,
       },
+      frontImageUrl: '/images/products/cup-yellow.png',
+      backImageUrl: '/images/products/cup-yellow.png',
     },
     {
       id: 'gallery-cup-5',
@@ -278,7 +303,10 @@ export const productImages: TProductImage[][] = [
         print_w: 40,
         print_h: 35,
       },
+      frontImageUrl: '/images/products/cup-orange.png',
+      backImageUrl: '/images/products/cup-orange.png',
     },
+    // ...existing code...
   ],
   [
     {
@@ -301,6 +329,8 @@ export const productImages: TProductImage[][] = [
         print_w: 40,
         print_h: 30,
       },
+      frontImageUrl: '/images/products/hat.png',
+      backImageUrl: '/images/products/hat.png',
     },
     {
       id: 'gallery-hat-2',
@@ -322,6 +352,8 @@ export const productImages: TProductImage[][] = [
         print_w: 40,
         print_h: 30,
       },
+      frontImageUrl: '/images/products/hat-pink.png',
+      backImageUrl: '/images/products/hat-pink.png',
     },
     {
       id: 'gallery-hat-3',
@@ -343,6 +375,8 @@ export const productImages: TProductImage[][] = [
         print_w: 40,
         print_h: 30,
       },
+      frontImageUrl: '/images/products/hat-blue.png',
+      backImageUrl: '/images/products/hat-blue.png',
     },
     {
       id: 'gallery-hat-4',
@@ -364,6 +398,8 @@ export const productImages: TProductImage[][] = [
         print_w: 40,
         print_h: 30,
       },
+      frontImageUrl: '/images/products/hat-green.png',
+      backImageUrl: '/images/products/hat-green.png',
     },
     {
       id: 'gallery-hat-5',
@@ -385,6 +421,8 @@ export const productImages: TProductImage[][] = [
         print_w: 40,
         print_h: 30,
       },
+      frontImageUrl: '/images/products/hat-purple.png',
+      backImageUrl: '/images/products/hat-purple.png',
     },
   ],
   [
@@ -408,6 +446,8 @@ export const productImages: TProductImage[][] = [
         print_w: 60,
         print_h: 60,
       },
+      frontImageUrl: '/images/products/keychain.png',
+      backImageUrl: '/images/products/keychain.png',
     },
     {
       id: 'gallery-keychain-2',
@@ -429,6 +469,8 @@ export const productImages: TProductImage[][] = [
         print_w: 60,
         print_h: 60,
       },
+      frontImageUrl: '/images/products/keychain-green.png',
+      backImageUrl: '/images/products/keychain-green.png',
     },
     {
       id: 'gallery-keychain-3',
@@ -450,6 +492,8 @@ export const productImages: TProductImage[][] = [
         print_w: 60,
         print_h: 60,
       },
+      frontImageUrl: '/images/products/keychain-orange.png',
+      backImageUrl: '/images/products/keychain-orange.png',
     },
     {
       id: 'gallery-keychain-4',
@@ -471,6 +515,8 @@ export const productImages: TProductImage[][] = [
         print_w: 60,
         print_h: 60,
       },
+      frontImageUrl: '/images/products/keychain-pink.png',
+      backImageUrl: '/images/products/keychain-pink.png',
     },
     {
       id: 'gallery-keychain-5',
@@ -492,6 +538,8 @@ export const productImages: TProductImage[][] = [
         print_w: 60,
         print_h: 60,
       },
+      frontImageUrl: '/images/products/keychain-purple.png',
+      backImageUrl: '/images/products/keychain-purple.png',
     },
   ],
   [
@@ -515,6 +563,8 @@ export const productImages: TProductImage[][] = [
         print_w: 70,
         print_h: 60,
       },
+      frontImageUrl: '/images/products/phonecase-black.png',
+      backImageUrl: '/images/products/phonecase-black.png',
     },
     {
       id: 'gallery-phonecase-2',
@@ -536,6 +586,8 @@ export const productImages: TProductImage[][] = [
         print_w: 70,
         print_h: 60,
       },
+      frontImageUrl: '/images/products/phonecase-gray.png',
+      backImageUrl: '/images/products/phonecase-gray.png',
     },
     {
       id: 'gallery-phonecase-3',
@@ -557,6 +609,8 @@ export const productImages: TProductImage[][] = [
         print_w: 70,
         print_h: 60,
       },
+      frontImageUrl: '/images/products/phonecase-silver.png',
+      backImageUrl: '/images/products/phonecase-silver.png',
     },
     {
       id: 'gallery-phonecase-4',
@@ -578,6 +632,8 @@ export const productImages: TProductImage[][] = [
         print_w: 70,
         print_h: 60,
       },
+      frontImageUrl: '/images/products/phonecase-orange.png',
+      backImageUrl: '/images/products/phonecase-orange.png',
     },
     {
       id: 'gallery-phonecase-5',
@@ -599,6 +655,8 @@ export const productImages: TProductImage[][] = [
         print_w: 70,
         print_h: 60,
       },
+      frontImageUrl: '/images/products/phonecase.png',
+      backImageUrl: '/images/products/phonecase.png',
     },
   ],
 
@@ -625,6 +683,8 @@ export const productImages: TProductImage[][] = [
         print_w: 100,
         print_h: 100,
       },
+      frontImageUrl: '/images/products/figurine-1.png',
+      backImageUrl: '/images/products/figurine-1.png',
     },
   ],
   [
@@ -649,6 +709,9 @@ export const productImages: TProductImage[][] = [
         print_w: 100,
         print_h: 100,
       },
+      frontImageUrl: '/images/products/figurine-2.png',
+      backImageUrl: '/images/products/figurine-2.png',
     },
+    // ...existing code...
   ],
 ]

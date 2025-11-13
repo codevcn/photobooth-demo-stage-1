@@ -1,5 +1,5 @@
 import { getNaturalSizeOfImage } from '@/utils/helpers'
-import { TPrintedImage } from '@/utils/types'
+import { TPrintedImage } from '@/utils/types/global'
 import { X } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 

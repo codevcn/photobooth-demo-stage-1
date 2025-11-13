@@ -6,7 +6,7 @@ import { useContext, useEffect, useState } from 'react'
 import { ElementLayerContext } from '@/context/global-context'
 import { swapArrayItems } from '@/utils/helpers'
 import { getInitialContants } from '@/utils/contants'
-import { TElementLayerState, TElementVisualBaseState } from '@/utils/types'
+import { TElementLayerState, TElementVisualBaseState } from '@/utils/types/global'
 
 const fixedMaxZoom: number = 2
 const fixedMinZoom: number = 0.3

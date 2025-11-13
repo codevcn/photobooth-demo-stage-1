@@ -1,4 +1,4 @@
-import { TStickerVisualState } from '@/utils/types'
+import { TStickerVisualState } from '@/utils/types/global'
 import { X, RotateCw, Scaling } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 import { eventEmitter } from '@/utils/events'

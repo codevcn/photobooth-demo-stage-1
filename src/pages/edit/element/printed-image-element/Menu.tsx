@@ -2,7 +2,7 @@ import { useGlobalContext } from '@/context/global-context'
 import { getInitialContants } from '@/utils/contants'
 import { EInternalEvents } from '@/utils/enums'
 import { eventEmitter } from '@/utils/events'
-import { TElementType, TPrintedImageVisualState } from '@/utils/types'
+import { TElementType, TPrintedImageVisualState } from '@/utils/types/global'
 import {
   RefreshCw,
   Move,

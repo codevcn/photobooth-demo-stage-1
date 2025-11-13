@@ -1,4 +1,4 @@
-import { TUserInputImage } from '@/utils/types'
+import { TUserInputImage } from '@/utils/types/global'
 import { TGetCustomerMediaResponse } from './types'
 import { canvasToBlob } from '@/utils/helpers'
 

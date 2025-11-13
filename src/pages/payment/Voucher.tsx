@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Tag, X, Loader2 } from 'lucide-react'
 import { voucherService } from '@/services/voucher.service'
-import { TVoucher } from '@/utils/types'
+import { TVoucher } from '@/utils/types/global'
 
 interface VoucherSectionProps {
   orderSubtotal: number

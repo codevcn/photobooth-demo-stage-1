@@ -7,7 +7,8 @@ import {
   TTextVisualState,
   TStickerVisualState,
   TPrintedImageVisualState,
-} from '@/utils/types'
+  TSurfaceType,
+} from '@/utils/types/global'
 import { TextElement } from './element/text-element/TextElement'
 import { StickerElement } from './element/sticker-element/StickerElement'
 import { PrintedImagesModal } from './element/printed-image-element/PrintedImages'
@@ -25,11 +26,13 @@ import { PrintAreaOverlay } from '@/components/print-area/PrintAreaOverlay'
 import ActionBar from './ActionBar'
 import { toast } from 'react-toastify'
 import { useVisualStatesCollector } from '@/hooks/use-visual-states-collector'
+import { DropdownMenu } from '@/components/common/DropdownMenu'
+import { Image } from 'lucide-react'
 
 type TSelectingType = TElementType | null
 
 interface EditAreaProps {
-  editingProduct?: TProductImage
+  editingProduct: TProductImage
   textElements: TTextVisualState[]
   stickerElements: TStickerVisualState[]
   onUpdateText: (elements: TTextVisualState[]) => void
@@ -47,6 +50,8 @@ interface EditAreaProps {
   ) => void
   mockupId: string | null
   selectedColor: string
+  selectedSurface: TSurfaceType
+  onSurfaceChange: (surface: TSurfaceType) => void
 }
 
 const EditArea: React.FC<EditAreaProps> = ({
@@ -64,12 +69,15 @@ const EditArea: React.FC<EditAreaProps> = ({
   handleAddToCart,
   mockupId,
   selectedColor,
+  selectedSurface,
+  onSurfaceChange,
 }) => {
   const [showPrintedImagesModal, setShowPrintedImagesModal] = useState<boolean>(false)
   const editAreaContainerRef = useRef<HTMLDivElement>(null)
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null)
   const [selectingType, setSelectingType] = useState<TSelectingType>(null)
   const { collectMockupVisualStates } = useVisualStatesCollector()
+  const [isAddingToCart, setIsAddingToCart] = useState<boolean>(false)
   // const {
   //   forZoom: { ref: refForZoom },
   //   state: { scale },
@@ -152,18 +160,23 @@ const EditArea: React.FC<EditAreaProps> = ({
   //   }
   // }
 
-  const beforeAddToCart = (onDoneAdd: () => void, onError: (error: Error) => void) => {
+  const beforeAddToCart = () => {
     if (checkIfAnyElementOutOfBounds()) {
       toast.warning('Vui lòng đảm bảo tất cả phần tử nằm trong vùng in trước khi thêm vào giỏ hàng')
       return
     }
+    setIsAddingToCart(true)
     cancelSelectingElement()
     setTimeout(() => {
       // Thu thập visual states của tất cả elements
       handleAddToCart(
         collectMockupVisualStates(htmlToCanvasEditorRef.current || undefined),
-        onDoneAdd,
-        onError
+        () => {
+          setIsAddingToCart(false)
+        },
+        (error) => {
+          setIsAddingToCart(false)
+        }
       )
     }, 0)
   }
@@ -184,7 +197,7 @@ const EditArea: React.FC<EditAreaProps> = ({
 
   // Cập nhật vùng in khi sản phẩm thay đổi
   useEffect(() => {
-    if (editingProduct && htmlToCanvasEditorRef.current) {
+    if (htmlToCanvasEditorRef.current) {
       // Delay để đảm bảo DOM đã render xong
       const timeoutId = setTimeout(() => {
         if (htmlToCanvasEditorRef.current) {
@@ -195,11 +208,11 @@ const EditArea: React.FC<EditAreaProps> = ({
 
       return () => clearTimeout(timeoutId)
     }
-  }, [editingProduct?.id, initializePrintArea, editingProduct?.printArea]) // Sử dụng initializePrintArea thay vì updatePrintArea
+  }, [editingProduct.id, initializePrintArea, editingProduct.printArea]) // Sử dụng initializePrintArea thay vì updatePrintArea
 
   // Theo dõi resize của container
   useEffect(() => {
-    if (!editingProduct || !htmlToCanvasEditorRef.current) return
+    if (!htmlToCanvasEditorRef.current) return
 
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
@@ -223,7 +236,7 @@ const EditArea: React.FC<EditAreaProps> = ({
   return (
     <div className="rounded-2xl relative" ref={editAreaContainerRef}>
       <div className="flex items-center justify-between mb-4">
-        <div className="text-left">
+        <div className="text-left flex-1">
           <h3 className="text-lg font-bold text-gray-800">Khu vực chỉnh sửa</h3>
           <p className="text-xs text-gray-500">Chạm vào các phần tử để di chuyển vị trí</p>
         </div>
@@ -248,8 +261,12 @@ const EditArea: React.FC<EditAreaProps> = ({
           className="NAME-canvas-editor relative z-0 w-full h-fit py-2 px-2 max-h-[500px] overflow-hidden"
         >
           <img
-            src={editingProduct?.url}
-            alt={editingProduct?.name}
+            src={
+              selectedSurface === 'front'
+                ? editingProduct.frontImageUrl
+                : editingProduct.backImageUrl
+            }
+            alt={editingProduct.name}
             className="NAME-product-image touch-none w-full h-full max-h-[calc(500px-8px)] object-contain"
           />
 
@@ -323,9 +340,28 @@ const EditArea: React.FC<EditAreaProps> = ({
         </div>
       )}
 
+      {/* Surface Selector */}
+      <div className="bg-white rounded-lg p-3 mt-3 border border-gray-200">
+        <div className="flex items-center gap-3">
+          <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
+            Chọn mặt in:
+          </label>
+          <div className="flex-1">
+            <DropdownMenu
+              options={[
+                { label: 'Mặt trước', value: 'front', icon: <Image size={16} /> },
+                { label: 'Mặt sau', value: 'back', icon: <Image size={16} /> },
+              ]}
+              value={selectedSurface}
+              onChange={onSurfaceChange}
+            />
+          </div>
+        </div>
+      </div>
+
       {/* Action Bar */}
       <div className="px-4 pb-3 mt-4">
-        <ActionBar cartCount={cartCount} onAddToCart={beforeAddToCart} />
+        <ActionBar cartCount={cartCount} isLoading={isAddingToCart} onAddToCart={beforeAddToCart} />
       </div>
     </div>
   )

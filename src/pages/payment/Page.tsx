@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { formatNumberWithCommas } from '@/utils/helpers'
-import { TProductImage, TVoucher } from '@/utils/types'
+import { TProductImage, TVoucher } from '@/utils/types/global'
 import { PaymentModal } from '@/pages/payment/PaymentModal'
 import { useNavigate } from 'react-router-dom'
 import { createPortal } from 'react-dom'
@@ -93,6 +93,7 @@ const PaymentPage = () => {
               image: mockupData.dataURL,
             },
             elementsVisualState: mockupData.elementsVisualState,
+            surfaceType: mockupData.surfaceType,
           })
         }
       }

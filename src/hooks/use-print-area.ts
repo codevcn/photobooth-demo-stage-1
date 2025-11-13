@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { TProductImage } from '@/utils/types'
+import { TProductImage } from '@/utils/types/global'
 
 type TPrintAreaBounds = {
   x: number

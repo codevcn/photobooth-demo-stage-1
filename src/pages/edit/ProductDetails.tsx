@@ -1,20 +1,20 @@
 import { formatNumberWithCommas } from '@/utils/helpers'
-import { TProductImage } from '@/utils/types'
+import { TProductImage } from '@/utils/types/global'
 import { useEffect, useRef, useState } from 'react'
 
 interface ProductImageProps {
   image: TProductImage
-  imgsContainerRef: React.RefObject<HTMLDivElement>
+  selectedSurface: 'front' | 'back'
 }
 
-const ProductImage: React.FC<ProductImageProps> = ({ image, imgsContainerRef }) => {
-  const { url, id, name } = image
+const ProductImage: React.FC<ProductImageProps> = ({ image, selectedSurface }) => {
+  const { frontImageUrl, backImageUrl, id, name } = image
 
   return (
     <div className="NAME-image-box h-96 p-3 min-w-full" data-img-box-id={id}>
       <img
         key={id}
-        src={url}
+        src={selectedSurface === 'front' ? frontImageUrl : backImageUrl}
         alt={name}
         className="object-contain snap-center flex-shrink-0 h-full max-h-full w-full max-w-full"
       />
@@ -38,6 +38,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
   const imgsContainerRef = useRef<HTMLDivElement>(null)
   const [pickedIndex, setPickedIndex] = useState<number>(0)
   const [pickedItem, setPickedItem] = useState<TProductImage>(productDetails)
+  const [selectedSurface, setSelectedSurface] = useState<'front' | 'back'>('front')
   const { name, description, priceInVND, priceAfterDiscount, id: pickedItemId } = pickedItem
 
   const pickItem = (imgId: string) => {
@@ -63,18 +64,38 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
     return () => {
       document.body.style.overflow = 'auto'
     }
-  }, [show])
+  }, [])
 
   return (
-    <div
-      style={{
-        opacity: show ? 1 : 0,
-        pointerEvents: show ? 'auto' : 'none',
-      }}
-      className="fixed inset-0 transition duration-200 min-h-screen z-[999] mx-auto"
-    >
+    <div className="fixed inset-0 transition duration-200 min-h-screen z-[999] mx-auto">
       <div className="bg-black/50 absolute inset-0 z-10" onClick={() => onHideShow(false)}></div>
-      <div className="bg-white overflow-y-auto rounded-lg relative z-20 w-[90%] h-full max-h-[75vh] top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2">
+      <div className="bg-white overflow-y-auto rounded-lg relative z-20 w-[90%] h-full max-h-[90vh] top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2">
+        {/* Header Section with Title and Close Button */}
+        <div className="sticky top-0 z-30 bg-white border-b border-gray-200 px-4 py-1 flex items-center justify-between shadow-sm">
+          <h2 className="text-lg font-bold text-gray-900">Chi tiết sản phẩm</h2>
+          <button
+            onClick={() => onHideShow(false)}
+            className="p-2 rounded-full hover:bg-gray-100 active:scale-95 transition-all"
+            aria-label="Đóng"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="lucide lucide-x-icon lucide-x text-gray-600"
+            >
+              <path d="M18 6 6 18" />
+              <path d="m6 6 12 12" />
+            </svg>
+          </button>
+        </div>
+
         {/* <!-- Image Gallery Section --> */}
         <section className="relative">
           {/* <!-- Promotion Badge - Prominent --> */}
@@ -90,11 +111,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
               className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide"
             >
               {peerProducts.map((product) => (
-                <ProductImage
-                  key={product.id}
-                  image={product}
-                  imgsContainerRef={imgsContainerRef}
-                />
+                <ProductImage key={product.id} image={product} selectedSurface={selectedSurface} />
               ))}
             </div>
           </div>
@@ -114,6 +131,69 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
                 <img src={url} alt={name} className="w-full h-full object-cover" />
               </button>
             ))}
+          </div>
+
+          {/* Surface, Size & Color Selection */}
+          <div className="bg-white p-4 border-b space-y-4">
+            {/* Surface Selection */}
+            <div>
+              <h3 className="text-sm font-semibold text-gray-700 mb-2">Chọn mặt in</h3>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setSelectedSurface('front')}
+                  className={`flex-1 py-2 px-4 rounded-lg border-2 font-medium text-sm transition-all ${
+                    selectedSurface === 'front'
+                      ? 'border-pink-cl bg-pink-50 text-pink-cl'
+                      : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  Mặt trước
+                </button>
+                <button
+                  onClick={() => setSelectedSurface('back')}
+                  className={`flex-1 py-2 px-4 rounded-lg border-2 font-medium text-sm transition-all ${
+                    selectedSurface === 'back'
+                      ? 'border-pink-cl bg-pink-50 text-pink-cl'
+                      : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  Mặt sau
+                </button>
+              </div>
+            </div>
+
+            {/* Size & Color Selection */}
+            <div className="grid grid-cols-2 gap-4">
+              {/* Size */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-700 mb-2">Kích thước</h3>
+                <div className="flex flex-wrap gap-2">
+                  {pickedItem.size.map((size) => (
+                    <button
+                      key={size}
+                      className="px-3 py-1.5 rounded-lg border-2 border-gray-200 bg-white text-gray-700 font-medium text-sm"
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Color */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-700 mb-2">Màu sắc</h3>
+                <div className="flex items-center gap-2">
+                  <div
+                    className="w-8 h-8 rounded-full border-2 border-gray-300"
+                    style={{ backgroundColor: pickedItem.color.value }}
+                    title={pickedItem.color.title}
+                  />
+                  <span className="text-sm text-gray-700 font-medium">
+                    {pickedItem.color.title}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -143,7 +223,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
           <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
             <div className="flex items-baseline gap-3">
               {/* <!-- Discounted Price - Large & Prominent --> */}
-              <span className="text-3xl font-bold text-blue-600">
+              <span className="text-3xl font-bold text-pink-cl">
                 {formatNumberWithCommas(priceInVND) + ' VND'}
               </span>
 
@@ -168,7 +248,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
           </div>
 
           {/* <!-- Seller & Origin Information --> */}
-          <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+          <div className="bg-gray-100 rounded-lg p-4 space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">Người bán</span>
               <span className="text-sm font-semibold text-gray-900">F-mon Fashion</span>
@@ -187,57 +267,6 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-2">Mô tả</h2>
             <p className="text-sm text-gray-700 leading-relaxed">{description}</p>
-            {/* <!-- Các tính năng nổi bật --> */}
-            {/* <ul className="mt-3 space-y-2">
-              <li className="flex items-start gap-2 text-sm text-gray-700">
-                <svg
-                  className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-                <span></span>
-              </li>
-              <li className="flex items-start gap-2 text-sm text-gray-700">
-                <svg
-                  className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-                <span>Thời lượng pin 40 giờ, sạc nhanh</span>
-              </li>
-              <li className="flex items-start gap-2 text-sm text-gray-700">
-                <svg
-                  className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-                <span>Đệm tai bằng mút hoạt tính cao cấp</span>
-              </li>
-            </ul> */}
           </div>
         </section>
       </div>

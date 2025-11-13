@@ -1,4 +1,57 @@
-import { TDetectCollisionWithViewportEdgesResult } from './types'
+import { TDetectCollisionWithViewportEdgesResult } from './types/global'
+
+export class UILayoutManager {
+  /**
+   * Adjusts the position of a dropdown/menu element to prevent collision with viewport edges
+   * @param element - The HTML element to adjust
+   * @param margin - Minimum distance from viewport edges (default: 10px)
+   * @returns Object containing adjustment information
+   */
+  static handleDropdownCollision(
+    element: HTMLElement,
+    margin: number = 10
+  ): { adjusted: boolean; adjustedEdges: string[] } {
+    const rect = element.getBoundingClientRect()
+    const viewportWidth = window.innerWidth
+    const viewportHeight = window.innerHeight
+    const adjustedEdges: string[] = []
+
+    // Check and adjust horizontal position
+    if (rect.right > viewportWidth - margin) {
+      // Collision with right edge
+      const overflow = rect.right - (viewportWidth - margin)
+      const currentLeft = parseFloat(getComputedStyle(element).left) || 0
+      element.style.left = `${currentLeft - overflow}px`
+      adjustedEdges.push('right')
+    } else if (rect.left < margin) {
+      // Collision with left edge
+      const overflow = margin - rect.left
+      const currentLeft = parseFloat(getComputedStyle(element).left) || 0
+      element.style.left = `${currentLeft + overflow}px`
+      adjustedEdges.push('left')
+    }
+
+    // Check and adjust vertical position
+    if (rect.bottom > viewportHeight - margin) {
+      // Collision with bottom edge
+      const overflow = rect.bottom - (viewportHeight - margin)
+      const currentTop = parseFloat(getComputedStyle(element).top) || 0
+      element.style.top = `${currentTop - overflow}px`
+      adjustedEdges.push('bottom')
+    } else if (rect.top < margin) {
+      // Collision with top edge
+      const overflow = margin - rect.top
+      const currentTop = parseFloat(getComputedStyle(element).top) || 0
+      element.style.top = `${currentTop + overflow}px`
+      adjustedEdges.push('top')
+    }
+
+    return {
+      adjusted: adjustedEdges.length > 0,
+      adjustedEdges,
+    }
+  }
+}
 
 export class PageLayoutHelper {
   static detectFixedCollisionWithViewportEdges(

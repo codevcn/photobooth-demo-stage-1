@@ -3,7 +3,7 @@ import { Camera } from 'lucide-react'
 import QRScanner from './QRScanner'
 import ImageSelector from './ImageSelector'
 import { CropImage } from './CropImage'
-import { TUserInputImage } from '@/utils/types'
+import { TUserInputImage } from '@/utils/types/global'
 import { useEditedImageContext } from '@/context/global-context'
 import { toast } from 'react-toastify'
 

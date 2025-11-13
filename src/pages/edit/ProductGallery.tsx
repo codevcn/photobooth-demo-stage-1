@@ -1,4 +1,4 @@
-import { TPrintedImage, TProductImage } from '@/utils/types'
+import { TPrintedImage, TProductImage } from '@/utils/types/global'
 import React, { useMemo } from 'react'
 
 interface ProductGalleryProps {

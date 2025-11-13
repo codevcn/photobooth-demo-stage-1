@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import QrScanner from 'qr-scanner'
 import { qrGetter } from '@/configs/brands/photoism/qr-getter'
 import { toast } from 'react-toastify'
-import { TUserInputImage } from '@/utils/types'
+import { TUserInputImage } from '@/utils/types/global'
 
 interface QRScannerProps {
   onScanSuccess: (result: TUserInputImage[]) => void
@@ -95,32 +95,32 @@ export default function QRScanner({ onScanSuccess, showCropper }: QRScannerProps
     }
   }, [showCropper, error])
 
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     qrGetter
-  //       .handleImageData('https://qr.seobuk.kr/s/8ijZsg_', (percentage, images, error) => {
-  //         setProgress(percentage)
-  //         if (error) {
-  //           console.error('>>> Lỗi lấy dữ liệu mã QR:', error)
-  //           setError('Không thể lấy dữ liệu từ mã QR. Vui lòng thử lại.')
-  //           return
-  //         }
-  //         if (images) {
-  //           console.log('>>> images:', images)
-  //           onScanSuccess(
-  //             images.map((img) => ({
-  //               ...img,
-  //               url: img.isOriginalImageUrl ? img.url : URL.createObjectURL(img.blob),
-  //             }))
-  //           )
-  //         }
-  //       })
-  //       .catch((err) => {
-  //         console.error('>>> Lỗi xử lý dữ liệu mã QR:', err)
-  //         setError('Không thể xử lý mã QR. Vui lòng thử lại.')
-  //       })
-  //   }, 1000)
-  // }, [])
+  useEffect(() => {
+    setTimeout(() => {
+      qrGetter
+        .handleImageData('https://qr.seobuk.kr/s/8ijZsg_', (percentage, images, error) => {
+          setProgress(percentage)
+          if (error) {
+            console.error('>>> Lỗi lấy dữ liệu mã QR:', error)
+            setError('Không thể lấy dữ liệu từ mã QR. Vui lòng thử lại.')
+            return
+          }
+          if (images) {
+            console.log('>>> images:', images)
+            onScanSuccess(
+              images.map((img) => ({
+                ...img,
+                url: img.isOriginalImageUrl ? img.url : URL.createObjectURL(img.blob),
+              }))
+            )
+          }
+        })
+        .catch((err) => {
+          console.error('>>> Lỗi xử lý dữ liệu mã QR:', err)
+          setError('Không thể xử lý mã QR. Vui lòng thử lại.')
+        })
+    }, 1000)
+  }, [])
 
   return (
     <div className="w-full">

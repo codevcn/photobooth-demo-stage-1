@@ -8,7 +8,7 @@ import {
   isValidEmail,
   isValidPhoneNumber,
 } from '@/utils/helpers'
-import { TPaymentType } from '@/utils/types'
+import { TPaymentType } from '@/utils/types/global'
 import { X, Check, TruckElectric, ArrowLeft } from 'lucide-react'
 import { useRef, useState, useEffect } from 'react'
 import { toast } from 'react-toastify'

@@ -1,6 +1,6 @@
 import { Minus, Plus, X } from 'lucide-react'
 import { formatNumberWithCommas } from '@/utils/helpers'
-import { TElementsVisualState } from '@/utils/types'
+import { TElementsVisualState, TSurfaceType } from '@/utils/types/global'
 
 type TProductItem = {
   id: string
@@ -18,6 +18,7 @@ type TProductItem = {
     image: string
   }
   elementsVisualState: TElementsVisualState
+  surfaceType: TSurfaceType
 }
 
 interface ProductListProps {
@@ -38,7 +39,17 @@ export const ProductList: React.FC<ProductListProps> = ({
   return (
     <section className="flex flex-col gap-2">
       {cartItems.map(
-        ({ id, mockupData, name, size, color, originalPrice, discountedPrice, quantity }) => (
+        ({
+          id,
+          mockupData,
+          name,
+          size,
+          color,
+          originalPrice,
+          discountedPrice,
+          quantity,
+          surfaceType,
+        }) => (
           <div
             key={mockupData.id}
             className="bg-white rounded-2xl shadow-sm py-4 px-2 transition-all duration-200"
@@ -83,15 +94,20 @@ export const ProductList: React.FC<ProductListProps> = ({
                 </div>
 
                 <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
-                  <span className="bg-gray-100 px-2 py-1 rounded-md">{size}</span>
-                  <span className="bg-gray-100 px-2 py-1 rounded-md">{color.title}</span>
+                  <span className="bg-gray-100 px-2 py-1 rounded-md font-medium">{size}</span>
+                  <span className="bg-gray-100 px-2 py-1 rounded-md font-medium">
+                    {color.title}
+                  </span>
+                  <span className="bg-pink-100 text-pink-600 px-2 py-1 rounded-md font-medium">
+                    {surfaceType === 'front' ? 'Mặt trước' : 'Mặt sau'}
+                  </span>
                 </div>
 
                 {/* Price and Quantity */}
                 <div className="flex flex-col gap-3">
                   {discountedPrice ? (
                     <div className="flex flex-col">
-                      <span className="text-xs text-gray-400 line-through">
+                      <span className="text-xs text-gray-400 line-through font-medium">
                         <span>{formatNumberWithCommas(originalPrice)}</span>
                         <span> VND</span>
                       </span>

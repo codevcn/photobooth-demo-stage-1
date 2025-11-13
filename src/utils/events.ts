@@ -1,5 +1,5 @@
 import { EInternalEvents } from './enums'
-import { TElementType } from './types'
+import { TElementType } from './types/global'
 
 interface IInternalEvents {
   [EInternalEvents.CLICK_ON_PAGE]: (target: HTMLElement | null) => void

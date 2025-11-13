@@ -1,5 +1,5 @@
 import { apiClient } from '@/lib/api-client'
-import { TProductInCart } from '@/utils/types'
+import { TProductInCart } from '@/utils/types/global'
 
 // Request body types based on Postman collection
 export type CreateOrderRequest = {

@@ -1,6 +1,6 @@
 import React from 'react'
 import { Check } from 'lucide-react'
-import { TProductSize } from '@/utils/types'
+import { TProductSize } from '@/utils/types/global'
 
 interface SizeSelectorProps {
   selectedSize: TProductSize
@@ -25,7 +25,7 @@ const SizeSelector: React.FC<SizeSelectorProps> = ({
       <div onClick={onClose} className="bg-black/50 absolute inset-0 z-10"></div>
       <div className="bg-white w-full rounded-xl p-4 shadow-2xl relative z-20">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-xl font-bold text-gray-800">Chọn kích thước</h3>
+          <h3 className="text-xl font-bold text-gray-800">Chọn kích thước cho sản phẩm</h3>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full touch-target">
             <svg
               xmlns="http://www.w3.org/2000/svg"

@@ -1,5 +1,5 @@
 import { getInitialContants } from './contants'
-import { TPaymentType } from './types'
+import { TPaymentType } from './types/global'
 
 export const getNaturalSizeOfImage = (
   imgURL: string,

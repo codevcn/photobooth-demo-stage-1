@@ -26,6 +26,8 @@ export type TProductImage = {
     print_w?: number
     print_h?: number
   }
+  frontImageUrl: string
+  backImageUrl: string
 }
 
 export type TPrintedImage = {
@@ -148,8 +150,11 @@ export type TMockupData = {
   id: string
   elementsVisualState: TElementsVisualState
   dataURL: string
+  surfaceType: TSurfaceType
 }
 
 export type TProductInCart = TProductInfo & {
   mockupDataList: TMockupData[]
 }
+
+export type TSurfaceType = 'front' | 'back'

@@ -1,4 +1,4 @@
-import { TVoucher, VoucherValidationResult } from '@/utils/types'
+import { TVoucher, VoucherValidationResult } from '@/utils/types/global'
 
 class VoucherService {
   // Danh sách voucher mẫu

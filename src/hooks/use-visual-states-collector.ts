@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { TElementsVisualState } from '@/utils/types'
+import { TElementsVisualState } from '@/utils/types/global'
 
 type TUseVisualStatesCollectorReturn = {
   collectMockupVisualStates: (mockupmockupContainerRef?: HTMLElement) => TElementsVisualState

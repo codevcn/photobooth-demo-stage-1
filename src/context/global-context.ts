@@ -3,7 +3,7 @@ import {
   TGlobalContextValue,
   TEditedImageContextValue,
   TProductImageContextValue,
-} from '@/utils/types'
+} from '@/utils/types/global'
 import { createContext, useContext } from 'react'
 
 export const GlobalContext = createContext<TGlobalContextValue>({

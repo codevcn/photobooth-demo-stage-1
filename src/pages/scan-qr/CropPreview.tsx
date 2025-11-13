@@ -1,4 +1,4 @@
-import { TUserInputImage } from '@/utils/types'
+import { TUserInputImage } from '@/utils/types/global'
 import { CheckCheck, X } from 'lucide-react'
 
 type TCropPreviewProps = {

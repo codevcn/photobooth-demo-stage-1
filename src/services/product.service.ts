@@ -1,21 +1,8 @@
 import { apiClient } from '@/lib/api-client'
 import { productImages } from '@/dev/storage'
 import { delay } from '@/utils/helpers'
-import { TProductImage } from '@/utils/types'
-
-// API Response Types
-type Product = {
-  id: number
-  name: string
-  slug: string
-  base_image_url: string
-  description?: string
-  status: string
-  created_at: string
-  updated_at: string
-}
-
-type ApiProductsResponse = Product[]
+import { TProductImage } from '@/utils/types/global'
+import { TProductCatalogResponse } from '@/utils/types/api'
 
 class ProductService {
   /**
@@ -23,7 +10,7 @@ class ProductService {
    * Note: The API doesn't have pagination, so we'll fetch all and slice locally
    */
   async fetchProducts(page: number, limit: number): Promise<TProductImage[][]> {
-    const response = await apiClient.get<ApiProductsResponse>('/products')
+    const response = await apiClient.get<TProductCatalogResponse>('/products')
 
     if (!response.success || !response.data) {
       console.error('Failed to fetch products from API:', response.error)

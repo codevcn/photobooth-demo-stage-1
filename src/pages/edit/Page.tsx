@@ -17,7 +17,9 @@ import {
   TTextVisualState,
   TStickerVisualState,
   TPrintedImageVisualState,
-} from '@/utils/types'
+  TMockupData,
+  TSurfaceType,
+} from '@/utils/types/global'
 import { eventEmitter } from '@/utils/events'
 import { EInternalEvents } from '@/utils/enums'
 import {
@@ -54,6 +56,7 @@ const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
   const [activeImageId, setActiveImageId] = useState<string>(firstImage.id || '')
   const [selectedColor, setSelectedColor] = useState<string>(firstImage.color.value || '')
   const [selectedSize, setSelectedSize] = useState<TProductSize>(firstImage.size[0] || 'M')
+  const [selectedSurface, setSelectedSurface] = useState<TSurfaceType>('front')
   const [cartCount, setCartCount] = useState<number>(0)
 
   // Tool overlays
@@ -149,7 +152,8 @@ const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
           elemtnsVisualState,
           { id: activeImageId, color: activeProduct.color, size: selectedSize },
           imageDataUrl,
-          sessionId
+          sessionId,
+          selectedSurface
         )
         toast.success('Đã thêm vào giỏ hàng')
         setCartCount(LocalStorageHelper.countSavedMockupImages())
@@ -227,14 +231,14 @@ const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
       return
     }
     const cartItems = savedMockup.productsInCart
-    let foundMockup: TElementsVisualState | null = null
+    let foundMockup: TMockupData | null = null
     let foundProductInfo: TProductInfo | null = null
 
     // Search for the mockup in all cart items
     for (const item of cartItems) {
       const mockup = item.mockupDataList?.find((m) => m.id === mockupId)
       if (mockup) {
-        foundMockup = mockup.elementsVisualState
+        foundMockup = mockup
         foundProductInfo = {
           id: item.id,
           color: item.color,
@@ -247,19 +251,19 @@ const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
     if (!foundMockup || !foundProductInfo) return
 
     // Restore text elements
-    const restoredTextElements = foundMockup.texts || []
+    const restoredTextElements = foundMockup.elementsVisualState.texts || []
     if (restoredTextElements.length > 0) {
       setTextElements(restoredTextElements)
     }
 
     // Restore sticker elements
-    const restoredStickerElements = foundMockup.stickers || []
+    const restoredStickerElements = foundMockup.elementsVisualState.stickers || []
     if (restoredStickerElements.length > 0) {
       setStickerElements(restoredStickerElements)
     }
 
     // Restore printed image elements
-    const restoredPrintedImageElements = foundMockup.printedImages || []
+    const restoredPrintedImageElements = foundMockup.elementsVisualState.printedImages || []
     if (restoredPrintedImageElements.length > 0) {
       setPrintedImageElements(restoredPrintedImageElements)
     }
@@ -268,6 +272,11 @@ const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
     setActiveImageId(foundProductInfo.id)
     setSelectedColor(foundProductInfo.color.value)
     setSelectedSize(foundProductInfo.size)
+
+    // Restore surface type
+    if (foundMockup.surfaceType) {
+      setSelectedSurface(foundMockup.surfaceType)
+    }
   }
 
   const initEditElement = () => {
@@ -338,6 +347,8 @@ const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
               handleAddToCart={handleAddToCart}
               mockupId={mockupId}
               selectedColor={selectedColor}
+              selectedSurface={selectedSurface}
+              onSurfaceChange={setSelectedSurface}
             />
           </div>
 

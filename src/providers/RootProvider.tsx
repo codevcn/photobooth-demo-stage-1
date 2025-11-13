@@ -2,7 +2,7 @@ import { EditedImageContext, GlobalContext, ProductImageContext } from '@/contex
 import { EInternalEvents } from '@/utils/enums'
 import { eventEmitter } from '@/utils/events'
 import { generateSessionId } from '@/utils/helpers'
-import { TEditedImage, TElementType, TGlobalContextValue, TProductImage } from '@/utils/types'
+import { TEditedImage, TElementType, TGlobalContextValue, TProductImage } from '@/utils/types/global'
 import { useEffect, useState } from 'react'
 
 type TGlobalState = Omit<TGlobalContextValue, 'visualStatesManager'>
