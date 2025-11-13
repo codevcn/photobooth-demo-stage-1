@@ -1,14 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { formatNumberWithCommas } from '@/utils/helpers'
-import { TProductImage, TVoucher } from '@/utils/types/global'
+import { TBaseProduct, TPaymentProductItem, TProductImage, TVoucher } from '@/utils/types/global'
 import { PaymentModal } from '@/pages/payment/PaymentModal'
 import { useNavigate } from 'react-router-dom'
 import { createPortal } from 'react-dom'
 import { LocalStorageHelper } from '@/utils/localstorage'
-import { useGlobalContext, useProductImageContext } from '@/context/global-context'
+import { useGlobalContext, useProductContext } from '@/context/global-context'
 import { VoucherSection } from '@/pages/payment/Voucher'
-import { ProductList, TProductItem } from '@/pages/payment/ProductList'
-import { productImages as productImagesDev } from '@/dev/storage'
+import { ProductList } from '@/pages/payment/ProductList'
 
 interface IPaymentModalProps {
   imgSrc?: string
@@ -29,13 +28,13 @@ const ProductImageModal = ({ imgSrc, onClose }: IPaymentModalProps) => {
 
 const PaymentPage = () => {
   const { sessionId } = useGlobalContext()
-  const [cartItems, setCartItems] = useState<TProductItem[]>([])
+  const [cartItems, setCartItems] = useState<TPaymentProductItem[]>([])
   const [appliedVoucher, setAppliedVoucher] = useState<TVoucher | null>(null)
   const [voucherDiscount, setVoucherDiscount] = useState(0)
   const [showModal, setShowModal] = useState(false)
   const navigate = useNavigate()
   const [selectedImage, setSelectedImage] = useState<string>()
-  const { productImages } = useProductImageContext()
+  const { products } = useProductContext()
 
   // Hàm tính subtotal (tổng tiền trước giảm giá voucher)
   const calculateSubtotal = (): number => {
@@ -61,10 +60,12 @@ const PaymentPage = () => {
     )
   }
 
-  const findProductInfoInMainProducts = (id: string): TProductImage | null => {
-    for (const product of productImages.flat()) {
-      if (product.id === id) {
-        return product
+  const findProductImageInProducts = (productImageId: number): TProductImage | null => {
+    for (const product of products.flat()) {
+      for (const image of product.images) {
+        if (image.id === productImageId) {
+          return image
+        }
       }
     }
     return null
@@ -73,27 +74,26 @@ const PaymentPage = () => {
   const loadCartItems = () => {
     const savedItems = LocalStorageHelper.getSavedMockupData()
     if (savedItems) {
-      const productItems: TProductItem[] = []
+      const productItems: TPaymentProductItem[] = []
       for (const product of savedItems.productsInCart) {
-        const productInfo = findProductInfoInMainProducts(product.id)
-        if (!productInfo) continue
-
+        const productImage = findProductImageInProducts(product.productImageId)
+        if (!productImage) continue
         // Duyệt qua danh sách mockup data
         for (const mockupData of product.mockupDataList) {
           productItems.push({
-            id: productInfo.id,
-            name: productInfo.description,
+            id: productImage.id,
+            name: productImage.name,
             size: product.size,
             color: product.color,
             quantity: 1,
-            originalPrice: productInfo.priceInVND,
-            discountedPrice: productInfo.priceAfterDiscount,
+            originalPrice: productImage.priceAmountOneSide,
+            discountedPrice: productImage.priceAfterDiscount,
             mockupData: {
               id: mockupData.id,
-              image: mockupData.dataURL,
+              image: mockupData.imageData.dataUrl,
             },
             elementsVisualState: mockupData.elementsVisualState,
-            surfaceType: mockupData.surfaceType,
+            surfaceType: mockupData.surfaceInfo.type,
           })
         }
       }
@@ -103,7 +103,7 @@ const PaymentPage = () => {
     }
   }
 
-  const removeProductFromCart = (idAsImageDataURL: string, productId: string) => {
+  const removeProductFromCart = (idAsImageDataURL: string, productId: number) => {
     if (!sessionId) return
     setCartItems((items) =>
       items.filter((item) => {

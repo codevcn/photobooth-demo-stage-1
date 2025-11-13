@@ -1,39 +1,55 @@
 import React, { useEffect, useMemo } from 'react'
-import { TProductImage } from '@/utils/types/global'
+import { TBaseProduct, TProductSize } from '@/utils/types/global'
 
 interface ColorPickerProps {
   selectedColor: string
-  onSelectColor: (color: string, productId: string) => void
+  selectedSize: TProductSize
+  onSelectColor: (color: string, productImageId: number) => void
   onClose: () => void
-  activeProduct: TProductImage
-  peerProducts: TProductImage[]
+  product: TBaseProduct
 }
 
 type TColor = {
   value: string
   title: string
-  productId: string
+  productImageId: number
 }
 
 const ColorPicker: React.FC<ColorPickerProps> = ({
   selectedColor,
+  selectedSize,
   onSelectColor,
   onClose,
-  activeProduct,
-  peerProducts,
+  product,
 }) => {
+  // Chỉ lấy colors có sẵn cho size đang chọn
   const colors = useMemo<TColor[]>(() => {
-    return peerProducts.map((product) => ({ ...product.color, productId: product.id }))
-  }, [peerProducts, activeProduct])
+    const uniqueColors = new Map<string, TColor>()
+    for (const image of product.images) {
+      if (image.size === selectedSize && !uniqueColors.has(image.color.value)) {
+        uniqueColors.set(image.color.value, {
+          ...image.color,
+          productImageId: image.id,
+        })
+      }
+    }
+    return Array.from(uniqueColors.values())
+  }, [product, selectedSize])
 
-  const pickColor = (colorValue: string, productId: string) => {
-    onSelectColor(colorValue, productId)
+  const pickColor = (colorValue: string, productImageId: number) => {
+    onSelectColor(colorValue, productImageId)
     onClose()
   }
 
   useEffect(() => {
-    if (!selectedColor) onSelectColor(colors[0].value, colors[0].productId)
-  }, [])
+    // Auto-select first available color if current selection is not available
+    if (colors.length > 0) {
+      const currentColorAvailable = colors.some((c) => c.value === selectedColor)
+      if (!currentColorAvailable) {
+        onSelectColor(colors[0].value, colors[0].productImageId)
+      }
+    }
+  }, [colors, selectedColor])
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 animate-pop-in p-4">
@@ -61,12 +77,12 @@ const ColorPicker: React.FC<ColorPickerProps> = ({
         </div>
 
         <div className="grid grid-cols-4 gap-3 overflow-y-auto p-2">
-          {colors.map(({ value, title, productId }) => {
+          {colors.map(({ value, title, productImageId }) => {
             const isSelected = selectedColor === value
             return (
               <button
                 key={value}
-                onClick={() => pickColor(value, productId)}
+                onClick={() => pickColor(value, productImageId)}
                 className="flex flex-col items-center gap-2 touch-target"
               >
                 <div

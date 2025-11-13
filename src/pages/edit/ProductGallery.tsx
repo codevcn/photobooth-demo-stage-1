@@ -1,41 +1,58 @@
-import { TPrintedImage, TProductImage } from '@/utils/types/global'
+import { TBaseProduct, TPrintedImage } from '@/utils/types/global'
 import React, { useMemo } from 'react'
 
+type TGalleryProduct = {
+  id: number
+  name: string
+  productImageUrl: string
+  printedImageUrl: string
+}
+
 interface ProductGalleryProps {
-  galleryImages: TProductImage[][]
-  activeImageId: string
-  onSelectImage: (id: string) => void
+  products: TBaseProduct[]
+  activeImageId: number
+  onSelectImage: (id: number) => void
   printedImages: TPrintedImage[]
 }
 
-const countForTraditional: number = 6
-const countForTrending: number = 2
-
 const ProductGallery: React.FC<ProductGalleryProps> = ({
-  galleryImages,
+  products,
   activeImageId,
   onSelectImage,
   printedImages,
 }) => {
-  const productsToRender = useMemo(() => {
-    return galleryImages.slice(0, countForTraditional).map((group) => {
-      return {
-        ...(group.find((img) => img.id === activeImageId) || group[0]),
-        printedImageUrl: printedImages[0].url || '/placeholder.svg',
-      }
-    })
-  }, [galleryImages, activeImageId])
-
-  const trendingToRender = useMemo(() => {
-    return galleryImages
-      .slice(countForTraditional, countForTraditional + countForTrending)
-      .map((group) => {
-        return {
-          ...(group.find((img) => img.id === activeImageId) || group[0]),
-          printedImageUrl: printedImages[0].url || '/placeholder.svg',
+  const [productsToRender, trendingToRender] = useMemo<
+    [TGalleryProduct[], TGalleryProduct[]]
+  >(() => {
+    const nonTrendingProducts: TGalleryProduct[] = []
+    const trendingProducts: TGalleryProduct[] = []
+    for (const printedImage of printedImages) {
+      for (const product of products) {
+        if (product.isTrending) {
+          trendingProducts.push({
+            id: product.id,
+            name: product.name,
+            productImageUrl: product.url,
+            printedImageUrl: printedImage.url,
+          })
+        } else {
+          nonTrendingProducts.push({
+            id: product.id,
+            name: product.name,
+            productImageUrl: product.url,
+            printedImageUrl: printedImage.url,
+          })
         }
-      })
-  }, [galleryImages, activeImageId])
+      }
+    }
+    return [nonTrendingProducts, trendingProducts]
+    // return products.map((product) => {
+    //   return {
+    //     ...(group.find((img) => img.id === activeImageId) || group[0]),
+    //     printedImageUrl: printedImages[0].url || '/placeholder.svg',
+    //   }
+    // })
+  }, [products, activeImageId])
 
   return (
     <div>
@@ -60,7 +77,11 @@ const ProductGallery: React.FC<ProductGalleryProps> = ({
                   className="h-full w-full"
                 />
               </span>
-              <img src={image.url} alt={image.name} className="w-20 h-20 object-cover" />
+              <img
+                src={image.productImageUrl}
+                alt={image.name}
+                className="w-20 h-20 object-cover"
+              />
             </button>
           )
         })}
@@ -83,7 +104,11 @@ const ProductGallery: React.FC<ProductGalleryProps> = ({
                   className="h-full w-full"
                 />
               </span>
-              <img src={image.url} alt={image.name} className="w-20 h-20 object-cover" />
+              <img
+                src={image.productImageUrl}
+                alt={image.name}
+                className="w-20 h-20 object-cover"
+              />
             </button>
           )
         })}

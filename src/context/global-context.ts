@@ -2,7 +2,7 @@ import {
   TElementLayerContextValue,
   TGlobalContextValue,
   TEditedImageContextValue,
-  TProductImageContextValue,
+  TProductContextValue,
 } from '@/utils/types/global'
 import { createContext, useContext } from 'react'
 
@@ -31,9 +31,9 @@ export const EditedImageContext = createContext<TEditedImageContextValue>({
 
 export const useEditedImageContext = () => useContext(EditedImageContext)
 
-export const ProductImageContext = createContext<TProductImageContextValue>({
-  productImages: [],
-  setProductImages: () => {},
+export const ProductContext = createContext<TProductContextValue>({
+  products: [],
+  setProducts: () => {},
 })
 
-export const useProductImageContext = () => useContext(ProductImageContext)
+export const useProductContext = () => useContext(ProductContext)

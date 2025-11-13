@@ -1,71 +1,97 @@
-import { apiClient } from '@/lib/api-client'
-import { productImages } from '@/dev/storage'
+import { products as productsDev } from '@/dev/storage'
 import { delay } from '@/utils/helpers'
-import { TProductImage } from '@/utils/types/global'
-import { TProductCatalogResponse } from '@/utils/types/api'
+import {
+  TBaseProduct,
+  TPrintAreaInfo,
+  TProductImage,
+  TProductSize,
+  TSurfaceType,
+} from '@/utils/types/global'
+import { getFetchProductsCatalog } from '@/configs/api/product.api'
 
 class ProductService {
   /**
-   * Fetch products from API
-   * Note: The API doesn't have pagination, so we'll fetch all and slice locally
-   */
-  async fetchProducts(page: number, limit: number): Promise<TProductImage[][]> {
-    const response = await apiClient.get<TProductCatalogResponse>('/products')
-
-    if (!response.success || !response.data) {
-      console.error('Failed to fetch products from API:', response.error)
-      // Fallback to mock data
-      return this.fetchProductsMock(page, limit)
-    }
-
-    // Transform API data to TProductImage format
-    // Note: API doesn't provide full product details, so we use default values
-    const products: TProductImage[] = response.data
-      .filter((p) => p.status === 'active')
-      .map((product) => ({
-        id: product.id.toString(),
-        url: product.base_image_url,
-        name: product.name,
-        size: ['M', 'L'] as const, // Default sizes
-        color: {
-          title: 'White',
-          value: '#FFFFFF',
-        },
-        description: product.description || '',
-        priceInVND: 170000, // Default price - should come from API variants
-        stock: 100, // Default stock
-        category: 'cup' as const, // Default category
-        printArea: {
-          print_x: 100,
-          print_y: 150,
-          print_w: 2000,
-          print_h: 1400,
-        },
-      }))
-
-    // Group products by limit items per page
-    const grouped: TProductImage[][] = []
-    for (let i = 0; i < products.length; i += limit) {
-      grouped.push(products.slice(i, i + limit))
-    }
-
-    return grouped
-  }
-
-  /**
    * Mock data for development/testing
    */
-  async fetchProductsMock(page: number, limit: number): Promise<TProductImage[][]> {
+  private async fetchProductsMock(page: number, limit: number): Promise<TBaseProduct[]> {
     await delay(1000)
-    return productImages
+    return productsDev
   }
 
   /**
-   * Main method - switch between API and mock
-   * Set USE_API = true to use real API, false for mock data
+   * Fetch products from API and convert to TBaseProduct format
    */
-  async fetchProductsByPage(page: number, limit: number): Promise<TProductImage[][]> {
-    return this.fetchProductsMock(page, limit)
+  private async fetchProducts(page: number, pageSize: number): Promise<TBaseProduct[]> {
+    const response = await getFetchProductsCatalog(page, pageSize)
+
+    if (!response.success || !response.data?.data) {
+      throw new Error(response.error || 'Không thể lấy danh sách sản phẩm từ server')
+    }
+
+    const apiProducts = response.data.data
+
+    // Convert API products to TBaseProduct format
+    const convertedProducts: TBaseProduct[] = []
+    for (const product of apiProducts) {
+      if (product.status !== 'active') continue
+      // Get category from attributes or default to 'cup'
+      const category = product.attributes_json.category as TProductImage['category']
+
+      // Build printAreaList from surfaces
+      const printAreaList: TPrintAreaInfo[] = []
+      for (const surface of product.surfaces) {
+        printAreaList.push({
+          id: surface.id,
+          area: {
+            print_x: surface.print_areas.x_px,
+            print_y: surface.print_areas.y_px,
+            print_w: surface.print_areas.width_px,
+            print_h: surface.print_areas.height_px,
+          },
+          surfaceType: surface.code as TSurfaceType,
+          imageUrl: surface.preview_image_url || product.base_image_url,
+        })
+      }
+
+      // Convert each variant to TProductImage (without printAreaInfo)
+      const images: TProductImage[] = product.variants.map(
+        ({ id, color, size, price_amount_oneside, price_amount_bothside, currency, stock_qty }) => {
+          return {
+            id,
+            name: product.name,
+            size: size.toUpperCase() as TProductSize,
+            color: {
+              title: color,
+              value: color,
+            },
+            priceAmountOneSide: parseFloat(price_amount_oneside),
+            priceAmountBothSide: parseFloat(price_amount_bothside),
+            currency,
+            stock: stock_qty,
+            category,
+          }
+        }
+      )
+
+      convertedProducts.push({
+        id: product.id,
+        url: product.base_image_url,
+        name: product.name,
+        description: product.description,
+        images,
+        isTrending: false, // Can be enhanced with trending logic from attributes
+        printAreaList,
+      })
+    }
+    return convertedProducts
+  }
+
+  /**
+   * Main method - fetch from API with fallback to mock on error
+   */
+  async fetchProductsByPage(page: number, limit: number): Promise<TBaseProduct[]> {
+    return await this.fetchProducts(page, limit)
+    // return await this.fetchProductsMock(page, limit)
   }
 }
 

@@ -13,12 +13,14 @@ import {
   TElementType,
   TProductSize,
   TElementsVisualState,
-  TProductInfo,
+  TProductCartInfo,
   TTextVisualState,
   TStickerVisualState,
   TPrintedImageVisualState,
   TMockupData,
   TSurfaceType,
+  TBaseProduct,
+  TPrintAreaInfo,
 } from '@/utils/types/global'
 import { eventEmitter } from '@/utils/events'
 import { EInternalEvents } from '@/utils/enums'
@@ -27,36 +29,37 @@ import {
   useEditedImageContext,
   useElementLayerContext,
   useGlobalContext,
-  useProductImageContext,
+  useProductContext,
 } from '../../context/global-context'
 import { LocalStorageHelper } from '@/utils/localstorage'
 import { toast } from 'react-toastify'
 import { ArrowLeft } from 'lucide-react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { swapArrayItems } from '@/utils/helpers'
 import { getInitialContants } from '@/utils/contants'
 import { productService } from '@/services/product.service'
 import { PageLoading } from '@/components/custom/Loading'
 import { useHtmlToCanvas } from '@/hooks/use-html-to-canvas'
 
 type TEditPageProps = {
-  productImages: TProductImage[][]
+  products: TBaseProduct[]
   printedImages: TPrintedImage[]
 }
 
-const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
+const EditPage = ({ products, printedImages }: TEditPageProps) => {
   const { sessionId } = useGlobalContext()
   const mockupId = useSearchParams()[0].get('mockupId')
 
-  const [galleryImages, firstImage] = useMemo<[TProductImage[][], TProductImage]>(
-    () => [productImages, productImages[0][0]],
-    [productImages]
-  )
+  const firstImage = useMemo<TProductImage>(() => {
+    const galleryImgs: TProductImage[] = []
+    for (const prod of products) {
+      galleryImgs.push(...prod.images)
+    }
+    return galleryImgs[0]
+  }, [products])
 
-  const [activeImageId, setActiveImageId] = useState<string>(firstImage.id || '')
-  const [selectedColor, setSelectedColor] = useState<string>(firstImage.color.value || '')
-  const [selectedSize, setSelectedSize] = useState<TProductSize>(firstImage.size[0] || 'M')
-  const [selectedSurface, setSelectedSurface] = useState<TSurfaceType>('front')
+  const [activeImageId, setActiveImageId] = useState<number>(firstImage.id)
+  const [selectedColor, setSelectedColor] = useState<string>(firstImage.color.value)
+  const [selectedSize, setSelectedSize] = useState<TProductSize>(firstImage.size)
   const [cartCount, setCartCount] = useState<number>(0)
 
   // Tool overlays
@@ -72,36 +75,24 @@ const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
   const { editorRef, handleSaveHtmlAsImage } = useHtmlToCanvas()
   const { removeFromElementLayers } = useElementLayerContext()
 
-  const [activeProduct, peerProducts] = useMemo<[TProductImage, TProductImage[]]>(() => {
-    let activeProduct: TProductImage
-    const products = galleryImages.find((imgs) => {
-      for (const img of imgs) {
+  const [activeProduct, activeProductImage] = useMemo<[TBaseProduct, TProductImage]>(() => {
+    let activeProductImage: TProductImage | undefined = undefined
+    let activeProduct: TBaseProduct | undefined = undefined
+    for (const product of products) {
+      for (const img of product.images) {
         if (img.id === activeImageId) {
-          activeProduct = img
-          return true
+          activeProductImage = img
+          activeProduct = product
         }
       }
-      return false
-    })
-    return [activeProduct!, products || []]
-  }, [galleryImages, activeImageId])
+    }
+    return [activeProduct!, activeProductImage!]
+  }, [products, activeImageId])
+  const [selectedPrintAreaInfo, setSelectedPrintAreaInfo] = useState<TPrintAreaInfo>(
+    activeProduct[0]
+  )
 
   const navigate = useNavigate()
-
-  const handleSetActiveImageId = (imgId: string) => {
-    if (imgId !== activeImageId) {
-      setActiveImageId(imgId)
-      const selectedList = productImages.find((c) => {
-        return c.some((p) => p.id === imgId)
-      })
-      if (!selectedList) return
-      swapArrayItems(
-        selectedList,
-        0,
-        selectedList.findIndex(({ id }) => id === imgId)
-      )
-    }
-  }
 
   const handleAddPrintedElement = (type: TElementType, printedImageElements: TPrintedImage[]) => {
     if (type === 'printed-image' && printedImageElements.length > 0) {
@@ -147,13 +138,26 @@ const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
   ) => {
     if (!sessionId) return
     handleSaveHtmlAsImage(
-      (imageDataUrl) => {
+      (imageDataUrl, imageSizeInfo) => {
         LocalStorageHelper.saveMockupImageAtLocal(
           elemtnsVisualState,
-          { id: activeImageId, color: activeProduct.color, size: selectedSize },
-          imageDataUrl,
+          {
+            productImageId: activeImageId,
+            color: activeProductImage.color,
+            size: selectedSize,
+          },
+          {
+            dataUrl: imageDataUrl,
+            size: {
+              width: imageSizeInfo.width,
+              height: imageSizeInfo.height,
+            },
+          },
           sessionId,
-          selectedSurface
+          {
+            id: selectedPrintAreaInfo.id,
+            type: selectedPrintAreaInfo.surfaceType,
+          }
         )
         toast.success('Đã thêm vào giỏ hàng')
         setCartCount(LocalStorageHelper.countSavedMockupImages())
@@ -206,10 +210,17 @@ const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
     ])
   }
 
-  const handleSelectColor = (color: string, productId: string) => {
+  const handleSelectColor = (color: string, productImageId: number) => {
     setSelectedColor(color)
-    if (productId !== activeImageId) {
-      handleSetActiveImageId(productId)
+    if (productImageId !== activeImageId) {
+      setActiveImageId(productImageId)
+    }
+  }
+
+  const handleSelectSize = (size: TProductSize, productImageId: number) => {
+    setSelectedSize(size)
+    if (productImageId !== activeImageId) {
+      setActiveImageId(productImageId)
     }
   }
 
@@ -225,6 +236,13 @@ const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
     })
   }
 
+  const handleSelectSurface = (surfaceType: TSurfaceType) => {
+    const printAreaInfo = activeProduct.printAreaList.find(
+      (area) => area.surfaceType === surfaceType
+    )
+    if (printAreaInfo) setSelectedPrintAreaInfo(printAreaInfo)
+  }
+
   const restoreMockupVisualStates = (mockupId: string, sessionId: string) => {
     const savedMockup = LocalStorageHelper.getSavedMockupData()
     if (!savedMockup) {
@@ -232,7 +250,7 @@ const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
     }
     const cartItems = savedMockup.productsInCart
     let foundMockup: TMockupData | null = null
-    let foundProductInfo: TProductInfo | null = null
+    let foundProductInfo: TProductCartInfo | null = null
 
     // Search for the mockup in all cart items
     for (const item of cartItems) {
@@ -240,7 +258,7 @@ const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
       if (mockup) {
         foundMockup = mockup
         foundProductInfo = {
-          id: item.id,
+          productImageId: item.productImageId,
           color: item.color,
           size: item.size,
         }
@@ -269,13 +287,15 @@ const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
     }
 
     // Restore product selection
-    setActiveImageId(foundProductInfo.id)
+    const productInfoId = foundProductInfo.productImageId
+    setActiveImageId(productInfoId)
     setSelectedColor(foundProductInfo.color.value)
     setSelectedSize(foundProductInfo.size)
 
     // Restore surface type
-    if (foundMockup.surfaceType) {
-      setSelectedSurface(foundMockup.surfaceType)
+    const surfaceType = foundMockup.surfaceInfo.type
+    if (surfaceType) {
+      handleSelectSurface(surfaceType)
     }
   }
 
@@ -310,8 +330,7 @@ const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
 
   return (
     activeImageId &&
-    activeProduct &&
-    peerProducts && (
+    activeProductImage && (
       <div className="min-h-screen bg-superlight-pink-cl flex flex-col max-w-md mx-auto">
         {/* Gallery Section */}
         <div className="pt-4 pb-3 px-4 bg-white shadow-sm relative">
@@ -322,7 +341,7 @@ const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
             <ArrowLeft size={20} className="text-white" />
           </div>
           <ProductGallery
-            galleryImages={galleryImages}
+            products={products}
             activeImageId={activeImageId}
             onSelectImage={setActiveImageId}
             printedImages={printedImages}
@@ -333,7 +352,6 @@ const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
         <div className="mt-4">
           <div className="flex-1 px-2">
             <EditArea
-              editingProduct={activeProduct}
               textElements={textElements}
               stickerElements={stickerElements}
               onUpdateText={setTextElements}
@@ -347,8 +365,9 @@ const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
               handleAddToCart={handleAddToCart}
               mockupId={mockupId}
               selectedColor={selectedColor}
-              selectedSurface={selectedSurface}
-              onSurfaceChange={setSelectedSurface}
+              onSelectSurface={handleSelectSurface}
+              editingProductImage={activeProductImage}
+              selectedPrintAreaInfo={selectedPrintAreaInfo}
             />
           </div>
 
@@ -359,8 +378,7 @@ const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
               onAddSticker={() => setShowStickerPicker(true)}
               onChooseColor={() => setShowColorPicker(true)}
               onChooseSize={() => setShowSizeSelector(true)}
-              activeProduct={activeProduct}
-              peerProducts={peerProducts}
+              product={activeProduct}
             />
           </div>
 
@@ -368,19 +386,20 @@ const EditPage = ({ productImages, printedImages }: TEditPageProps) => {
           {showColorPicker && (
             <ColorPicker
               selectedColor={selectedColor}
+              selectedSize={selectedSize}
               onSelectColor={handleSelectColor}
               onClose={() => setShowColorPicker(false)}
-              activeProduct={activeProduct}
-              peerProducts={peerProducts}
+              product={activeProduct}
             />
           )}
 
           {showSizeSelector && (
             <SizeSelector
               selectedSize={selectedSize}
-              onSelectSize={setSelectedSize}
+              selectedColor={selectedColor}
+              onSelectSize={handleSelectSize}
               onClose={() => setShowSizeSelector(false)}
-              sizes={activeProduct.size}
+              product={activeProduct}
             />
           )}
 
@@ -428,7 +447,7 @@ const ElementLayerProvider = ({ children }: { children: React.ReactNode }) => {
 
 const PageWrapper = () => {
   const [error, setError] = useState<string | null>(null)
-  const { productImages, setProductImages } = useProductImageContext()
+  const { products, setProducts } = useProductContext()
   const { editedImages: printedImages } = useEditedImageContext()
   const [fetched, setFetched] = useState<boolean>(false)
   const navigate = useNavigate()
@@ -436,7 +455,7 @@ const PageWrapper = () => {
   const fetchProducts = async () => {
     try {
       const data = await productService.fetchProductsByPage(1, 20)
-      setProductImages(data)
+      setProducts(data)
       setFetched(true)
     } catch (error) {
       setError('Không thể tải dữ liệu sản phẩm. Vui lòng thử lại sau.')
@@ -444,10 +463,10 @@ const PageWrapper = () => {
   }
 
   useEffect(() => {
-    if (fetched && (productImages.length === 0 || printedImages.length === 0)) {
+    if (fetched && (products.length === 0 || printedImages.length === 0)) {
       setError('Không có sản phẩm hoặc hình in nào để chỉnh sửa.')
     }
-  }, [productImages, printedImages])
+  }, [products, printedImages])
 
   useEffect(() => {
     fetchProducts()
@@ -479,9 +498,9 @@ const PageWrapper = () => {
         Quay lại trang chủ
       </button>
     </div>
-  ) : productImages.length > 0 && printedImages.length > 0 ? (
+  ) : products.length > 0 && printedImages.length > 0 ? (
     <ElementLayerProvider>
-      <EditPage productImages={productImages} printedImages={printedImages} />
+      <EditPage products={products} printedImages={printedImages} />
     </ElementLayerProvider>
   ) : (
     <PageLoading message="Đang tải dữ liệu..." />

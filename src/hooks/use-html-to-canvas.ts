@@ -1,11 +1,21 @@
+import { TImageSizeInfo } from '@/utils/types/global'
 import { domToCanvas } from 'modern-screenshot'
 import { useRef } from 'react'
 
-export const useHtmlToCanvas = () => {
+type TUseHtlmToCanvasReturn = {
+  editorRef: React.RefObject<HTMLDivElement>
+  handleSaveHtmlAsImage: (
+    onSaved: (imgDataUrl: string, imageSizeInfo: TImageSizeInfo) => void,
+    onError: (error: Error) => void,
+    onCanvas: (canvas: HTMLCanvasElement) => void
+  ) => void
+}
+
+export const useHtmlToCanvas = (): TUseHtlmToCanvasReturn => {
   const editorRef = useRef<HTMLDivElement>(null)
 
   const handleSaveHtmlAsImage = async (
-    onSaved: (imgDataUrl: string) => void,
+    onSaved: (imgDataUrl: string, imageSizeInfo: TImageSizeInfo) => void,
     onError: (error: Error) => void,
     onCanvas: (canvas: HTMLCanvasElement) => void
   ) => {
@@ -20,7 +30,10 @@ export const useHtmlToCanvas = () => {
           width: editor.getBoundingClientRect().width,
           height: editor.getBoundingClientRect().height,
         })
-        onSaved(canvas.toDataURL('image/webp', 0.95))
+        onSaved(canvas.toDataURL('image/webp', 0.95), {
+          width: canvas.width,
+          height: canvas.height,
+        })
         onCanvas(canvas)
         // if (blob) {
         //   onSaved(URL.createObjectURL(blob))

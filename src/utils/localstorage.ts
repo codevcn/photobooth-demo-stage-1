@@ -1,9 +1,9 @@
 import {
   TElementsVisualState,
   TMockupData,
-  TProductInfo,
+  TMockupImageData,
+  TProductCartInfo,
   TSavedMockupData,
-  TSurfaceType,
 } from './types/global'
 
 export class LocalStorageHelper {
@@ -15,37 +15,37 @@ export class LocalStorageHelper {
 
   private static createMockupData(
     elementsVisualState: TElementsVisualState,
-    imageDataUrl: string,
-    surfaceType: TSurfaceType = 'front'
+    imageData: TMockupImageData,
+    surfaceInfo: TMockupData['surfaceInfo']
   ): TMockupData {
     return {
       id: this.generateMockupId(),
       elementsVisualState,
-      dataURL: imageDataUrl,
-      surfaceType,
+      imageData,
+      surfaceInfo,
     }
   }
 
   static saveMockupImageAtLocal(
     elementsVisualState: TElementsVisualState,
-    productInfo: TProductInfo,
-    imageDataUrl: string,
+    productInfo: TProductCartInfo,
+    imageData: TMockupImageData,
     sessionId: string,
-    surfaceType: TSurfaceType = 'front'
+    surfaceInfo: TMockupData['surfaceInfo']
   ) {
     let existingData = this.getSavedMockupData()
 
     // Tạo mockup data mới
-    const newMockupData = this.createMockupData(elementsVisualState, imageDataUrl, surfaceType)
+    const newMockupData = this.createMockupData(elementsVisualState, imageData, surfaceInfo)
 
     if (existingData && existingData.sessionId === sessionId) {
-      const productId = productInfo.id
+      const productId = productInfo.productImageId
       let productFound = false
 
       // Tìm sản phẩm đã tồn tại
       for (const product of existingData.productsInCart) {
         if (
-          product.id === productId &&
+          product.productImageId === productId &&
           product.color.value === productInfo.color.value &&
           product.size === productInfo.size
         ) {
@@ -94,11 +94,11 @@ export class LocalStorageHelper {
     return count
   }
 
-  static removeSavedMockupImage(sessionId: string, productId: string, mockupDataId: string) {
+  static removeSavedMockupImage(sessionId: string, productId: number, mockupDataId: string) {
     const data = this.getSavedMockupData()
     if (data && data.sessionId === sessionId) {
       for (const product of data.productsInCart) {
-        if (product.id === productId) {
+        if (product.productImageId === productId) {
           product.mockupDataList = product.mockupDataList.filter(
             (mockup) => mockup.id !== mockupDataId
           )

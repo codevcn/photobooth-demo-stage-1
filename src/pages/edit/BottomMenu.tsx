@@ -2,15 +2,14 @@ import { useMemo, useState } from 'react'
 import { Type, Sticker, Palette, Ruler, Info } from 'lucide-react'
 import { ProductDetails } from './ProductDetails'
 import { createPortal } from 'react-dom'
-import { TProductImage } from '@/utils/types/global'
+import { TBaseProduct } from '@/utils/types/global'
 
 interface BottomMenuProps {
   onAddText: () => void
   onAddSticker: () => void
   onChooseColor: () => void
   onChooseSize: () => void
-  activeProduct: TProductImage
-  peerProducts: TProductImage[]
+  product: TBaseProduct
 }
 
 const BottomMenu: React.FC<BottomMenuProps> = ({
@@ -18,8 +17,7 @@ const BottomMenu: React.FC<BottomMenuProps> = ({
   onAddSticker,
   onChooseColor,
   onChooseSize,
-  activeProduct,
-  peerProducts,
+  product,
 }) => {
   const [showProductDetails, setShowProductDetails] = useState(false)
 
@@ -74,8 +72,7 @@ const BottomMenu: React.FC<BottomMenuProps> = ({
           <ProductDetails
             show={showProductDetails}
             onHideShow={setShowProductDetails}
-            productDetails={activeProduct}
-            peerProducts={peerProducts}
+            product={product}
           />,
           document.body
         )}

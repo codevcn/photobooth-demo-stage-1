@@ -1,15 +1,15 @@
-import { EditedImageContext, GlobalContext, ProductImageContext } from '@/context/global-context'
+import { EditedImageContext, GlobalContext, ProductContext } from '@/context/global-context'
 import { EInternalEvents } from '@/utils/enums'
 import { eventEmitter } from '@/utils/events'
 import { generateSessionId } from '@/utils/helpers'
-import { TEditedImage, TElementType, TGlobalContextValue, TProductImage } from '@/utils/types/global'
+import { TBaseProduct, TEditedImage, TElementType, TGlobalContextValue } from '@/utils/types/global'
 import { useEffect, useState } from 'react'
 
 type TGlobalState = Omit<TGlobalContextValue, 'visualStatesManager'>
 
 export const AppRootProvider = ({ children }: { children: React.ReactNode }) => {
   const [editedImages, setEditedImages] = useState<TEditedImage[]>([])
-  const [productImages, setProductImages] = useState<TProductImage[][]>([])
+  const [products, setProducts] = useState<TBaseProduct[]>([])
   const [globalState, setGlobalState] = useState<TGlobalState>({
     pickedElementRoot: null,
     elementType: null,
@@ -34,9 +34,9 @@ export const AppRootProvider = ({ children }: { children: React.ReactNode }) => 
   return (
     <GlobalContext.Provider value={globalState}>
       <EditedImageContext.Provider value={{ editedImages, setEditedImages, clearAllEditedImages }}>
-        <ProductImageContext.Provider value={{ productImages, setProductImages }}>
+        <ProductContext.Provider value={{ products, setProducts }}>
           {children}
-        </ProductImageContext.Provider>
+        </ProductContext.Provider>
       </EditedImageContext.Provider>
     </GlobalContext.Provider>
   )

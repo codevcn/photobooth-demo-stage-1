@@ -1,30 +1,11 @@
 import { Minus, Plus, X } from 'lucide-react'
 import { formatNumberWithCommas } from '@/utils/helpers'
-import { TElementsVisualState, TSurfaceType } from '@/utils/types/global'
-
-type TProductItem = {
-  id: string
-  name: string
-  size: string
-  color: {
-    title: string
-    value: string
-  }
-  quantity: number
-  originalPrice: number
-  discountedPrice?: number
-  mockupData: {
-    id: string
-    image: string
-  }
-  elementsVisualState: TElementsVisualState
-  surfaceType: TSurfaceType
-}
+import { TPaymentProductItem } from '@/utils/types/global'
 
 interface ProductListProps {
-  cartItems: TProductItem[]
+  cartItems: TPaymentProductItem[]
   onUpdateQuantity: (mockupDataId: string, delta: number) => void
-  onRemoveProduct: (mockupDataId: string, productId: string) => void
+  onRemoveProduct: (mockupDataId: string, productId: number) => void
   onShowProductImage: (imageUrl: string) => void
   onEditMockup: (mockupDataId: string) => void
 }
@@ -162,5 +143,3 @@ export const ProductList: React.FC<ProductListProps> = ({
     </section>
   )
 }
-
-export type { TProductItem }

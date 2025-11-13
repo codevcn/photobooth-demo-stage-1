@@ -1,5 +1,5 @@
 import { getInitialContants } from './contants'
-import { TPaymentType } from './types/global'
+import { TPaymentType, TSurfaceType } from './types/global'
 
 export const getNaturalSizeOfImage = (
   imgURL: string,
@@ -119,4 +119,13 @@ export const canvasToBlob = (
       callback(null)
     }
   }, type)
+}
+
+export const labelToSurfaceType = (surfaceType: TSurfaceType): string => {
+  switch (surfaceType) {
+    case 'front':
+      return 'Mặt trước'
+    default:
+      return 'Mặt sau'
+  }
 }

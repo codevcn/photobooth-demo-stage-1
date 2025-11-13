@@ -1,73 +1,39 @@
-import { apiClient } from '@/lib/api-client'
-import { TProductInCart } from '@/utils/types/global'
-
-// Request body types based on Postman collection
-export type CreateOrderRequest = {
-  store_code: string
-  items: {
-    variant_id: number
-    surface_id: number
-    quantity: number
-    editor_state_json: Record<string, unknown>
-    file_url: string
-  }[]
-  shipping_amount: number
-  customer: {
-    name: string
-    email: string
-    phone: string
-  }
-  shipping_address: {
-    address1: string
-    city: string
-    province: string
-    postcode: string
-    country: string
-  }
-  voucher_code?: string
-  note?: string
-  domain_snapshot: string
-  payment_method: 'momo' | 'zalo' | 'cod'
-}
-
-export type CreateOrderResponse = {
-  id: number
-  order_number: string
-  total_amount: number
-  status: string
-  created_at: string
-}
+import { postCreateOrder } from '@/configs/api/order.api'
+import { TCreateOrderReq, TOrderResponse } from '@/utils/types/api'
+import { TProductInCart, TShippingInfo } from '@/utils/types/global'
 
 class OrderService {
   /**
-   * Create order - Send cart items + shipping info to server
+   * Create order - Convert cart items to API format and submit
    */
   async createOrder(
     productsInCart: TProductInCart[],
-    shippingInfo: CreateOrderRequest['customer'] & {
-      address: string
-      province: string
-      city: string
-      message?: string
-    },
-    paymentMethod: 'momo' | 'zalo' | 'cod',
+    shippingInfo: TShippingInfo,
     voucherCode?: string
-  ): Promise<CreateOrderResponse> {
+  ): Promise<TOrderResponse> {
     // Transform cart data to API format
-    const items = productsInCart.flatMap((product) =>
-      product.mockupDataList.map((mockup) => ({
-        variant_id: parseInt(product.id) || 1, // Fallback to 1 if not number
-        surface_id: 1, // Default surface
-        quantity: 1,
-        editor_state_json: mockup.elementsVisualState as Record<string, unknown>,
-        file_url: mockup.dataURL, // Base64 image data URL
-      }))
-    )
+    const items: TCreateOrderReq['items'] = []
+    for (const product of productsInCart) {
+      for (const mockupData of product.mockupDataList) {
+        const mockupImageSize = mockupData.imageData.size
+        items.push({
+          variant_id: product.productImageId,
+          quantity: 1, // Each mockup is 1 item
+          surfaces: [
+            {
+              surface_id: mockupData.surfaceInfo.id,
+              editor_state_json: mockupData.elementsVisualState,
+              file_url: mockupData.imageData.dataUrl, // Base64 data URL of the mockup image
+              width_px: mockupImageSize.width,
+              height_px: mockupImageSize.height,
+            },
+          ],
+        })
+      }
+    }
 
-    const requestBody: CreateOrderRequest = {
-      store_code: 'photoism-hn', // Default store
-      items,
-      shipping_amount: 30000, // Fixed shipping fee
+    const requestBody: TCreateOrderReq = {
+      store_code: import.meta.env.VITE_STORE_CODE,
       customer: {
         name: shippingInfo.name,
         email: shippingInfo.email,
@@ -77,40 +43,21 @@ class OrderService {
         address1: shippingInfo.address,
         city: shippingInfo.city,
         province: shippingInfo.province,
-        postcode: '100000', // Default postcode
+        postcode: '000000',
         country: 'VN',
       },
-      voucher_code: voucherCode || '',
-      note: shippingInfo.message || '',
-      domain_snapshot: window.location.hostname,
-      payment_method: paymentMethod,
+      items,
+      voucher_code: voucherCode,
+      note: shippingInfo.message,
     }
 
-    const response = await apiClient.post<CreateOrderResponse, CreateOrderRequest>(
-      '/orders',
-      requestBody
-    )
+    const response = await postCreateOrder(requestBody)
 
-    if (!response.success || !response.data) {
-      throw new Error(response.error || 'Failed to create order')
+    if (!response.success || !response.data?.data) {
+      throw new Error(response.error || 'Không thể tạo đơn hàng')
     }
 
-    return response.data
-  }
-
-  async mockCreateOrder(...p: any): Promise<CreateOrderResponse> {
-    await new Promise((resolve) => setTimeout(() => resolve(true), 500)) // Simulate delay
-    return {
-      id: 12345,
-      order_number: 'PSHOP-67890',
-      total_amount: 250000,
-      status: 'pending',
-      created_at: new Date().toISOString(),
-    }
-  }
-
-  async submitOrder(): Promise<void> {
-    return new Promise((resolve) => setTimeout(() => resolve(), 1000))
+    return response.data.data
   }
 }
 

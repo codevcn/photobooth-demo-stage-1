@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { TProductImage } from '@/utils/types/global'
+import { TPrintAreaInfo } from '@/utils/types/global'
 
 type TPrintAreaBounds = {
   x: number
@@ -16,9 +16,9 @@ type TUsePrintAreaReturn = {
   checkElementBounds: (
     elementRect: DOMRect | { left: number; top: number; right: number; bottom: number }
   ) => boolean
-  updatePrintArea: (productPrintArea: TProductImage['printArea'], containerRect: DOMRect) => void
+  updatePrintArea: (productPrintArea: TPrintAreaInfo['area'], containerRect: DOMRect) => void
   initializePrintArea: (
-    productPrintArea: TProductImage['printArea'],
+    productPrintArea: TPrintAreaInfo['area'],
     containerElement: HTMLElement
   ) => TPrintAreaBounds | null
   checkIfAnyElementOutOfBounds: () => boolean
@@ -32,7 +32,7 @@ export const usePrintArea = (): TUsePrintAreaReturn => {
   const containerSizeRef = useRef<{ width: number; height: number } | null>(null)
 
   const calculatePrintAreaFromContainer = useCallback(
-    (productPrintArea: TProductImage['printArea'], containerElement: HTMLElement) => {
+    (productPrintArea: TPrintAreaInfo['area'], containerElement: HTMLElement) => {
       if (
         typeof productPrintArea.print_x === 'number' &&
         typeof productPrintArea.print_y === 'number' &&
@@ -74,7 +74,7 @@ export const usePrintArea = (): TUsePrintAreaReturn => {
   )
 
   const updatePrintArea = useCallback(
-    (productPrintArea: TProductImage['printArea'], containerRect: DOMRect) => {
+    (productPrintArea: TPrintAreaInfo['area'], containerRect: DOMRect) => {
       // Chỉ update nếu kích thước container thực sự thay đổi
       if (
         !containerSizeRef.current ||

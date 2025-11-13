@@ -8,6 +8,8 @@ import {
   TStickerVisualState,
   TPrintedImageVisualState,
   TSurfaceType,
+  TBaseProduct,
+  TPrintAreaInfo,
 } from '@/utils/types/global'
 import { TextElement } from './element/text-element/TextElement'
 import { StickerElement } from './element/sticker-element/StickerElement'
@@ -26,13 +28,12 @@ import { PrintAreaOverlay } from '@/components/print-area/PrintAreaOverlay'
 import ActionBar from './ActionBar'
 import { toast } from 'react-toastify'
 import { useVisualStatesCollector } from '@/hooks/use-visual-states-collector'
-import { DropdownMenu } from '@/components/common/DropdownMenu'
-import { Image } from 'lucide-react'
+import { SurfaceSelector } from './SurfaceSelector'
 
 type TSelectingType = TElementType | null
 
 interface EditAreaProps {
-  editingProduct: TProductImage
+  editingProductImage: TProductImage
   textElements: TTextVisualState[]
   stickerElements: TStickerVisualState[]
   onUpdateText: (elements: TTextVisualState[]) => void
@@ -50,12 +51,12 @@ interface EditAreaProps {
   ) => void
   mockupId: string | null
   selectedColor: string
-  selectedSurface: TSurfaceType
-  onSurfaceChange: (surface: TSurfaceType) => void
+  selectedPrintAreaInfo: TPrintAreaInfo
+  onSelectSurface: (surfaceType: TSurfaceType) => void
 }
 
 const EditArea: React.FC<EditAreaProps> = ({
-  editingProduct,
+  editingProductImage,
   printedImages,
   textElements,
   stickerElements,
@@ -69,8 +70,8 @@ const EditArea: React.FC<EditAreaProps> = ({
   handleAddToCart,
   mockupId,
   selectedColor,
-  selectedSurface,
-  onSurfaceChange,
+  selectedPrintAreaInfo,
+  onSelectSurface,
 }) => {
   const [showPrintedImagesModal, setShowPrintedImagesModal] = useState<boolean>(false)
   const editAreaContainerRef = useRef<HTMLDivElement>(null)
@@ -137,11 +138,11 @@ const EditArea: React.FC<EditAreaProps> = ({
   }
 
   // const handlePickProductImage = (e: React.MouseEvent) => {
-  //   if (editingProduct) {
+  //   if (editingProductImage) {
   //     const target = e.target as HTMLElement
   //     if (target.classList.contains('NAME-product-image')) {
   //       e.stopPropagation()
-  //       handleUpdateSelectedElementId(editingProduct.id, 'product-image')
+  //       handleUpdateSelectedElementId(editingProductImage.id, 'product-image')
   //     }
   //   }
   // }
@@ -202,13 +203,13 @@ const EditArea: React.FC<EditAreaProps> = ({
       const timeoutId = setTimeout(() => {
         if (htmlToCanvasEditorRef.current) {
           // Sử dụng initializePrintArea với container element thay vì getBoundingClientRect
-          initializePrintArea(editingProduct.printArea, htmlToCanvasEditorRef.current)
+          initializePrintArea(selectedPrintAreaInfo.area, htmlToCanvasEditorRef.current)
         }
       }, 50)
 
       return () => clearTimeout(timeoutId)
     }
-  }, [editingProduct.id, initializePrintArea, editingProduct.printArea]) // Sử dụng initializePrintArea thay vì updatePrintArea
+  }, [editingProductImage.id, initializePrintArea, selectedPrintAreaInfo.area]) // Sử dụng initializePrintArea thay vì updatePrintArea
 
   // Theo dõi resize của container
   useEffect(() => {
@@ -222,7 +223,7 @@ const EditArea: React.FC<EditAreaProps> = ({
           // Sử dụng initializePrintArea thay vì updatePrintArea để tránh getBoundingClientRect
           setTimeout(() => {
             if (htmlToCanvasEditorRef.current) {
-              initializePrintArea(editingProduct.printArea, htmlToCanvasEditorRef.current)
+              initializePrintArea(selectedPrintAreaInfo.area, htmlToCanvasEditorRef.current)
             }
           }, 100)
         }
@@ -231,7 +232,7 @@ const EditArea: React.FC<EditAreaProps> = ({
 
     resizeObserver.observe(htmlToCanvasEditorRef.current)
     return () => resizeObserver.disconnect()
-  }, [editingProduct, initializePrintArea]) // Thay đổi dependency
+  }, [editingProductImage, initializePrintArea]) // Thay đổi dependency
 
   return (
     <div className="rounded-2xl relative" ref={editAreaContainerRef}>
@@ -261,12 +262,8 @@ const EditArea: React.FC<EditAreaProps> = ({
           className="NAME-canvas-editor relative z-0 w-full h-fit py-2 px-2 max-h-[500px] overflow-hidden"
         >
           <img
-            src={
-              selectedSurface === 'front'
-                ? editingProduct.frontImageUrl
-                : editingProduct.backImageUrl
-            }
-            alt={editingProduct.name}
+            src={selectedPrintAreaInfo.imageUrl}
+            alt={editingProductImage.name}
             className="NAME-product-image touch-none w-full h-full max-h-[calc(500px-8px)] object-contain"
           />
 
@@ -340,24 +337,10 @@ const EditArea: React.FC<EditAreaProps> = ({
         </div>
       )}
 
-      {/* Surface Selector */}
-      <div className="bg-white rounded-lg p-3 mt-3 border border-gray-200">
-        <div className="flex items-center gap-3">
-          <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
-            Chọn mặt in:
-          </label>
-          <div className="flex-1">
-            <DropdownMenu
-              options={[
-                { label: 'Mặt trước', value: 'front', icon: <Image size={16} /> },
-                { label: 'Mặt sau', value: 'back', icon: <Image size={16} /> },
-              ]}
-              value={selectedSurface}
-              onChange={onSurfaceChange}
-            />
-          </div>
-        </div>
-      </div>
+      <SurfaceSelector
+        selectedSurface={selectedPrintAreaInfo.surfaceType}
+        onSurfaceChange={onSelectSurface}
+      />
 
       {/* Action Bar */}
       <div className="px-4 pb-3 mt-4">

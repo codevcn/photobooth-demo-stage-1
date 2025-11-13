@@ -41,6 +41,7 @@ type TEndOfPaymentData = {
     title: string
   }
   total: number
+  orderHashCode?: string
 }
 
 interface EndOfPaymentProps {
@@ -288,33 +289,35 @@ export const PaymentModal = ({ show, paymentInfo, onHideShow, voucherCode }: Pay
     try {
       // Step 1: Create order
       setConfirmingMessage('Đang tạo đơn hàng...')
-      const orderResponse = await orderService.mockCreateOrder(
+      const orderResponse = await orderService.createOrder(
         savedData.productsInCart,
         shippingInfo,
-        paymentMethod,
         voucherCode
       )
 
-      toast.success(`Đơn hàng ${orderResponse.order_number} đã được tạo`)
+      const { order, payment_instructions } = orderResponse.data
 
-      // Step 2: Get payment QR (only for Momo/Zalo)
+      toast.success(`Đơn hàng ${order.hash_code} đã được tạo`)
+
+      // Step 2: Handle payment based on method
       if (paymentMethod === 'momo' || paymentMethod === 'zalo') {
-        setConfirmingMessage('Đang tạo mã QR thanh toán...')
-        const qrResponse = await paymentService.getPaymentQR(
-          orderResponse.order_number,
-          paymentMethod,
-          total
-        )
+        // Use payment instructions from order response
+        if (payment_instructions && payment_instructions.length > 0) {
+          const paymentInstruction = payment_instructions[0]
 
-        setEndOfPayment({
-          countdownDuration: qrResponse.expires_in,
-          QRCodeURL: qrResponse.qr_code_url,
-          paymentMethod: {
-            method: paymentMethod,
-            title: capitalizeFirstLetter(paymentMethod),
-          },
-          total,
-        })
+          setEndOfPayment({
+            countdownDuration: 600, // 10 minutes default
+            QRCodeURL: paymentInstruction.qr_code,
+            paymentMethod: {
+              method: paymentMethod,
+              title: capitalizeFirstLetter(paymentMethod),
+            },
+            total,
+            orderHashCode: order.hash_code,
+          })
+        } else {
+          throw new Error('Không nhận được thông tin thanh toán từ server')
+        }
       } else {
         // COD: No QR needed, just show success
         setEndOfPayment({
@@ -325,6 +328,7 @@ export const PaymentModal = ({ show, paymentInfo, onHideShow, voucherCode }: Pay
             title: capitalizeFirstLetter(paymentMethod),
           },
           total,
+          orderHashCode: order.hash_code,
         })
       }
     } catch (error) {
