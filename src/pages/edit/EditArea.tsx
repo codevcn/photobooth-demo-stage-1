@@ -42,7 +42,7 @@ interface EditAreaProps {
   printedImageElements: TPrintedImageVisualState[]
   onAddPrintedImages: (elements: TPrintedImage[]) => void
   onRemovePrintedImages: (ids: string[]) => void
-  htmlToCanvasEditorRef: React.RefObject<HTMLDivElement>
+  htmlToCanvasEditorRef: React.MutableRefObject<HTMLDivElement | null>
   cartCount: number
   handleAddToCart: (
     elementsVisualState: TElementsVisualState,
@@ -53,6 +53,7 @@ interface EditAreaProps {
   selectedColor: string
   selectedPrintAreaInfo: TPrintAreaInfo
   onSelectSurface: (surfaceType: TSurfaceType) => void
+  activeProduct: TBaseProduct
 }
 
 const EditArea: React.FC<EditAreaProps> = ({
@@ -72,6 +73,7 @@ const EditArea: React.FC<EditAreaProps> = ({
   selectedColor,
   selectedPrintAreaInfo,
   onSelectSurface,
+  activeProduct,
 }) => {
   const [showPrintedImagesModal, setShowPrintedImagesModal] = useState<boolean>(false)
   const editAreaContainerRef = useRef<HTMLDivElement>(null)
@@ -88,6 +90,7 @@ const EditArea: React.FC<EditAreaProps> = ({
   const {
     printAreaRef,
     overlayRef,
+    containerElementRef,
     isOutOfBounds,
     initializePrintArea,
     checkIfAnyElementOutOfBounds,
@@ -199,17 +202,30 @@ const EditArea: React.FC<EditAreaProps> = ({
   // Cập nhật vùng in khi sản phẩm thay đổi
   useEffect(() => {
     if (htmlToCanvasEditorRef.current) {
-      // Delay để đảm bảo DOM đã render xong
-      const timeoutId = setTimeout(() => {
+      const imageElement = htmlToCanvasEditorRef.current.querySelector(
+        '.NAME-product-image'
+      ) as HTMLImageElement
+
+      if (!imageElement) return
+
+      const updatePrintAreaWhenImageLoaded = () => {
         if (htmlToCanvasEditorRef.current) {
-          // Sử dụng initializePrintArea với container element thay vì getBoundingClientRect
           initializePrintArea(selectedPrintAreaInfo.area, htmlToCanvasEditorRef.current)
         }
-      }, 50)
+      }
 
-      return () => clearTimeout(timeoutId)
+      // Nếu ảnh đã load xong
+      if (imageElement.complete && imageElement.naturalWidth > 0) {
+        // Delay nhỏ để đảm bảo DOM đã render xong
+        const timeoutId = setTimeout(updatePrintAreaWhenImageLoaded, 50)
+        return () => clearTimeout(timeoutId)
+      } else {
+        // Nếu ảnh chưa load, đợi event load
+        imageElement.addEventListener('load', updatePrintAreaWhenImageLoaded)
+        return () => imageElement.removeEventListener('load', updatePrintAreaWhenImageLoaded)
+      }
     }
-  }, [editingProductImage.id, initializePrintArea, selectedPrintAreaInfo.area]) // Sử dụng initializePrintArea thay vì updatePrintArea
+  }, [editingProductImage.id, initializePrintArea, selectedPrintAreaInfo])
 
   // Theo dõi resize của container
   useEffect(() => {
@@ -217,22 +233,26 @@ const EditArea: React.FC<EditAreaProps> = ({
 
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        // Chỉ update khi kích thước thực sự thay đổi đáng kể
         const { width, height } = entry.contentRect
         if (width > 0 && height > 0) {
-          // Sử dụng initializePrintArea thay vì updatePrintArea để tránh getBoundingClientRect
-          setTimeout(() => {
-            if (htmlToCanvasEditorRef.current) {
-              initializePrintArea(selectedPrintAreaInfo.area, htmlToCanvasEditorRef.current)
-            }
-          }, 100)
+          const imageElement = htmlToCanvasEditorRef.current?.querySelector(
+            '.NAME-product-image'
+          ) as HTMLImageElement
+
+          if (imageElement && imageElement.complete && imageElement.naturalWidth > 0) {
+            setTimeout(() => {
+              if (htmlToCanvasEditorRef.current) {
+                initializePrintArea(selectedPrintAreaInfo.area, htmlToCanvasEditorRef.current)
+              }
+            }, 100)
+          }
         }
       }
     })
 
     resizeObserver.observe(htmlToCanvasEditorRef.current)
     return () => resizeObserver.disconnect()
-  }, [editingProductImage, initializePrintArea]) // Thay đổi dependency
+  }, [editingProductImage, initializePrintArea, selectedPrintAreaInfo.area])
 
   return (
     <div className="rounded-2xl relative" ref={editAreaContainerRef}>
@@ -257,15 +277,23 @@ const EditArea: React.FC<EditAreaProps> = ({
 
       <div className="bg-white rounded-lg">
         <div
-          ref={htmlToCanvasEditorRef}
-          data-edit-container="true"
-          className="NAME-canvas-editor relative z-0 w-full h-fit py-2 px-2 max-h-[500px] overflow-hidden"
+          ref={(node) => {
+            htmlToCanvasEditorRef.current = node
+            containerElementRef.current = node
+          }}
+          className="NAME-canvas-editor relative z-0 w-full h-fit max-h-[500px] overflow-hidden"
         >
-          <img
-            src={selectedPrintAreaInfo.imageUrl}
-            alt={editingProductImage.name}
-            className="NAME-product-image touch-none w-full h-full max-h-[calc(500px-8px)] object-contain"
-          />
+          {selectedPrintAreaInfo && selectedPrintAreaInfo.imageUrl ? (
+            <img
+              src={selectedPrintAreaInfo.imageUrl}
+              alt={editingProductImage.name}
+              className="NAME-product-image touch-none w-full h-full max-h-[calc(500px-8px)] object-contain"
+            />
+          ) : (
+            <div className="flex items-center justify-center h-[484px] text-gray-400">
+              <p>Không có ảnh sản phẩm</p>
+            </div>
+          )}
 
           {/* Print Area Overlay */}
           <PrintAreaOverlay
@@ -340,6 +368,7 @@ const EditArea: React.FC<EditAreaProps> = ({
       <SurfaceSelector
         selectedSurface={selectedPrintAreaInfo.surfaceType}
         onSurfaceChange={onSelectSurface}
+        productPrintAreaList={activeProduct.printAreaList}
       />
 
       {/* Action Bar */}

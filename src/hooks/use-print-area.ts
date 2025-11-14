@@ -11,12 +11,12 @@ type TPrintAreaBounds = {
 type TUsePrintAreaReturn = {
   printAreaRef: React.RefObject<HTMLDivElement>
   overlayRef: React.RefObject<HTMLDivElement>
+  containerElementRef: React.MutableRefObject<HTMLElement | null>
   isOutOfBounds: boolean
   printAreaBounds: TPrintAreaBounds | null
   checkElementBounds: (
     elementRect: DOMRect | { left: number; top: number; right: number; bottom: number }
   ) => boolean
-  updatePrintArea: (productPrintArea: TPrintAreaInfo['area'], containerRect: DOMRect) => void
   initializePrintArea: (
     productPrintArea: TPrintAreaInfo['area'],
     containerElement: HTMLElement
@@ -30,6 +30,7 @@ export const usePrintArea = (): TUsePrintAreaReturn => {
   const [isOutOfBounds, setIsOutOfBounds] = useState(false)
   const [printAreaBounds, setPrintAreaBounds] = useState<TPrintAreaBounds | null>(null)
   const containerSizeRef = useRef<{ width: number; height: number } | null>(null)
+  const containerElementRef = useRef<HTMLElement | null>(null)
 
   const calculatePrintAreaFromContainer = useCallback(
     (productPrintArea: TPrintAreaInfo['area'], containerElement: HTMLElement) => {
@@ -39,18 +40,71 @@ export const usePrintArea = (): TUsePrintAreaReturn => {
         typeof productPrintArea.print_w === 'number' &&
         typeof productPrintArea.print_h === 'number'
       ) {
-        // Sử dụng offsetWidth/offsetHeight thay vì getBoundingClientRect để tránh layout shift
+        // Tìm ảnh sản phẩm
+        const imageElement = containerElement.querySelector(
+          '.NAME-product-image'
+        ) as HTMLImageElement
+        if (!imageElement) {
+          setPrintAreaBounds(null)
+          containerSizeRef.current = null
+          return null
+        }
+
+        // Kích thước container
         const containerWidth = containerElement.offsetWidth
         const containerHeight = containerElement.offsetHeight
+
+        // Kích thước gốc của ảnh
+        const naturalWidth = imageElement.naturalWidth
+        const naturalHeight = imageElement.naturalHeight
+
+        if (naturalWidth === 0 || naturalHeight === 0) {
+          // Ảnh chưa load xong
+          setPrintAreaBounds(null)
+          containerSizeRef.current = null
+          return null
+        }
+
+        // Tính toán kích thước thực tế của ảnh sau khi object-contain
+        const containerRatio = containerWidth / containerHeight
+        const imageRatio = naturalWidth / naturalHeight
+
+        let actualImageWidth: number
+        let actualImageHeight: number
+        let offsetX = 0
+        let offsetY = 0
+
+        if (imageRatio > containerRatio) {
+          // Ảnh rộng hơn - width = containerWidth, height tính theo tỷ lệ
+          actualImageWidth = containerWidth
+          actualImageHeight = containerWidth / imageRatio
+          offsetY = (containerHeight - actualImageHeight) / 2
+        } else {
+          // Ảnh cao hơn - height = containerHeight, width tính theo tỷ lệ
+          actualImageHeight = containerHeight
+          actualImageWidth = containerHeight * imageRatio
+          offsetX = (containerWidth - actualImageWidth) / 2
+        }
 
         // Lưu lại kích thước container
         containerSizeRef.current = { width: containerWidth, height: containerHeight }
 
-        // Chuyển đổi từ phần trăm sang pixel
-        const x = (productPrintArea.print_x / 100) * containerWidth
-        const y = (productPrintArea.print_y / 100) * containerHeight
-        const width = (productPrintArea.print_w / 100) * containerWidth
-        const height = (productPrintArea.print_h / 100) * containerHeight
+        // Tính toán scale factor từ ảnh gốc (real size) sang ảnh hiển thị (displayed size)
+        // API cung cấp print area coordinates dựa trên kích thước ảnh gốc (width_real_px × height_real_px)
+        // Ta cần convert sang pixel trên màn hình dựa trên actualImageWidth × actualImageHeight
+        const baseWidth = naturalWidth
+        const baseHeight = naturalHeight
+
+        // Scale factor = (kích thước hiển thị) / (kích thước gốc)
+        const scaleX = actualImageWidth / baseWidth
+        const scaleY = actualImageHeight / baseHeight
+
+        // Convert từ pixel coordinates (dựa trên ảnh gốc) sang pixel trên màn hình
+        // x_displayed = offsetX + (x_original * scale)
+        const x = offsetX + productPrintArea.print_x * scaleX
+        const y = offsetY + productPrintArea.print_y * scaleY
+        const width = productPrintArea.print_w * scaleX
+        const height = productPrintArea.print_h * scaleY
 
         const newBounds = { x, y, width, height }
         setPrintAreaBounds(newBounds)
@@ -71,26 +125,6 @@ export const usePrintArea = (): TUsePrintAreaReturn => {
       }
     },
     []
-  )
-
-  const updatePrintArea = useCallback(
-    (productPrintArea: TPrintAreaInfo['area'], containerRect: DOMRect) => {
-      // Chỉ update nếu kích thước container thực sự thay đổi
-      if (
-        !containerSizeRef.current ||
-        Math.abs(containerSizeRef.current.width - containerRect.width) > 5 ||
-        Math.abs(containerSizeRef.current.height - containerRect.height) > 5
-      ) {
-        // Tìm container element để sử dụng offset thay vì rect
-        const containerElement = document.querySelector(
-          '[data-edit-container="true"]'
-        ) as HTMLElement
-        if (containerElement) {
-          calculatePrintAreaFromContainer(productPrintArea, containerElement)
-        }
-      }
-    },
-    [calculatePrintAreaFromContainer]
   )
 
   const checkElementBounds = useCallback(
@@ -124,7 +158,7 @@ export const usePrintArea = (): TUsePrintAreaReturn => {
     if (!printAreaBounds) return false
 
     const editableElements = document.querySelectorAll('.NAME-root-element')
-    const editContainer = document.querySelector('[data-edit-container="true"]')
+    const editContainer = containerElementRef.current
 
     if (!editContainer) return false
 
@@ -156,14 +190,13 @@ export const usePrintArea = (): TUsePrintAreaReturn => {
     let checkTimeout: NodeJS.Timeout
 
     const checkBounds = () => {
-      const editableElements = document.querySelectorAll('.NAME-root-element')
+      const editableElements = document.body.querySelectorAll('.NAME-root-element')
       let hasOutOfBounds = false
+      const editContainer = containerElementRef.current
+      if (editContainer) {
+        for (const element of editableElements) {
+          const rect = element.getBoundingClientRect()
 
-      editableElements.forEach((element) => {
-        const rect = element.getBoundingClientRect()
-        const editContainer = document.querySelector('[data-edit-container="true"]')
-
-        if (editContainer) {
           const containerRect = editContainer.getBoundingClientRect()
 
           // Chuyển đổi tọa độ element về tọa độ tương đối với container
@@ -176,10 +209,10 @@ export const usePrintArea = (): TUsePrintAreaReturn => {
 
           if (!checkElementBounds(relativeRect as DOMRect)) {
             hasOutOfBounds = true
+            break // Thoát sớm khi tìm thấy element ngoài bounds
           }
         }
-      })
-
+      }
       updateOverlayVisibility(hasOutOfBounds)
     }
 
@@ -205,10 +238,10 @@ export const usePrintArea = (): TUsePrintAreaReturn => {
   return {
     printAreaRef,
     overlayRef,
+    containerElementRef,
     isOutOfBounds,
     printAreaBounds,
     checkElementBounds,
-    updatePrintArea,
     initializePrintArea: calculatePrintAreaFromContainer,
     checkIfAnyElementOutOfBounds,
   }

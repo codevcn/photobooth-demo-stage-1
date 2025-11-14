@@ -109,5 +109,5 @@ class ApiClient {
 
 export const apiClient = new ApiClient(
   env.apiBaseUrl,
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJyb2xlIjoic3VwZXJhZG1pbiIsImlhdCI6MTc2MjkzOTQ4MSwiZXhwIjoxNzYyOTgyNjgxfQ.M9MIQmrA7nOyVsXS-l32YdBMB1Wm7gUQHCFYWnvQBQk'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJyb2xlIjoic3VwZXJhZG1pbiIsImlhdCI6MTc2Mjk4OTU3NywiZXhwIjoxNzYzMDMyNzc3fQ.LmW5a7E2sw2NaMxbqGqQOMm7RkmsHQHYKkydHOAWq3Q'
 )

@@ -34,19 +34,26 @@ class ProductService {
     const convertedProducts: TBaseProduct[] = []
     for (const product of apiProducts) {
       if (product.status !== 'active') continue
+      if (product.variants.length === 0) continue
+      if (product.surfaces.length === 0) continue
       // Get category from attributes or default to 'cup'
       const category = product.attributes_json.category as TProductImage['category']
 
       // Build printAreaList from surfaces
       const printAreaList: TPrintAreaInfo[] = []
       for (const surface of product.surfaces) {
+        if (surface.code !== 'front' && surface.code !== 'back') continue // Only include 'front' and 'back' surfaces
         printAreaList.push({
           id: surface.id,
           area: {
+            // Keep pixel values from API - will be converted to actual position in hook
             print_x: surface.print_areas.x_px,
             print_y: surface.print_areas.y_px,
             print_w: surface.print_areas.width_px,
             print_h: surface.print_areas.height_px,
+            // Store real dimensions for scaling calculation
+            width_real_px: surface.print_areas.width_real_px,
+            height_real_px: surface.print_areas.height_real_px,
           },
           surfaceType: surface.code as TSurfaceType,
           imageUrl: surface.preview_image_url || product.base_image_url,

@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react'
-import { Type, Sticker, Palette, Ruler, Info } from 'lucide-react'
 import { ProductDetails } from './ProductDetails'
 import { createPortal } from 'react-dom'
 import { TBaseProduct } from '@/utils/types/global'
@@ -7,16 +6,14 @@ import { TBaseProduct } from '@/utils/types/global'
 interface BottomMenuProps {
   onAddText: () => void
   onAddSticker: () => void
-  onChooseColor: () => void
-  onChooseSize: () => void
+  onChooseVariant: () => void
   product: TBaseProduct
 }
 
 const BottomMenu: React.FC<BottomMenuProps> = ({
   onAddText,
   onAddSticker,
-  onChooseColor,
-  onChooseSize,
+  onChooseVariant,
   product,
 }) => {
   const [showProductDetails, setShowProductDetails] = useState(false)
@@ -24,36 +21,99 @@ const BottomMenu: React.FC<BottomMenuProps> = ({
   const menuItems = useMemo(
     () => [
       {
-        icon: <Type size={24} className="text-pink-cl" />,
+        icon: (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="lucide lucide-type-icon lucide-type text-pink-cl"
+          >
+            <path d="M12 4v16" />
+            <path d="M4 7V5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2" />
+            <path d="M9 20h6" />
+          </svg>
+        ),
         label: 'Thêm chữ',
         onClick: onAddText,
       },
       {
-        icon: <Sticker size={24} className="text-pink-cl" />,
+        icon: (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="lucide lucide-sticker-icon lucide-sticker text-pink-cl"
+          >
+            <path d="M21 9a2.4 2.4 0 0 0-.706-1.706l-3.588-3.588A2.4 2.4 0 0 0 15 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2z" />
+            <path d="M15 3v5a1 1 0 0 0 1 1h5" />
+            <path d="M8 13h.01" />
+            <path d="M16 13h.01" />
+            <path d="M10 16s.8 1 2 1c1.3 0 2-1 2-1" />
+          </svg>
+        ),
         label: 'Thêm sticker',
         onClick: onAddSticker,
       },
       {
-        icon: <Palette size={24} className="text-pink-cl" />,
-        label: 'Chọn màu',
-        onClick: onChooseColor,
+        icon: (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="lucide lucide-shirt-icon lucide-shirt text-pink-cl"
+          >
+            <path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z" />
+          </svg>
+        ),
+        label: 'Phân loại',
+        onClick: onChooseVariant,
       },
       {
-        icon: <Ruler size={24} className="text-pink-cl" />,
-        label: 'Kích thước',
-        onClick: onChooseSize,
-      },
-      {
-        icon: <Info size={24} className="text-pink-cl" />,
+        icon: (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="lucide lucide-info-icon lucide-info text-pink-cl"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 16v-4" />
+            <path d="M12 8h.01" />
+          </svg>
+        ),
         label: 'Chi tiết',
         onClick: () => setShowProductDetails(true),
       },
     ],
-    [onAddSticker, onAddText]
+    [onAddSticker, onAddText, onChooseVariant]
   )
 
   return (
-    <div className="grid grid-cols-5 gap-1 px-4 py-2">
+    <div className="grid grid-cols-4 gap-1 px-4 py-2">
       {menuItems.map((item, index) => (
         <button
           key={index}

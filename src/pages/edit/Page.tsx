@@ -2,8 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import ProductGallery from './ProductGallery'
 import EditArea from './EditArea'
 import BottomMenu from './BottomMenu'
-import ColorPicker from './product/product-color/ColorPicker'
-import SizeSelector from './product/product-size/SizeSelector'
+import ProductVariantPicker from './product/ProductVariantPicker'
 import TextEditor from './element/text-element/TextEditor'
 import StickerPicker from './element/sticker-element/StickerPicker'
 import {
@@ -63,8 +62,7 @@ const EditPage = ({ products, printedImages }: TEditPageProps) => {
   const [cartCount, setCartCount] = useState<number>(0)
 
   // Tool overlays
-  const [showColorPicker, setShowColorPicker] = useState(false)
-  const [showSizeSelector, setShowSizeSelector] = useState(false)
+  const [showVariantPicker, setShowVariantPicker] = useState(false)
   const [showTextEditor, setShowTextEditor] = useState(false)
   const [showStickerPicker, setShowStickerPicker] = useState(false)
 
@@ -89,7 +87,7 @@ const EditPage = ({ products, printedImages }: TEditPageProps) => {
     return [activeProduct!, activeProductImage!]
   }, [products, activeImageId])
   const [selectedPrintAreaInfo, setSelectedPrintAreaInfo] = useState<TPrintAreaInfo>(
-    activeProduct[0]
+    activeProduct.printAreaList[0]
   )
 
   const navigate = useNavigate()
@@ -131,12 +129,30 @@ const EditPage = ({ products, printedImages }: TEditPageProps) => {
     removeFromElementLayers(ids)
   }
 
+  const validateBeforeAddToCart = (): string | null => {
+    if (!selectedColor || !selectedSize) {
+      return 'Vui lòng chọn màu và kích thước sản phẩm trước khi thêm vào giỏ hàng'
+    }
+    for (const product of products) {
+      for (const img of product.images) {
+        if (img.color.value === selectedColor && img.size === selectedSize) {
+          return null
+        }
+      }
+    }
+    return 'Sản phẩm với màu và kích thước đã chọn không tồn tại'
+  }
+
   const handleAddToCart = (
     elemtnsVisualState: TElementsVisualState,
     onDoneAdd: () => void,
     onError: (error: Error) => void
   ) => {
     if (!sessionId) return
+    const message = validateBeforeAddToCart()
+    if (message) {
+      return onError(new Error(message))
+    }
     handleSaveHtmlAsImage(
       (imageDataUrl, imageSizeInfo) => {
         LocalStorageHelper.saveMockupImageAtLocal(
@@ -144,7 +160,7 @@ const EditPage = ({ products, printedImages }: TEditPageProps) => {
           {
             productImageId: activeImageId,
             color: activeProductImage.color,
-            size: selectedSize,
+            size: activeProductImage.size,
           },
           {
             dataUrl: imageDataUrl,
@@ -210,14 +226,8 @@ const EditPage = ({ products, printedImages }: TEditPageProps) => {
     ])
   }
 
-  const handleSelectColor = (color: string, productImageId: number) => {
+  const handleSelectVariant = (color: string, size: TProductSize, productImageId: number) => {
     setSelectedColor(color)
-    if (productImageId !== activeImageId) {
-      setActiveImageId(productImageId)
-    }
-  }
-
-  const handleSelectSize = (size: TProductSize, productImageId: number) => {
     setSelectedSize(size)
     if (productImageId !== activeImageId) {
       setActiveImageId(productImageId)
@@ -323,6 +333,18 @@ const EditPage = ({ products, printedImages }: TEditPageProps) => {
   }
 
   useEffect(() => {
+    // Update color và size theo product mới
+    if (activeProductImage) {
+      setSelectedColor(activeProductImage.color.value)
+      setSelectedSize(activeProductImage.size)
+    }
+  }, [activeProductImage])
+
+  useEffect(() => {
+    setSelectedPrintAreaInfo(activeProduct.printAreaList[0])
+  }, [activeProduct])
+
+  useEffect(() => {
     initClickOnPageEvent()
     initCartCount()
     initEditElement()
@@ -343,6 +365,7 @@ const EditPage = ({ products, printedImages }: TEditPageProps) => {
           <ProductGallery
             products={products}
             activeImageId={activeImageId}
+            activeProduct={activeProduct}
             onSelectImage={setActiveImageId}
             printedImages={printedImages}
           />
@@ -368,6 +391,7 @@ const EditPage = ({ products, printedImages }: TEditPageProps) => {
               onSelectSurface={handleSelectSurface}
               editingProductImage={activeProductImage}
               selectedPrintAreaInfo={selectedPrintAreaInfo}
+              activeProduct={activeProduct}
             />
           </div>
 
@@ -376,29 +400,18 @@ const EditPage = ({ products, printedImages }: TEditPageProps) => {
             <BottomMenu
               onAddText={() => setShowTextEditor(true)}
               onAddSticker={() => setShowStickerPicker(true)}
-              onChooseColor={() => setShowColorPicker(true)}
-              onChooseSize={() => setShowSizeSelector(true)}
+              onChooseVariant={() => setShowVariantPicker(true)}
               product={activeProduct}
             />
           </div>
 
           {/* Overlays */}
-          {showColorPicker && (
-            <ColorPicker
+          {showVariantPicker && (
+            <ProductVariantPicker
               selectedColor={selectedColor}
               selectedSize={selectedSize}
-              onSelectColor={handleSelectColor}
-              onClose={() => setShowColorPicker(false)}
-              product={activeProduct}
-            />
-          )}
-
-          {showSizeSelector && (
-            <SizeSelector
-              selectedSize={selectedSize}
-              selectedColor={selectedColor}
-              onSelectSize={handleSelectSize}
-              onClose={() => setShowSizeSelector(false)}
+              onSelectVariant={handleSelectVariant}
+              onClose={() => setShowVariantPicker(false)}
               product={activeProduct}
             />
           )}

@@ -13,10 +13,12 @@ export type TPrintAreaInfo = {
   // productImageId: string
   id: number
   area: {
-    print_x?: number
-    print_y?: number
-    print_w?: number
-    print_h?: number
+    print_x?: number // pixel position x
+    print_y?: number // pixel position y
+    print_w?: number // pixel width
+    print_h?: number // pixel height
+    width_real_px?: number // real width of product image (for scaling)
+    height_real_px?: number // real height of product image (for scaling)
   }
   surfaceType: TSurfaceType
   imageUrl: string
