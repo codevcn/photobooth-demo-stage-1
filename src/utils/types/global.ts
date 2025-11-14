@@ -13,12 +13,12 @@ export type TPrintAreaInfo = {
   // productImageId: string
   id: number
   area: {
-    print_x?: number // pixel position x
-    print_y?: number // pixel position y
-    print_w?: number // pixel width
-    print_h?: number // pixel height
-    width_real_px?: number // real width of product image (for scaling)
-    height_real_px?: number // real height of product image (for scaling)
+    printX?: number // pixel position x
+    printY?: number // pixel position y
+    printW?: number // pixel width
+    printH?: number // pixel height
+    widthRealPx: number // real width of product image (for exporting)
+    heightRealPx: number // real height of product image (for exporting)
   }
   surfaceType: TSurfaceType
   imageUrl: string
@@ -68,10 +68,17 @@ export type TElementLayerState = {
   index: number
 }
 
+export type TPreSentMockupImageLink = {
+  mockupId: string
+  imageUrl: string
+}
+
 export type TGlobalContextValue = {
   pickedElementRoot: HTMLElement | null
   elementType: TElementType | null
   sessionId: string | null
+  preSentMockupImageLinks: TPreSentMockupImageLink[]
+  addPreSentMockupImageLink: (imageUrl: string, mockupId: string) => void
 }
 
 export type TElementLayerContextValue = {
@@ -86,6 +93,7 @@ export type TDetectCollisionWithViewportEdgesResult = {
 }
 
 export type TProductCartInfo = {
+  productId: number
   productImageId: number
   color: {
     title: string
@@ -172,6 +180,8 @@ export type TElementsVisualState = Partial<{
   texts: TTextVisualState[]
 }>
 
+export type TMockupDataId = string
+
 export type TMockupData = {
   id: string
   elementsVisualState: TElementsVisualState
@@ -180,6 +190,7 @@ export type TMockupData = {
     id: number
     type: TSurfaceType
   }
+  preSentImageLink?: string
 }
 
 export type TProductInCart = TProductCartInfo & {
@@ -189,7 +200,8 @@ export type TProductInCart = TProductCartInfo & {
 export type TSurfaceType = 'front' | 'back'
 
 export type TPaymentProductItem = {
-  id: number
+  productId: number
+  productImageId: number
   name: string
   size: string
   color: {
@@ -228,4 +240,17 @@ export type TMockupImageData = {
 export type TImageSizeInfo = {
   width: number
   height: number
+}
+
+export type TImgMimeType = 'image/png' | 'image/jpeg' | 'image/webp'
+
+export type TEndOfPaymentData = {
+  countdownInSeconds: number
+  QRCode: string
+  paymentMethod: {
+    method: TPaymentType
+    title: string
+  }
+  total: number
+  orderHashCode?: string
 }

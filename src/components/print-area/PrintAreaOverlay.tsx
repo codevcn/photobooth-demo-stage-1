@@ -55,7 +55,7 @@ export const PrintAreaOverlay: React.FC<TPrintAreaOverlayProps> = ({
       {/* Print Area Indicator */}
       <div
         ref={printAreaRef}
-        className="absolute border-2 border-dashed bg-blue-50/20 pointer-events-none z-5 transition-all duration-300"
+        className="absolute border-2 border-dashed bg-blue-50/20 pointer-events-none z-[30] transition-all duration-300"
         style={{
           opacity: isOutOfBounds ? 0.9 : 0.4,
           backgroundColor: isOutOfBounds ? 'rgba(239, 68, 68, 0.1)' : 'rgba(96, 165, 250, 0.1)',
@@ -75,7 +75,7 @@ export const PrintAreaOverlay: React.FC<TPrintAreaOverlayProps> = ({
       {/* Overlay for out of bounds warning */}
       <div
         ref={overlayRef}
-        className="absolute inset-0 pointer-events-none z-2 transition-all duration-500"
+        className="absolute inset-0 pointer-events-none z-[20] transition-all duration-500"
         style={{
           opacity: 0,
           backgroundColor: isOutOfBounds

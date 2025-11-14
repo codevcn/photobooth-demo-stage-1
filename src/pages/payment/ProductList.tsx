@@ -4,7 +4,7 @@ import { TPaymentProductItem } from '@/utils/types/global'
 
 interface ProductListProps {
   cartItems: TPaymentProductItem[]
-  onUpdateQuantity: (mockupDataId: string, delta: number) => void
+  onUpdateQuantity: (mockupDataId: string, delta: number, productId: number) => void
   onRemoveProduct: (mockupDataId: string, productId: number) => void
   onShowProductImage: (imageUrl: string) => void
   onEditMockup: (mockupDataId: string) => void
@@ -21,7 +21,8 @@ export const ProductList: React.FC<ProductListProps> = ({
     <section className="flex flex-col gap-2">
       {cartItems.map(
         ({
-          id,
+          productId,
+          productImageId,
           mockupData,
           name,
           size,
@@ -110,7 +111,7 @@ export const ProductList: React.FC<ProductListProps> = ({
                   <div className="flex items-center gap-2">
                     <div className="flex items-center gap-1 bg-gray-100 rounded-full p-1">
                       <button
-                        onClick={() => onUpdateQuantity(mockupData.id, -1)}
+                        onClick={() => onUpdateQuantity(mockupData.id, -1, productId)}
                         className="w-8 h-8 flex items-center justify-center rounded-full bg-white shadow-sm active:scale-75 transition-transform"
                         aria-label="Giảm số lượng"
                       >
@@ -118,7 +119,7 @@ export const ProductList: React.FC<ProductListProps> = ({
                       </button>
                       <span className="w-8 text-center font-semibold text-sm">{quantity}</span>
                       <button
-                        onClick={() => onUpdateQuantity(mockupData.id, 1)}
+                        onClick={() => onUpdateQuantity(mockupData.id, 1, productId)}
                         className="w-8 h-8 flex items-center justify-center rounded-full bg-white shadow-sm active:scale-75 transition-transform"
                         aria-label="Tăng số lượng"
                       >
@@ -127,7 +128,7 @@ export const ProductList: React.FC<ProductListProps> = ({
                     </div>
                     <div>
                       <button
-                        onClick={() => onRemoveProduct(mockupData.id, id)}
+                        onClick={() => onRemoveProduct(mockupData.id, productId)}
                         className="p-1 rounded-full bg-red-600 hover:scale-90 transition"
                       >
                         <X size={22} strokeWidth={3} className="text-white" />

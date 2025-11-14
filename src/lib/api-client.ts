@@ -14,9 +14,7 @@ class ApiClient {
 
   constructor(baseUrl: string, authToken?: string) {
     this.baseUrl = baseUrl
-    this.defaultHeaders = {
-      'Content-Type': 'application/json',
-    }
+    this.defaultHeaders = {}
     this.authToken = authToken
   }
 
@@ -67,7 +65,7 @@ class ApiClient {
     return this.request<T>(endpoint, {
       ...options,
       method: 'POST',
-      body: body ? JSON.stringify(body) : undefined,
+      body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
     })
   }
 

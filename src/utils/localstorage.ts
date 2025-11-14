@@ -1,6 +1,7 @@
 import {
   TElementsVisualState,
   TMockupData,
+  TMockupDataId,
   TMockupImageData,
   TProductCartInfo,
   TSavedMockupData,
@@ -32,7 +33,7 @@ export class LocalStorageHelper {
     imageData: TMockupImageData,
     sessionId: string,
     surfaceInfo: TMockupData['surfaceInfo']
-  ) {
+  ): TMockupDataId {
     let existingData = this.getSavedMockupData()
 
     // Tạo mockup data mới
@@ -76,6 +77,7 @@ export class LocalStorageHelper {
       }
     }
     localStorage.setItem(LocalStorageHelper.mockupImageName, JSON.stringify(existingData))
+    return newMockupData.id
   }
 
   static getSavedMockupData(): TSavedMockupData | null {
@@ -106,6 +108,42 @@ export class LocalStorageHelper {
         }
       }
       localStorage.setItem(LocalStorageHelper.mockupImageName, JSON.stringify(data))
+    }
+  }
+
+  static updateMockupQuantity(
+    sessionId: string,
+    productId: number,
+    mockupDataId: string,
+    amount: number
+  ) {
+    const data = this.getSavedMockupData()
+    if (!data || data.sessionId !== sessionId) return
+
+    for (const product of data.productsInCart) {
+      if (product.productImageId === productId) {
+        const mockupIndex = product.mockupDataList.findIndex((m) => m.id === mockupDataId)
+        if (mockupIndex === -1) return
+
+        const mockup = product.mockupDataList[mockupIndex]
+
+        if (amount > 0) {
+          // Thêm mockup: tạo bản sao với originalMockupId trỏ về mockup gốc
+          for (let i = 0; i < amount; i++) {
+            const duplicatedMockup: TMockupData = {
+              ...mockup,
+              id: this.generateMockupId(),
+            }
+            product.mockupDataList.push(duplicatedMockup)
+          }
+        } else if (amount < 0) {
+          // Bớt mockup: chỉ bớt 1 bản gốc
+          product.mockupDataList.splice(mockupIndex, 1)
+        }
+
+        localStorage.setItem(LocalStorageHelper.mockupImageName, JSON.stringify(data))
+        break
+      }
     }
   }
 

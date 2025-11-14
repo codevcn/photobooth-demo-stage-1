@@ -35,10 +35,10 @@ export const usePrintArea = (): TUsePrintAreaReturn => {
   const calculatePrintAreaFromContainer = useCallback(
     (productPrintArea: TPrintAreaInfo['area'], containerElement: HTMLElement) => {
       if (
-        typeof productPrintArea.print_x === 'number' &&
-        typeof productPrintArea.print_y === 'number' &&
-        typeof productPrintArea.print_w === 'number' &&
-        typeof productPrintArea.print_h === 'number'
+        typeof productPrintArea.printX === 'number' &&
+        typeof productPrintArea.printY === 'number' &&
+        typeof productPrintArea.printW === 'number' &&
+        typeof productPrintArea.printH === 'number'
       ) {
         // Tìm ảnh sản phẩm
         const imageElement = containerElement.querySelector(
@@ -101,10 +101,10 @@ export const usePrintArea = (): TUsePrintAreaReturn => {
 
         // Convert từ pixel coordinates (dựa trên ảnh gốc) sang pixel trên màn hình
         // x_displayed = offsetX + (x_original * scale)
-        const x = offsetX + productPrintArea.print_x * scaleX
-        const y = offsetY + productPrintArea.print_y * scaleY
-        const width = productPrintArea.print_w * scaleX
-        const height = productPrintArea.print_h * scaleY
+        const x = offsetX + productPrintArea.printX * scaleX
+        const y = offsetY + productPrintArea.printY * scaleY
+        const width = productPrintArea.printW * scaleX
+        const height = productPrintArea.printH * scaleY
 
         const newBounds = { x, y, width, height }
         setPrintAreaBounds(newBounds)

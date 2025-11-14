@@ -18,7 +18,7 @@ export const PaymentMethodSelector = ({
         {/* Momo */}
         {selectedMethod === 'momo' ? (
           <div className="smd:row-span-2 flex items-center bg-gradient-to-r from-pink-50 to-purple-50 border-2 border-pink-200 rounded-xl px-3 py-2">
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center justify-between gap-2 w-full">
               <div className="flex items-center gap-3">
                 <div className="bg-[#A50064] rounded-lg p-2">
                   <img src="/images/logo/momo.png" alt="Momo" className="h-6 w-6" />
@@ -46,7 +46,7 @@ export const PaymentMethodSelector = ({
         {/* Zalo */}
         {selectedMethod === 'zalo' ? (
           <div className="smd:row-span-2 flex items-center bg-gradient-to-r from-pink-50 to-purple-50 border-2 border-pink-200 rounded-xl px-3 py-2">
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center justify-between gap-2 w-full">
               <div className="flex items-center gap-3">
                 <div className="bg-[#0144DB] rounded-lg p-2">
                   <img src="/images/logo/zalo.png" alt="Zalo" className="h-6 w-6" />
@@ -74,7 +74,7 @@ export const PaymentMethodSelector = ({
         {/* Cash on Delivery */}
         {selectedMethod === 'cod' ? (
           <div className="smd:col-span-2 bg-gradient-to-r from-pink-50 to-purple-50 border-2 border-pink-200 rounded-xl px-3 py-2">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2 w-full">
               <div className="flex items-center gap-3">
                 <div className="bg-green-600 rounded-lg p-2">
                   <Banknote size={24} className="text-white" />

@@ -1,48 +1,102 @@
 import { TImageSizeInfo } from '@/utils/types/global'
 import { domToCanvas } from 'modern-screenshot'
-import { useRef } from 'react'
 
 type TUseHtlmToCanvasReturn = {
-  editorRef: React.RefObject<HTMLDivElement>
   handleSaveHtmlAsImage: (
-    onSaved: (imgDataUrl: string, imageSizeInfo: TImageSizeInfo) => void,
-    onError: (error: Error) => void,
-    onCanvas: (canvas: HTMLCanvasElement) => void
+    htmContainer: HTMLDivElement,
+    desiredImgMimeType: string | null,
+    onSaved: (imgData: Blob, imageSizeInfo: TImageSizeInfo, canvas: HTMLCanvasElement) => void,
+    onError: (error: Error) => void
+  ) => void
+  handleSaveHtmlAsImageWithDesiredSize: (
+    htmContainer: HTMLDivElement,
+    desiredOutputWidth: number,
+    desiredOutputHeight: number,
+    desiredImgMimeType: string | null,
+    onSaved: (imgDataUrl: string, imageSizeInfo: TImageSizeInfo, canvas: HTMLCanvasElement) => void,
+    onError: (error: Error) => void
   ) => void
 }
 
 export const useHtmlToCanvas = (): TUseHtlmToCanvasReturn => {
-  const editorRef = useRef<HTMLDivElement>(null)
-
   const handleSaveHtmlAsImage = async (
-    onSaved: (imgDataUrl: string, imageSizeInfo: TImageSizeInfo) => void,
-    onError: (error: Error) => void,
-    onCanvas: (canvas: HTMLCanvasElement) => void
+    htmContainer: HTMLDivElement,
+    desiredImgMimeType: string | null,
+    onSaved: (imgData: Blob, imageSizeInfo: TImageSizeInfo, canvas: HTMLCanvasElement) => void,
+    onError: (error: Error) => void
   ) => {
     requestIdleCallback(async () => {
-      const editor = editorRef.current
-      if (!editor) return
       try {
-        const canvas = await domToCanvas(editor, {
-          scale: 6,
+        // Scale factor để tạo ảnh chất lượng cao (giảm từ 6 xuống 3 để giảm kích thước file)
+        const scale = 6
+
+        const canvas = await domToCanvas(htmContainer, {
+          scale: scale,
           quality: 1,
-          type: 'image/webp',
-          width: editor.getBoundingClientRect().width,
-          height: editor.getBoundingClientRect().height,
+          type: desiredImgMimeType || 'image/webp',
         })
-        onSaved(canvas.toDataURL('image/webp', 0.95), {
-          width: canvas.width,
-          height: canvas.height,
+        canvas.toBlob((blob) => {
+          if (blob) {
+            onSaved(
+              blob,
+              {
+                width: canvas.width,
+                height: canvas.height,
+              },
+              canvas
+            )
+          }
         })
-        onCanvas(canvas)
-        // if (blob) {
-        //   onSaved(URL.createObjectURL(blob))
-        // }
       } catch (error) {
         onError(error as Error)
       }
     })
   }
 
-  return { editorRef, handleSaveHtmlAsImage }
+  const handleSaveHtmlAsImageWithDesiredSize = (
+    htmContainer: HTMLDivElement,
+    desiredOutputWidth: number,
+    desiredOutputHeight: number,
+    desiredImgMimeType: string | null,
+    onSaved: (imgDataUrl: string, imageSizeInfo: TImageSizeInfo, canvas: HTMLCanvasElement) => void,
+    onError: (error: Error) => void
+  ) => {
+    requestIdleCallback(async () => {
+      try {
+        // Scale factor để tạo ảnh chất lượng cao
+        const scale = 6
+
+        const canvas = await domToCanvas(htmContainer, {
+          scale: scale,
+          quality: 0.95,
+          type: 'image/webp',
+        })
+
+        const finalCanvas = document.createElement('canvas')
+        finalCanvas.width = desiredOutputWidth
+        finalCanvas.height = desiredOutputHeight
+
+        // Vẽ lại ảnh đã capture vào canvas mới với kích thước mong muốn
+        const ctx = finalCanvas.getContext('2d')
+        if (ctx) {
+          ctx.drawImage(canvas, 0, 0, desiredOutputWidth, desiredOutputHeight)
+        }
+
+        // canvas.width === desiredOutputWidth
+        // canvas.height === desiredOutputHeight
+        onSaved(
+          finalCanvas.toDataURL(desiredImgMimeType || 'image/webp', 0.95),
+          {
+            width: finalCanvas.width,
+            height: finalCanvas.height,
+          },
+          finalCanvas
+        )
+      } catch (error) {
+        onError(error as Error)
+      }
+    })
+  }
+
+  return { handleSaveHtmlAsImage, handleSaveHtmlAsImageWithDesiredSize }
 }

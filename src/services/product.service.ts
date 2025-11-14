@@ -7,7 +7,8 @@ import {
   TProductSize,
   TSurfaceType,
 } from '@/utils/types/global'
-import { getFetchProductsCatalog } from '@/configs/api/product.api'
+import { getFetchProductsCatalog, postPreSendMockupImage } from '@/configs/api/product.api'
+import { TPreSentMockupImageRes } from '@/utils/types/api'
 
 class ProductService {
   /**
@@ -47,13 +48,13 @@ class ProductService {
           id: surface.id,
           area: {
             // Keep pixel values from API - will be converted to actual position in hook
-            print_x: surface.print_areas.x_px,
-            print_y: surface.print_areas.y_px,
-            print_w: surface.print_areas.width_px,
-            print_h: surface.print_areas.height_px,
+            printX: surface.print_areas.x_px,
+            printY: surface.print_areas.y_px,
+            printW: surface.print_areas.width_px,
+            printH: surface.print_areas.height_px,
             // Store real dimensions for scaling calculation
-            width_real_px: surface.print_areas.width_real_px,
-            height_real_px: surface.print_areas.height_real_px,
+            widthRealPx: surface.print_areas.width_real_px,
+            heightRealPx: surface.print_areas.height_real_px,
           },
           surfaceType: surface.code as TSurfaceType,
           imageUrl: surface.preview_image_url || product.base_image_url,
@@ -99,6 +100,16 @@ class ProductService {
   async fetchProductsByPage(page: number, limit: number): Promise<TBaseProduct[]> {
     return await this.fetchProducts(page, limit)
     // return await this.fetchProductsMock(page, limit)
+  }
+
+  async preSendMockupImage(image: Blob, filename: string): Promise<TPreSentMockupImageRes> {
+    const formData = new FormData()
+    formData.append('file', image, filename)
+    const response = await postPreSendMockupImage(formData)
+    if (!response.success || !response.data?.data) {
+      throw new Error(response.error || 'Không thể gửi mockup image đến server')
+    }
+    return response.data.data
   }
 }
 

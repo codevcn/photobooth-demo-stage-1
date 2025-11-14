@@ -64,16 +64,14 @@ export type TPrintAreas = {
   height_real_px: number
 }
 export type TOrderResponse = {
-  data: {
-    order: TOrder
-    store: TStore
-    address: TAddress
-    items: TOrderItem[]
-    payments: TPayment[]
-    shipments: TShipment[]
-    discounts: TDiscount[]
-    payment_instructions: TPaymentInstruction[]
-  }
+  order: TOrder
+  store: TStore
+  address: TAddress
+  items: TOrderItem[]
+  payments: TPayment[]
+  shipments: TShipment[]
+  discounts: TDiscount[]
+  payment_instructions: TPaymentInstruction[]
 }
 
 export type TOrder = {
@@ -239,3 +237,16 @@ export type TCreateOrderReq = {
 }
 
 export type TCreateOrderRes = TOrderResponse
+
+export type TPreSentMockupImageRes = {
+  filename: string
+  mime_type: string
+  size: number
+  url: string
+}
+
+export type TOrderStatusRes = {
+  id: number
+  status: TOrderStatus
+  is_paid: boolean
+}

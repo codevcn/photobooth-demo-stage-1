@@ -58,6 +58,7 @@ type TCommonContentsType =
   | 'MAX_CROP_PREVIEWS_COUNT'
   | 'MIN_CROP_SIZE_WIDTH'
   | 'MIN_CROP_SIZE_HEIGHT'
+  | 'FIXED_COUNTDOWN_PAYMENT_SECONDS'
 
 export const getCommonContants = <R>(type: TCommonContentsType): R => {
   switch (type) {
@@ -69,6 +70,8 @@ export const getCommonContants = <R>(type: TCommonContentsType): R => {
       return 50 as R
     case 'MIN_CROP_SIZE_HEIGHT':
       return 50 as R
+    case 'FIXED_COUNTDOWN_PAYMENT_SECONDS':
+      return 900 as R // 15 minutes
     default:
       return null as R
   }

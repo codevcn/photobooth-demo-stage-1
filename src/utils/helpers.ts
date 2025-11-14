@@ -1,5 +1,5 @@
 import { getInitialContants } from './contants'
-import { TPaymentType, TSurfaceType } from './types/global'
+import { TImgMimeType, TPaymentType, TSurfaceType } from './types/global'
 
 export const getNaturalSizeOfImage = (
   imgURL: string,
@@ -127,5 +127,18 @@ export const labelToSurfaceType = (surfaceType: TSurfaceType): string => {
       return 'Mặt trước'
     default:
       return 'Mặt sau'
+  }
+}
+
+export const convertMimeTypeToExtension = (mimeType: TImgMimeType): string => {
+  switch (mimeType) {
+    case 'image/png':
+      return 'png'
+    case 'image/jpeg':
+      return 'jpeg'
+    case 'image/webp':
+      return 'webp'
+    default:
+      return ''
   }
 }

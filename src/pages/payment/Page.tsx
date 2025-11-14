@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { formatNumberWithCommas } from '@/utils/helpers'
-import { TBaseProduct, TPaymentProductItem, TProductImage, TVoucher } from '@/utils/types/global'
+import { TPaymentProductItem, TProductImage, TVoucher } from '@/utils/types/global'
 import { PaymentModal } from '@/pages/payment/PaymentModal'
 import { useNavigate } from 'react-router-dom'
 import { createPortal } from 'react-dom'
@@ -50,11 +50,20 @@ const PaymentPage = () => {
     setVoucherDiscount(discount)
   }
 
-  const updateQuantity = (idAsImageDataURL: string, delta: number) => {
+  const updateQuantity = (mockupId: string, delta: number, productImageId: number) => {
+    let productStock: number = 0
+    for (const product of products) {
+      for (const image of product.images) {
+        if (image.id === productImageId) {
+          productStock = image.stock
+          break
+        }
+      }
+    }
     setCartItems((items) =>
       items.map((item) =>
-        item.mockupData.id === idAsImageDataURL
-          ? { ...item, quantity: Math.max(1, item.quantity + delta) }
+        item.mockupData.id === mockupId
+          ? { ...item, quantity: Math.min(productStock, Math.max(1, item.quantity + delta)) }
           : item
       )
     )
@@ -81,7 +90,8 @@ const PaymentPage = () => {
         // Duyệt qua danh sách mockup data
         for (const mockupData of product.mockupDataList) {
           productItems.push({
-            id: productImage.id,
+            productId: product.productId,
+            productImageId: productImage.id,
             name: productImage.name,
             size: product.size,
             color: product.color,
@@ -103,13 +113,13 @@ const PaymentPage = () => {
     }
   }
 
-  const removeProductFromCart = (idAsImageDataURL: string, productId: number) => {
+  const removeProductFromCart = (mockupId: string, productId: number) => {
     if (!sessionId) return
     setCartItems((items) =>
       items.filter((item) => {
-        const matching = item.mockupData.id === idAsImageDataURL
+        const matching = item.mockupData.id === mockupId
         if (matching) {
-          LocalStorageHelper.removeSavedMockupImage(sessionId, productId, idAsImageDataURL)
+          LocalStorageHelper.removeSavedMockupImage(sessionId, productId, mockupId)
           return false
         } else {
           return true

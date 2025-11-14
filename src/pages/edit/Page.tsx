@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import ProductGallery from './ProductGallery'
 import EditArea from './EditArea'
 import BottomMenu from './BottomMenu'
@@ -20,6 +20,7 @@ import {
   TSurfaceType,
   TBaseProduct,
   TPrintAreaInfo,
+  TImgMimeType,
 } from '@/utils/types/global'
 import { eventEmitter } from '@/utils/events'
 import { EInternalEvents } from '@/utils/enums'
@@ -38,6 +39,7 @@ import { getInitialContants } from '@/utils/contants'
 import { productService } from '@/services/product.service'
 import { PageLoading } from '@/components/custom/Loading'
 import { useHtmlToCanvas } from '@/hooks/use-html-to-canvas'
+import { convertMimeTypeToExtension } from '@/utils/helpers'
 
 type TEditPageProps = {
   products: TBaseProduct[]
@@ -45,7 +47,7 @@ type TEditPageProps = {
 }
 
 const EditPage = ({ products, printedImages }: TEditPageProps) => {
-  const { sessionId } = useGlobalContext()
+  const { sessionId, addPreSentMockupImageLink } = useGlobalContext()
   const mockupId = useSearchParams()[0].get('mockupId')
 
   const firstImage = useMemo<TProductImage>(() => {
@@ -70,8 +72,10 @@ const EditPage = ({ products, printedImages }: TEditPageProps) => {
   const [textElements, setTextElements] = useState<TTextVisualState[]>([])
   const [stickerElements, setStickerElements] = useState<TStickerVisualState[]>([])
   const [printedImageElements, setPrintedImageElements] = useState<TPrintedImageVisualState[]>([])
-  const { editorRef, handleSaveHtmlAsImage } = useHtmlToCanvas()
+  const { handleSaveHtmlAsImage } = useHtmlToCanvas()
+  const { handleSaveHtmlAsImageWithDesiredSize } = useHtmlToCanvas()
   const { removeFromElementLayers } = useElementLayerContext()
+  const editorRef = useRef<HTMLDivElement>(null)
 
   const [activeProduct, activeProductImage] = useMemo<[TBaseProduct, TProductImage]>(() => {
     let activeProductImage: TProductImage | undefined = undefined
@@ -148,22 +152,26 @@ const EditPage = ({ products, printedImages }: TEditPageProps) => {
     onDoneAdd: () => void,
     onError: (error: Error) => void
   ) => {
-    if (!sessionId) return
+    if (!sessionId || !editorRef.current) return
     const message = validateBeforeAddToCart()
     if (message) {
       return onError(new Error(message))
     }
+    const imgMimeType: TImgMimeType = 'image/webp'
     handleSaveHtmlAsImage(
-      (imageDataUrl, imageSizeInfo) => {
-        LocalStorageHelper.saveMockupImageAtLocal(
+      editorRef.current,
+      imgMimeType,
+      (imageData, imageSizeInfo) => {
+        const mockupId = LocalStorageHelper.saveMockupImageAtLocal(
           elemtnsVisualState,
           {
+            productId: activeProduct.id,
             productImageId: activeImageId,
             color: activeProductImage.color,
             size: activeProductImage.size,
           },
           {
-            dataUrl: imageDataUrl,
+            dataUrl: URL.createObjectURL(imageData),
             size: {
               width: imageSizeInfo.width,
               height: imageSizeInfo.height,
@@ -175,6 +183,19 @@ const EditPage = ({ products, printedImages }: TEditPageProps) => {
             type: selectedPrintAreaInfo.surfaceType,
           }
         )
+        productService
+          .preSendMockupImage(
+            imageData,
+            `mockup-${Date.now()}.${convertMimeTypeToExtension(imgMimeType)}`
+          )
+          .then((res) => {
+            console.log('>>> pre-send mockup image res:', res)
+            addPreSentMockupImageLink(res.url, mockupId)
+          })
+          .catch((err) => {
+            console.error('>>> pre-send mockup image error:', err)
+            toast.error('Không thể gửi trước mockup lên server')
+          })
         toast.success('Đã thêm vào giỏ hàng')
         setCartCount(LocalStorageHelper.countSavedMockupImages())
         onDoneAdd()
@@ -184,8 +205,18 @@ const EditPage = ({ products, printedImages }: TEditPageProps) => {
         toast.warning(error.message || 'Không thể lưu mockup, không thể thêm sản phẩm vào giỏ hàng')
         setCartCount(LocalStorageHelper.countSavedMockupImages())
         onError(error)
+      }
+    )
+    handleSaveHtmlAsImageWithDesiredSize(
+      editorRef.current,
+      selectedPrintAreaInfo.area.widthRealPx,
+      selectedPrintAreaInfo.area.heightRealPx,
+      imgMimeType,
+      (imageDataUrl, imageSizeInfo) => {
+        console.log('>>> active pro:', { activeProduct, selectedPrintAreaInfo })
+        console.log('>>> image size info:', imageSizeInfo)
       },
-      () => {}
+      (error) => {}
     )
   }
 
@@ -268,6 +299,7 @@ const EditPage = ({ products, printedImages }: TEditPageProps) => {
       if (mockup) {
         foundMockup = mockup
         foundProductInfo = {
+          productId: item.productId,
           productImageId: item.productImageId,
           color: item.color,
           size: item.size,
