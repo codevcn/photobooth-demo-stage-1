@@ -87,7 +87,7 @@ class ProductService {
         name: product.name,
         description: product.description,
         images,
-        isTrending: false, // Can be enhanced with trending logic from attributes
+        inNewLine: false,
         printAreaList,
       })
     }

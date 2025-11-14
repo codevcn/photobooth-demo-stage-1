@@ -33,7 +33,7 @@ import {
 } from '../../context/global-context'
 import { LocalStorageHelper } from '@/utils/localstorage'
 import { toast } from 'react-toastify'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, ShoppingCart } from 'lucide-react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getInitialContants } from '@/utils/contants'
 import { productService } from '@/services/product.service'
@@ -41,12 +41,12 @@ import { PageLoading } from '@/components/custom/Loading'
 import { useHtmlToCanvas } from '@/hooks/use-html-to-canvas'
 import { convertMimeTypeToExtension } from '@/utils/helpers'
 
-type TEditPageProps = {
+type TEditPageHorizonProps = {
   products: TBaseProduct[]
   printedImages: TPrintedImage[]
 }
 
-const EditPage = ({ products, printedImages }: TEditPageProps) => {
+const EditPageHorizon = ({ products, printedImages }: TEditPageHorizonProps) => {
   const { sessionId, addPreSentMockupImageLink } = useGlobalContext()
   const mockupId = useSearchParams()[0].get('mockupId')
 
@@ -73,7 +73,7 @@ const EditPage = ({ products, printedImages }: TEditPageProps) => {
   const [stickerElements, setStickerElements] = useState<TStickerVisualState[]>([])
   const [printedImageElements, setPrintedImageElements] = useState<TPrintedImageVisualState[]>([])
   const { handleSaveHtmlAsImage } = useHtmlToCanvas()
-  const { handleSaveHtmlAsImageWithDesiredSize } = useHtmlToCanvas()
+  // const { handleSaveHtmlAsImageWithDesiredSize } = useHtmlToCanvas()
   const { removeFromElementLayers } = useElementLayerContext()
   const editorRef = useRef<HTMLDivElement>(null)
 
@@ -206,17 +206,6 @@ const EditPage = ({ products, printedImages }: TEditPageProps) => {
         onError(error)
       }
     )
-    // handleSaveHtmlAsImageWithDesiredSize(
-    //   editorRef.current,
-    //   selectedPrintAreaInfo.area.widthRealPx,
-    //   selectedPrintAreaInfo.area.heightRealPx,
-    //   imgMimeType,
-    //   (imageDataUrl, imageSizeInfo) => {
-    //     console.log('>>> active pro:', { activeProduct, selectedPrintAreaInfo })
-    //     console.log('>>> image size info:', imageSizeInfo)
-    //   },
-    //   (error) => {}
-    // )
   }
 
   const handleAddText = (text: string) => {
@@ -384,60 +373,97 @@ const EditPage = ({ products, printedImages }: TEditPageProps) => {
   return (
     activeImageId &&
     activeProductImage && (
-      <div className="min-h-screen bg-superlight-pink-cl flex flex-col max-w-md mx-auto">
-        {/* Gallery Section */}
-        <div className="pt-4 pb-3 px-4 bg-white shadow-sm relative">
-          <div
-            onClick={() => navigate('/')}
-            className="absolute top-3 left-2 bg-pink-cl py-0.5 px-2 rounded-lg"
-          >
-            <ArrowLeft size={20} className="text-white" />
+      <div className="min-h-screen bg-gradient-to-br from-superlight-pink-cl to-light-pink-cl/30">
+        {/* Top Header Bar */}
+        <header className="bg-white/95 backdrop-blur-sm shadow-md border-b border-pink-cl/10">
+          <div className="mx-auto px-2 lg:px-4 py-2 lg:py-2.5">
+            <div className="flex items-center justify-between">
+              {/* Left: Back Button */}
+              <button
+                onClick={() => navigate('/')}
+                className="flex items-center gap-2 bg-pink-cl hover:bg-dark-pink-cl text-white font-bold py-2 px-4 rounded-xl shadow-md hover:shadow-lg active:scale-95 transition-all duration-200"
+              >
+                <ArrowLeft size={20} />
+                <span className="hidden sm:inline">Quay lại</span>
+              </button>
+
+              {/* Center: Title */}
+              <h1 className="text-xl lg:text-2xl font-bold text-gray-800 flex items-center gap-2">
+                <span className="hidden md:inline">✨</span>
+                Chỉnh sửa sản phẩm
+                <span className="hidden md:inline">✨</span>
+              </h1>
+
+              {/* Right: Cart Button */}
+              <button
+                onClick={() => navigate('/payment')}
+                className="relative flex items-center gap-2 bg-gradient-to-r from-pink-cl to-pink-hover-cl hover:from-dark-pink-cl hover:to-pink-cl text-white font-bold py-2 px-4 rounded-xl shadow-md hover:shadow-lg active:scale-95 transition-all duration-200"
+              >
+                <ShoppingCart size={20} />
+                <span className="hidden sm:inline">Giỏ hàng</span>
+                {cartCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+                    {cartCount}
+                  </span>
+                )}
+              </button>
+            </div>
           </div>
-          <ProductGallery
-            products={products}
-            activeImageId={activeImageId}
-            activeProduct={activeProduct}
-            onSelectImage={setActiveImageId}
-            printedImages={printedImages}
-          />
+        </header>
+
+        {/* Main Content - 2 Column Layout */}
+        <div className="mx-auto px-2 lg:px-3 py-2 lg:py-3">
+          <div className="grid grid-cols-1 md:grid-cols-[minmax(220px,2fr)_8fr] gap-2">
+            {/* Left Column: Product Gallery & Info */}
+            <div className="space-y-2 overflow-hidden bg-white rounded-xl shadow-lg px-1.5 py-3 border border-gray-200">
+              {/* Product Gallery Card */}
+              <ProductGallery
+                products={products}
+                activeImageId={activeImageId}
+                activeProduct={activeProduct}
+                onSelectImage={setActiveImageId}
+                printedImages={printedImages}
+              />
+            </div>
+
+            {/* Right Column: Edit Area */}
+            <div className="grid grid-cols-1 spmd:grid-cols-[5fr_minmax(84px,1fr)] xl:grid-cols-[7fr_minmax(84px,1fr)] 2xl:grid-cols-[8fr_1fr] gap-2 h-fit">
+              <div className="bg-white max-w-full w-full rounded-xl shadow-md p-3 lg:p-4 outline outline-1 outline-gray-200">
+                <EditArea
+                  textElements={textElements}
+                  stickerElements={stickerElements}
+                  onUpdateText={setTextElements}
+                  onUpdateStickers={setStickerElements}
+                  printedImages={printedImages}
+                  onAddPrintedImages={(ele) => handleAddPrintedElement('printed-image', ele)}
+                  onRemovePrintedImages={(ids) => handleRemoveELement('printed-image', ids)}
+                  printedImageElements={printedImageElements}
+                  htmlToCanvasEditorRef={editorRef}
+                  cartCount={cartCount}
+                  handleAddToCart={handleAddToCart}
+                  mockupId={mockupId}
+                  selectedColor={selectedColor}
+                  onSelectSurface={handleSelectSurface}
+                  editingProductImage={activeProductImage}
+                  selectedPrintAreaInfo={selectedPrintAreaInfo}
+                  activeProduct={activeProduct}
+                />
+              </div>
+
+              {/* Editing Tools Card */}
+              <BottomMenu
+                onAddText={() => setShowTextEditor(true)}
+                onAddSticker={() => setShowStickerPicker(true)}
+                onChooseVariant={() => setShowVariantPicker(true)}
+                product={activeProduct}
+              />
+            </div>
+          </div>
         </div>
 
-        {/* Edit Area */}
-        <div className="mt-4">
-          <div className="flex-1 px-2">
-            <EditArea
-              textElements={textElements}
-              stickerElements={stickerElements}
-              onUpdateText={setTextElements}
-              onUpdateStickers={setStickerElements}
-              printedImages={printedImages}
-              onAddPrintedImages={(ele) => handleAddPrintedElement('printed-image', ele)}
-              onRemovePrintedImages={(ids) => handleRemoveELement('printed-image', ids)}
-              printedImageElements={printedImageElements}
-              htmlToCanvasEditorRef={editorRef}
-              cartCount={cartCount}
-              handleAddToCart={handleAddToCart}
-              mockupId={mockupId}
-              selectedColor={selectedColor}
-              onSelectSurface={handleSelectSurface}
-              editingProductImage={activeProductImage}
-              selectedPrintAreaInfo={selectedPrintAreaInfo}
-              activeProduct={activeProduct}
-            />
-          </div>
-
-          {/* Bottom Menu */}
-          <div className="bg-white border-t border-gray-200">
-            <BottomMenu
-              onAddText={() => setShowTextEditor(true)}
-              onAddSticker={() => setShowStickerPicker(true)}
-              onChooseVariant={() => setShowVariantPicker(true)}
-              product={activeProduct}
-            />
-          </div>
-
-          {/* Overlays */}
-          {showVariantPicker && (
+        {/* Overlays - Full Screen Modals */}
+        {showVariantPicker && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <ProductVariantPicker
               selectedColor={selectedColor}
               selectedSize={selectedSize}
@@ -445,18 +471,20 @@ const EditPage = ({ products, printedImages }: TEditPageProps) => {
               onClose={() => setShowVariantPicker(false)}
               product={activeProduct}
             />
-          )}
+          </div>
+        )}
 
-          {showTextEditor && (
+        {showTextEditor && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <TextEditor onAddText={handleAddText} onClose={() => setShowTextEditor(false)} />
-          )}
+          </div>
+        )}
 
-          <StickerPicker
-            onAddSticker={handleAddSticker}
-            onClose={() => setShowStickerPicker(false)}
-            show={showStickerPicker}
-          />
-        </div>
+        <StickerPicker
+          onAddSticker={handleAddSticker}
+          onClose={() => setShowStickerPicker(false)}
+          show={showStickerPicker}
+        />
       </div>
     )
   )
@@ -517,34 +545,39 @@ const PageWrapper = () => {
   }, [])
 
   return error ? (
-    <div className="flex flex-col items-center justify-center w-screen h-screen p-6">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="56"
-        height="56"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="lucide lucide-circle-alert-icon lucide-circle-alert text-pink-cl"
-      >
-        <circle cx="12" cy="12" r="10" />
-        <line x1="12" x2="12" y1="8" y2="12" />
-        <line x1="12" x2="12.01" y1="16" y2="16" />
-      </svg>
-      <p className="text-pink-cl text-lg text-center font-bold mt-2">{error}</p>
-      <button
-        onClick={() => navigate('/')}
-        className="bg-pink-cl text-white text-lg font-bold px-4 py-2 rounded mt-4"
-      >
-        Quay lại trang chủ
-      </button>
+    <div className="flex flex-col items-center justify-center w-screen h-screen p-6 bg-gradient-to-br from-superlight-pink-cl to-light-pink-cl/50">
+      <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full text-center border-2 border-pink-cl/20 animate-scale-in">
+        <div className="mb-6 inline-block p-4 bg-pink-cl/10 rounded-full animate-float">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="64"
+            height="64"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-pink-cl"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" x2="12" y1="8" y2="12" />
+            <line x1="12" x2="12.01" y1="16" y2="16" />
+          </svg>
+        </div>
+        <h2 className="text-2xl font-bold text-gray-800 mb-3">Đã có lỗi xảy ra</h2>
+        <p className="text-pink-cl text-base text-center font-semibold mb-6">{error}</p>
+        <button
+          onClick={() => navigate('/')}
+          className="w-full bg-gradient-to-r from-pink-cl to-pink-hover-cl hover:from-dark-pink-cl hover:to-pink-cl text-white text-lg font-bold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl active:scale-95 transition-all duration-200"
+        >
+          Quay lại trang chủ
+        </button>
+      </div>
     </div>
   ) : products.length > 0 && printedImages.length > 0 ? (
     <ElementLayerProvider>
-      <EditPage products={products} printedImages={printedImages} />
+      <EditPageHorizon products={products} printedImages={printedImages} />
     </ElementLayerProvider>
   ) : (
     <PageLoading message="Đang tải dữ liệu..." />

@@ -85,8 +85,6 @@ export const EndOfPayment: React.FC<EndOfPaymentProps> = ({ data }) => {
   }
 
   const handlePaymentStatusUpdate = (statusData: TOrderStatusRes) => {
-    console.log('>>> Payment status update:', statusData)
-
     if (statusData.is_paid) {
       setPaymentStatus({ status: 'completed' })
       setTransactionCode(statusData.id.toString())

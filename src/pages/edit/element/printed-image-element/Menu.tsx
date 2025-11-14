@@ -165,7 +165,7 @@ export const PrintedImageElementMenu = ({ elementId }: PrintedImageMenuProps) =>
         <div className="min-w-[22px]">
           <Fullscreen size={20} className="text-white" strokeWidth={3} />
         </div>
-        <div className="flex gap-1 items-center mx-1">
+        <div className="flex gap-1 items-center mx-1 grow">
           <input
             type="text"
             placeholder="Độ co giãn, VD: 55"
@@ -179,7 +179,7 @@ export const PrintedImageElementMenu = ({ elementId }: PrintedImageMenuProps) =>
         <div className="min-w-[22px]">
           <RefreshCw size={20} className="text-white" strokeWidth={3} />
         </div>
-        <div className="flex gap-1 items-center mx-1">
+        <div className="flex gap-1 items-center mx-1 grow">
           <input
             type="text"
             placeholder="Độ xoay, VD: 22"

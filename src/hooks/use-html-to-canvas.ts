@@ -28,7 +28,7 @@ export const useHtmlToCanvas = (): TUseHtlmToCanvasReturn => {
     requestIdleCallback(async () => {
       try {
         // Scale factor để tạo ảnh chất lượng cao (giảm từ 6 xuống 3 để giảm kích thước file)
-        const scale = 6
+        const scale = 8
 
         const canvas = await domToCanvas(htmContainer, {
           scale: scale,

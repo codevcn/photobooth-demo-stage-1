@@ -22,7 +22,6 @@ export const ProductList: React.FC<ProductListProps> = ({
       {cartItems.map(
         ({
           productId,
-          productImageId,
           mockupData,
           name,
           size,
@@ -30,7 +29,7 @@ export const ProductList: React.FC<ProductListProps> = ({
           originalPrice,
           discountedPrice,
           quantity,
-          surfaceType,
+          surface,
         }) => (
           <div
             key={mockupData.id}
@@ -39,14 +38,10 @@ export const ProductList: React.FC<ProductListProps> = ({
             <div className="flex gap-3">
               {/* Product Image */}
               <div
-                className="flex-shrink-0 cursor-pointer"
+                className="w-[88px] md:w-[200px] h-full min-h-full cursor-pointer"
                 onClick={() => onShowProductImage(mockupData.image)}
               >
-                <img
-                  src={mockupData.image}
-                  alt={name}
-                  className="w-[88px] h-20 rounded-xl object-contain"
-                />
+                <img src={mockupData.image} alt={name} className="w-full h-full object-contain" />
               </div>
 
               {/* Product Details */}
@@ -81,7 +76,7 @@ export const ProductList: React.FC<ProductListProps> = ({
                     {color.title}
                   </span>
                   <span className="bg-pink-100 text-pink-600 px-2 py-1 rounded-md font-medium">
-                    {surfaceType === 'front' ? 'Mặt trước' : 'Mặt sau'}
+                    {surface.type === 'front' ? 'Mặt trước' : 'Mặt sau'}
                   </span>
                 </div>
 

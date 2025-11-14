@@ -9,6 +9,7 @@ export default {
         sm: '481px', // Large Phones / Phablet
         smd: '590px', // Custom breakpoint
         md: '671px', // Tablet portrait
+        spmd: '729px', // Custom breakpoint
         lg: '901px', // Tablet landscape
         xl: '1025px', // Laptop
         '2xl': '1201px', // Laptop & Desktop small

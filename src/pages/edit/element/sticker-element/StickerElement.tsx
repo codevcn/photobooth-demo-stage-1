@@ -179,38 +179,80 @@ export const StickerElement = ({
         <div
           className={`${
             isSelected ? 'block' : 'hidden'
-          } NAME-rotate-box absolute -top-7 -left-7 z-[999]`}
+          } NAME-rotate-box absolute -top-7 -left-7 z-[999] md:-top-9 md:-left-9`}
         >
           <button
             ref={rotateButtonRef}
             className="cursor-grab active:cursor-grabbing bg-pink-cl text-white rounded-full p-1 active:scale-90 transition"
           >
-            <RotateCw size={18} color="currentColor" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="lucide lucide-rotate-cw-icon lucide-rotate-cw h-[18px] w-[18px] md:w-[26px] md:h-[26px]"
+            >
+              <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+              <path d="M21 3v5h-5" />
+            </svg>
           </button>
         </div>
         <div
           className={`${
             isSelected ? 'block' : 'hidden'
-          } NAME-remove-box absolute -bottom-7 -right-7 z-[999]`}
+          } NAME-remove-box absolute -bottom-7 -right-7 z-[999] md:-bottom-9 md:-right-9`}
         >
           <button
             ref={zoomButtonRef}
             style={{ transform: `rotateY(180deg)` }}
             className="cursor-grab active:cursor-grabbing bg-pink-cl text-white rounded-full p-1 active:scale-90 transition"
           >
-            <Scaling size={18} color="currentColor" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="lucide lucide-scaling-icon lucide-scaling h-[18px] w-[18px] md:w-[26px] md:h-[26px]"
+            >
+              <path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+              <path d="M14 15H9v-5" />
+              <path d="M16 3h5v5" />
+              <path d="M21 3 9 15" />
+            </svg>
           </button>
         </div>
         <div
           className={`${
             isSelected ? 'block' : 'hidden'
-          } NAME-remove-box absolute -top-7 -right-7 z-[999]`}
+          } NAME-remove-box absolute -top-7 -right-7 z-[999] md:-top-9 md:-right-9`}
         >
           <button
             onClick={() => onRemoveElement(id)}
             className="bg-red-600 text-white rounded-full p-1 active:scale-90 transition"
           >
-            <X size={18} color="currentColor" strokeWidth={3} />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="lucide lucide-x-icon lucide-x h-[18px] w-[18px] md:w-[26px] md:h-[26px]"
+            >
+              <path d="M18 6 6 18" />
+              <path d="m6 6 12 12" />
+            </svg>
           </button>
         </div>
       </div>

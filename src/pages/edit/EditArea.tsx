@@ -20,9 +20,7 @@ import { TextElementMenu } from './element/text-element/Menu'
 import { StickerElementMenu } from './element/sticker-element/Menu'
 import { eventEmitter } from '@/utils/events'
 import { EInternalEvents } from '@/utils/enums'
-// import { ProductImageElementMenu } from './product/product-image/Menu'
 import { PrintedImagesPreview } from './PrintedImagesPreview'
-// import { useElementControl } from '@/hooks/element/use-element-control'
 import { usePrintArea } from '@/hooks/use-print-area'
 import { PrintAreaOverlay } from '@/components/print-area/PrintAreaOverlay'
 import ActionBar from './ActionBar'
@@ -81,12 +79,6 @@ const EditArea: React.FC<EditAreaProps> = ({
   const [selectingType, setSelectingType] = useState<TSelectingType>(null)
   const { collectMockupVisualStates } = useVisualStatesCollector()
   const [isAddingToCart, setIsAddingToCart] = useState<boolean>(false)
-  // const {
-  //   forZoom: { ref: refForZoom },
-  //   state: { scale },
-  //   handleSetElementState,
-  // } = useElementControl(crypto.randomUUID(), { maxZoom, minZoom })
-
   const {
     printAreaRef,
     overlayRef,
@@ -140,30 +132,6 @@ const EditArea: React.FC<EditAreaProps> = ({
     }
   }
 
-  // const handlePickProductImage = (e: React.MouseEvent) => {
-  //   if (editingProductImage) {
-  //     const target = e.target as HTMLElement
-  //     if (target.classList.contains('NAME-product-image')) {
-  //       e.stopPropagation()
-  //       handleUpdateSelectedElementId(editingProductImage.id, 'product-image')
-  //     }
-  //   }
-  // }
-
-  // const listenSubmitEleProps = (elementId: string | null, scale?: number) => {
-  //   if (elementId === selectedElementId && selectingType === 'product-image') {
-  //     const root = editAreaContainerRef.current
-  //     if (root) {
-  //       const productImage = root.querySelector<HTMLDivElement>(`.NAME-product-image`)
-  //       if (productImage) {
-  //         if (scale) {
-  //           handleSetElementState(undefined, undefined, scale)
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
-
   const beforeAddToCart = () => {
     if (checkIfAnyElementOutOfBounds()) {
       toast.warning('Vui lòng đảm bảo tất cả phần tử nằm trong vùng in trước khi thêm vào giỏ hàng')
@@ -184,13 +152,6 @@ const EditArea: React.FC<EditAreaProps> = ({
       )
     }, 0)
   }
-
-  // useEffect(() => {
-  //   eventEmitter.on(EInternalEvents.SUBMIT_PRODUCT_IMAGE_ELE_PROPS, listenSubmitEleProps)
-  //   return () => {
-  //     eventEmitter.off(EInternalEvents.SUBMIT_PRODUCT_IMAGE_ELE_PROPS, listenSubmitEleProps)
-  //   }
-  // }, [selectedElementId, selectingType])
 
   useEffect(() => {
     eventEmitter.on(EInternalEvents.CLICK_ON_PAGE, listenClickOnPageEvent)
@@ -266,16 +227,18 @@ const EditArea: React.FC<EditAreaProps> = ({
             onOpenPrintedImagesModal={handleOpenPrintedImagesModal}
             printedImages={printedImages}
           />
-          <PrintedImagesModal
-            show={showPrintedImagesModal}
-            onAddImage={handleAddImage}
-            onClose={() => setShowPrintedImagesModal(false)}
-            printedImages={printedImages}
-          />
+          {showPrintedImagesModal && (
+            <PrintedImagesModal
+              show={showPrintedImagesModal}
+              onAddImage={handleAddImage}
+              onClose={() => setShowPrintedImagesModal(false)}
+              printedImages={printedImages}
+            />
+          )}
         </div>
       </div>
 
-      <div className="bg-white rounded-lg">
+      <div className="bg-gray-100">
         <div
           ref={(node) => {
             htmlToCanvasEditorRef.current = node
@@ -290,8 +253,24 @@ const EditArea: React.FC<EditAreaProps> = ({
               className="NAME-product-image touch-none w-full h-full max-h-[calc(500px-8px)] object-contain"
             />
           ) : (
-            <div className="flex items-center justify-center h-[484px] text-gray-400">
-              <p>Không có ảnh sản phẩm</p>
+            <div className="flex items-center justify-center h-full w-full text-gray-600">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lucide lucide-triangle-alert-icon lucide-triangle-alert"
+              >
+                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
+                <path d="M12 9v4" />
+                <path d="M12 17h.01" />
+              </svg>
+              <p className="text-base mt-3">Không có ảnh sản phẩm</p>
             </div>
           )}
 

@@ -42,7 +42,7 @@ export const SurfaceSelector = ({
   }, [productPrintAreaList])
 
   return (
-    <div className="bg-white rounded-lg p-3 mt-3 border border-gray-200">
+    <div className="bg-white rounded-lg p-3 mt-3 border border-gray-300">
       <div className="flex items-center gap-3">
         <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Chọn mặt in:</label>
         <div className="flex-1">

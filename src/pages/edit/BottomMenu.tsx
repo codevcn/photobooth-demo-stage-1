@@ -113,29 +113,34 @@ const BottomMenu: React.FC<BottomMenuProps> = ({
   )
 
   return (
-    <div className="grid grid-cols-4 gap-1 px-4 py-2">
-      {menuItems.map((item, index) => (
-        <button
-          key={index}
-          onClick={item.onClick}
-          className="flex flex-col items-center gap-2 py-3 px-2 rounded-xl active:bg-light-pink-cl touch-target transition-colors"
-        >
-          {item.icon}
-          <span className="text-xs font-medium text-gray-700 text-center leading-tight">
-            {item.label}
-          </span>
-        </button>
-      ))}
+    <div className="bg-white mt-2 md:mt-0 rounded-xl shadow-lg p-2 outline outline-1 outline-gray-200">
+      <h2 className="text-base text-center md:hidden font-bold text-gray-800 mb-2 lg:mb-3 flex items-center justify-center gap-2">
+        Công cụ chỉnh sửa
+      </h2>
+      <div className="grid grid-cols-4 spmd:grid-cols-1 gap-1">
+        {menuItems.map((item, index) => (
+          <button
+            key={index}
+            onClick={item.onClick}
+            className="flex flex-col items-center gap-2 py-3 px-2 rounded-xl active:bg-light-pink-cl touch-target transition-colors"
+          >
+            {item.icon}
+            <span className="text-xs font-medium text-gray-700 text-center leading-tight">
+              {item.label}
+            </span>
+          </button>
+        ))}
 
-      {showProductDetails &&
-        createPortal(
-          <ProductDetails
-            show={showProductDetails}
-            onHideShow={setShowProductDetails}
-            product={product}
-          />,
-          document.body
-        )}
+        {showProductDetails &&
+          createPortal(
+            <ProductDetails
+              show={showProductDetails}
+              onHideShow={setShowProductDetails}
+              product={product}
+            />,
+            document.body
+          )}
+      </div>
     </div>
   )
 }

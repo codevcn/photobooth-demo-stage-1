@@ -71,9 +71,9 @@ export const PrintedImagesModal = ({
       className="fixed inset-0 z-[999] flex items-center justify-center"
     >
       <div onClick={onClose} className="bg-black/70 absolute inset-0 z-10"></div>
-      <div className="relative z-20 bg-background w-full max-w-[430px] rounded-lg max-h-[80vh] flex flex-col transition duration-500 ease-in-out">
+      <div className="relative z-20 bg-background w-full max-w-[90vw] rounded-lg max-h-[90vh] flex flex-col transition duration-500 ease-in-out">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-border">
+        <div className="flex items-center justify-between px-4 py-2 border-b border-border">
           <h2 className="text-lg font-semibold">Chọn ảnh bạn đã chụp</h2>
           <button
             onClick={onClose}

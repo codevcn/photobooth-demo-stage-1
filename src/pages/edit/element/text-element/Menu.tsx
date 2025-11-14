@@ -292,7 +292,7 @@ export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuPro
   const menuRef = useRef<HTMLDivElement | null>(null)
 
   const validateInputsPositiveNumber = (
-    inputs: HTMLInputElement[],
+    inputs: (HTMLInputElement | HTMLTextAreaElement)[],
     type: TPropertyType
   ): (number | undefined)[] => {
     const values = inputs.map((input) => input.value.trim())
@@ -328,7 +328,7 @@ export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuPro
     )
   }
 
-  const submit = (inputs: HTMLInputElement[], type: TPropertyType) => {
+  const submit = (inputs: (HTMLInputElement | HTMLTextAreaElement)[], type: TPropertyType) => {
     const values = validateInputsPositiveNumber(inputs, type)
     if (values && values.length > 0) {
       switch (type) {
@@ -346,10 +346,15 @@ export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuPro
     }
   }
 
-  const catchEnter = (e: React.KeyboardEvent<HTMLInputElement>, type: TPropertyType) => {
+  const catchEnter = (
+    e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>,
+    type: TPropertyType
+  ) => {
     if (e.key === 'Enter') {
       const formGroup = e.currentTarget.closest<HTMLElement>('.NAME-form-group')
-      const inputs = formGroup?.querySelectorAll<HTMLInputElement>('input')
+      const inputs = formGroup?.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
+        'input,textarea'
+      )
       if (inputs) {
         submit(Array.from(inputs), type)
       }
@@ -388,9 +393,10 @@ export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuPro
 
   const initContentField = () => {
     const textElement = textElements.find((el) => el.id === elementId)
+    console.log('>>> eeee:', textElement?.content)
     if (textElement) {
-      const contentInput = menuRef.current?.querySelector<HTMLInputElement>(
-        '.NAME-form-content input'
+      const contentInput = menuRef.current?.querySelector<HTMLTextAreaElement>(
+        '.NAME-form-content textarea'
       )
       if (contentInput) {
         contentInput.value = textElement.content
@@ -398,7 +404,7 @@ export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuPro
     }
   }
 
-  const onContentFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onContentFieldChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     handleChangeProperties(
       undefined,
       undefined,
@@ -494,20 +500,19 @@ export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuPro
           <Pencil size={20} className="text-white" strokeWidth={3} />
         </div>
         <div className="flex gap-1 mx-1 w-full">
-          <input
-            type="text"
+          <textarea
             placeholder="Nhập nội dung..."
             onKeyDown={(e) => catchEnter(e, 'font-size')}
             onChange={onContentFieldChange}
             className="border rounded px-1 py-0.5 text-base outline-none w-full"
-          />
+          ></textarea>
         </div>
       </div>
       <div className="NAME-form-group NAME-form-fontSize flex items-center bg-pink-cl rounded px-1 py-1 shadow w-full">
         <div className="min-w-[22px]">
           <ALargeSmall size={20} className="text-white" strokeWidth={3} />
         </div>
-        <div className="flex gap-1 mx-1">
+        <div className="flex gap-1 mx-1 grow">
           <input
             type="text"
             placeholder="Cỡ chữ, VD: 18"
@@ -520,7 +525,7 @@ export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuPro
         <div className="min-w-[22px]">
           <RefreshCw size={20} className="text-white" strokeWidth={3} />
         </div>
-        <div className="flex gap-1 items-center mx-1">
+        <div className="flex gap-1 items-center mx-1 grow">
           <input
             type="text"
             placeholder="Độ xoay, VD: 22"

@@ -30,7 +30,7 @@ export type TBaseProduct = {
   name: string
   description: string
   images: TProductImage[] // variants
-  isTrending: boolean
+  inNewLine: boolean
   printAreaList: TPrintAreaInfo[] // surfaces
 }
 
