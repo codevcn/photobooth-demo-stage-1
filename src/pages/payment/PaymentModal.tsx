@@ -28,7 +28,7 @@ interface PaymentModalProps {
   }
   onHideShow: (show: boolean) => void
   voucherCode?: string
-  cartItems?: TPaymentProductItem[]
+  cartItems: TPaymentProductItem[]
 }
 
 export const PaymentModal = ({
@@ -132,11 +132,7 @@ export const PaymentModal = ({
     const productsInCart = mapProductsInCartToOrderItems()
     if (!productsInCart || productsInCart.length === 0) return
     try {
-      const orderResponse = await orderService.createOrder(
-        productsInCart,
-        shippingInfo,
-        voucherCode
-      )
+      const orderResponse = await orderService.createOrder(cartItems, shippingInfo, voucherCode)
 
       const { order, payment_instructions } = orderResponse
 

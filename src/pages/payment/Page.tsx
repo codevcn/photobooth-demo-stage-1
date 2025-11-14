@@ -89,6 +89,7 @@ const PaymentPage = () => {
         if (!productImage) continue
         // Duyệt qua danh sách mockup data
         for (const mockupData of product.mockupDataList) {
+          const { imageData } = mockupData
           productItems.push({
             productId: product.productId,
             productImageId: productImage.id,
@@ -100,10 +101,12 @@ const PaymentPage = () => {
             discountedPrice: productImage.priceAfterDiscount,
             mockupData: {
               id: mockupData.id,
-              image: mockupData.imageData.dataUrl,
+              image: imageData.dataUrl,
+              heightPx: imageData.size.height,
+              widthPx: imageData.size.width,
             },
             elementsVisualState: mockupData.elementsVisualState,
-            surfaceType: mockupData.surfaceInfo.type,
+            surface: mockupData.surfaceInfo,
           })
         }
       }
@@ -328,6 +331,7 @@ const PaymentPage = () => {
         }}
         onHideShow={setShowModal}
         voucherCode={appliedVoucher?.code}
+        cartItems={cartItems}
       />
 
       {createPortal(

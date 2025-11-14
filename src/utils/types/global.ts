@@ -214,9 +214,15 @@ export type TPaymentProductItem = {
   mockupData: {
     id: string
     image: string
+    heightPx: number
+    widthPx: number
   }
   elementsVisualState: TElementsVisualState
-  surfaceType: TSurfaceType
+  surface: {
+    id: number
+    type: TSurfaceType
+  }
+  preSentImageLink?: string
 }
 
 export type TShippingInfo = {

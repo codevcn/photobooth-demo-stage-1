@@ -1,5 +1,5 @@
 import { formatNumberWithCommas } from '@/utils/helpers'
-import { TBaseProduct, TProductImage } from '@/utils/types/global'
+import { TBaseProduct, TProductImage, TProductSize, TSurfaceType } from '@/utils/types/global'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 interface ProductImageProps {
@@ -30,60 +30,89 @@ interface ProductDetailsProps {
 export const ProductDetails: React.FC<ProductDetailsProps> = ({ show, onHideShow, product }) => {
   const { images: productImages, description, printAreaList } = product
   const imgsContainerRef = useRef<HTMLDivElement>(null)
-  const [pickedIndex, setPickedIndex] = useState<number>(0)
   const [pickedItem, setPickedItem] = useState<TProductImage>(productImages[0])
-  const [selectedSurface, setSelectedSurface] = useState<'front' | 'back'>('front')
-  const {
-    name,
-    priceAmountOneSide,
-    priceAfterDiscount,
-    id: pickedItemId,
-    size,
-    color,
-    stock,
-    category,
-  } = pickedItem
+  const [selectedSurface, setSelectedSurface] = useState<TSurfaceType>('front')
+  const { name, priceAmountOneSide, priceAfterDiscount, size, color, stock, category, currency } =
+    pickedItem
 
-  const sizes = useMemo<string[]>(() => {
-    const uniqueSizes = new Set<string>()
+  // Get unique sizes from all variants
+  const sizes = useMemo<TProductSize[]>(() => {
+    const uniqueSizes = new Set<TProductSize>()
     for (const img of product.images) {
       uniqueSizes.add(img.size)
     }
     return Array.from(uniqueSizes)
   }, [product.images])
 
+  // Get unique colors from all variants
+  const colors = useMemo<TProductImage['color'][]>(() => {
+    const uniqueColors = new Map<string, TProductImage['color']>()
+    for (const img of product.images) {
+      if (!uniqueColors.has(img.color.value)) {
+        uniqueColors.set(img.color.value, img.color)
+      }
+    }
+    return Array.from(uniqueColors.values())
+  }, [product.images])
+
+  // Get available surfaces from printAreaList
   const availableSurfaces = useMemo(() => {
-    const surfaceTypes = new Set<'front' | 'back'>()
+    const surfaceTypes = new Set<TSurfaceType>()
     for (const area of printAreaList) {
       surfaceTypes.add(area.surfaceType)
     }
     return Array.from(surfaceTypes)
   }, [printAreaList])
 
-  const pickItem = (imgId: number) => {
-    const index = productImages.findIndex(({ id }) => id === imgId)
-    if (index < 0) return
-    setPickedIndex(index)
-    setPickedItem(productImages[index])
+  // Get surfaces list for current variant (for thumbnail gallery)
+  const surfacesForCurrentVariant = useMemo(() => {
+    return printAreaList.filter((area) => availableSurfaces.includes(area.surfaceType))
+  }, [printAreaList, availableSurfaces])
+
+  const handleSizeChange = (newSize: TProductSize) => {
+    const itemWithSize = productImages.find(
+      (img) => img.size === newSize && img.color.value === color.value
+    )
+    if (itemWithSize) {
+      setPickedItem(itemWithSize)
+    }
   }
 
-  const swipeProductImages = () => {
+  const handleColorChange = (newColor: string) => {
+    const itemWithColor = productImages.find(
+      (img) => img.color.value === newColor && img.size === size
+    )
+    if (itemWithColor) {
+      setPickedItem(itemWithColor)
+    }
+  }
+
+  const handleSurfaceClick = (surfaceId: number) => {
+    const surface = printAreaList.find((area) => area.id === surfaceId)
+    if (surface) {
+      setSelectedSurface(surface.surfaceType)
+    }
+  }
+
+  const scrollToSurface = () => {
     const imgsContainer = imgsContainerRef.current
     if (!imgsContainer) return
-    const scrollPosition = (imgsContainer.children[pickedIndex] as HTMLElement).offsetLeft
-    imgsContainer.scrollTo({ left: scrollPosition, behavior: 'smooth' })
-  }
 
-  const handleSizeChange = (newSize: string) => {
-    const itemWithSize = productImages.find((img) => img.size === newSize)
-    if (itemWithSize) {
-      pickItem(itemWithSize.id)
+    const surfaceIndex = surfacesForCurrentVariant.findIndex(
+      (area) => area.surfaceType === selectedSurface
+    )
+
+    if (surfaceIndex >= 0) {
+      const scrollPosition = imgsContainer.children[surfaceIndex] as HTMLElement
+      if (scrollPosition) {
+        scrollPosition.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' })
+      }
     }
   }
 
   useEffect(() => {
-    swipeProductImages()
-  }, [pickedIndex])
+    scrollToSurface()
+  }, [selectedSurface])
 
   useEffect(() => {
     document.body.style.overflow = show ? 'hidden' : 'auto'
@@ -124,55 +153,50 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ show, onHideShow
 
         {/* <!-- Image Gallery Section --> */}
         <section className="relative">
-          {/* <!-- Promotion Badge - Prominent --> */}
-          <div className="absolute opacity-30 active:opacity-100 hover:opacity-100 top-2 left-2 z-10 bg-red-600 text-white px-3 py-1.5 rounded-lg font-bold text-sm shadow-lg">
-            <span className="text-xs">FLASH SALE</span>
-            <span className="block text-lg">-35% OFF</span>
-          </div>
-
           {/* <!-- Main Image Gallery (Swipeable) --> */}
           <div className="relative overflow-hidden bg-gray-100">
             <div
               ref={imgsContainerRef}
               className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide"
             >
-              {printAreaList
-                .filter((area) => area.surfaceType === selectedSurface)
-                .map((area) => (
-                  <ProductImage
-                    key={area.id}
-                    imageUrl={area.imageUrl}
-                    name={product.name}
-                    id={area.id}
-                  />
-                ))}
+              {surfacesForCurrentVariant.map((area) => (
+                <ProductImage
+                  key={area.id}
+                  imageUrl={area.imageUrl}
+                  name={product.name}
+                  id={area.id}
+                />
+              ))}
             </div>
           </div>
 
-          {/* <!-- Thumbnail Gallery - Product Variants --> */}
+          {/* <!-- Thumbnail Gallery - Surfaces --> */}
           <div
             className="thumbnail-scroll flex gap-2 p-3 overflow-x-auto bg-white border-b"
             role="tablist"
           >
-            {productImages.map((img) => {
-              const displayArea = printAreaList.find((area) => area.surfaceType === selectedSurface)
-              return (
-                <button
-                  key={img.id}
-                  className="thumbnail flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 border-gray-200 transition-all"
-                  style={{
-                    outline: img.id === pickedItemId ? '3px solid var(--vcn-pink-cl)' : 'none',
-                  }}
-                  onClick={() => pickItem(img.id)}
-                >
-                  <img
-                    src={displayArea?.imageUrl || ''}
-                    alt={img.name}
-                    className="w-full h-full object-cover"
-                  />
-                </button>
-              )
-            })}
+            {surfacesForCurrentVariant.map((area) => (
+              <button
+                key={area.id}
+                className="thumbnail flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all relative"
+                style={{
+                  borderColor:
+                    area.surfaceType === selectedSurface ? 'var(--vcn-pink-cl)' : '#e5e7eb',
+                  outline:
+                    area.surfaceType === selectedSurface ? '3px solid var(--vcn-pink-cl)' : 'none',
+                }}
+                onClick={() => handleSurfaceClick(area.id)}
+              >
+                <img
+                  src={area.imageUrl}
+                  alt={`${product.name} - ${area.surfaceType}`}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs py-0.5 text-center font-medium">
+                  {area.surfaceType === 'front' ? 'Trước' : 'Sau'}
+                </div>
+              </button>
+            ))}
           </div>
 
           {/* Surface, Size & Color Selection */}
@@ -180,7 +204,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ show, onHideShow
             {/* Surface Selection */}
             {availableSurfaces.length > 1 && (
               <div>
-                <h3 className="text-sm font-semibold text-gray-700 mb-2">Chọn mặt in</h3>
+                <h3 className="text-sm font-semibold text-gray-700 mb-2">Các mặt in</h3>
                 <div className="flex gap-2">
                   {availableSurfaces.map((surface) => (
                     <button
@@ -207,34 +231,42 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ show, onHideShow
                   <h3 className="text-sm font-semibold text-gray-700 mb-2">Kích thước</h3>
                   <div className="flex flex-wrap gap-2">
                     {sizes.map((sizeOption) => (
-                      <button
+                      <div
                         key={sizeOption}
                         onClick={() => handleSizeChange(sizeOption)}
-                        className={`px-3 py-1.5 rounded-lg border-2 font-medium text-sm transition-all ${
-                          size === sizeOption
-                            ? 'border-pink-cl bg-pink-50 text-pink-cl'
-                            : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
-                        }`}
+                        className={`border-gray-200 bg-white text-gray-700 px-3 py-1.5 rounded-lg border-2 font-medium text-sm transition-all`}
                       >
                         {sizeOption}
-                      </button>
+                      </div>
                     ))}
                   </div>
                 </div>
               )}
 
               {/* Color */}
-              <div>
-                <h3 className="text-sm font-semibold text-gray-700 mb-2">Màu sắc</h3>
-                <div className="flex items-center gap-2">
-                  <div
-                    className="w-8 h-8 rounded-full border-2 border-gray-300 shadow-sm"
-                    style={{ backgroundColor: color.value }}
-                    title={color.title}
-                  />
-                  <span className="text-sm text-gray-700 font-medium">{color.title}</span>
+              {colors.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700 mb-2">Màu sắc</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {colors.map((colorOption) => (
+                      <div
+                        key={colorOption.value}
+                        onClick={() => handleColorChange(colorOption.value)}
+                        className={`border-gray-200 bg-white flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 transition-all`}
+                        title={colorOption.title}
+                      >
+                        <div
+                          className="w-5 h-5 rounded-full border border-gray-300 shadow-sm"
+                          style={{ backgroundColor: colorOption.value }}
+                        />
+                        <span className="text-sm font-medium text-gray-700">
+                          {colorOption.title}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </section>
@@ -259,7 +291,9 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ show, onHideShow
                     </svg>
                     <span>Còn hàng</span>
                   </span>
-                  <span className="text-sm text-gray-500">• {stock} sản phẩm có sẵn</span>
+                  <span className="text-sm text-gray-500">
+                    • <span>{stock}</span> sản phẩm có sẵn
+                  </span>
                 </>
               ) : (
                 <span className="flex items-center gap-1.5 text-sm font-medium text-red-600">
@@ -286,17 +320,17 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ show, onHideShow
           </div>
 
           {/* <!-- Pricing Section - Prominent --> */}
-          <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
+          <div className="bg-pink-50 rounded-lg p-4 border border-pink-100">
             <div className="flex items-baseline gap-3">
               {/* <!-- Discounted Price - Large & Prominent --> */}
               <span className="text-3xl font-bold text-pink-cl">
-                {formatNumberWithCommas(priceAmountOneSide) + ' VND'}
+                {formatNumberWithCommas(priceAmountOneSide) + ' ' + currency}
               </span>
 
               {/* <!-- Original Price - Struck Through --> */}
               {priceAfterDiscount && (
                 <span className="text-lg text-gray-500 line-through">
-                  {formatNumberWithCommas(priceAfterDiscount) + ' VND'}
+                  {formatNumberWithCommas(priceAfterDiscount) + ' ' + currency}
                 </span>
               )}
             </div>
@@ -305,7 +339,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ show, onHideShow
               <span className="text-sm font-semibold text-green-700 bg-green-100 px-2 py-0.5 rounded">
                 <span>Tiết kiệm </span>
                 <span>{formatNumberWithCommas(priceAmountOneSide - priceAfterDiscount)}</span>
-                <span> VND</span>
+                <span> {currency}</span>
               </span>
             )}
             {priceAfterDiscount && (
