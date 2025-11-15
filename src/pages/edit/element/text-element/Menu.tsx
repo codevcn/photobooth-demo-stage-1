@@ -282,10 +282,9 @@ const TextFontPicker = ({ show, onHideShow, onSelectFont }: TextFontPickerProps)
 
 interface PrintedImageMenuProps {
   elementId: string
-  textElements: TTextVisualState[]
 }
 
-export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuProps) => {
+export const TextElementMenu = ({ elementId }: PrintedImageMenuProps) => {
   const [showColorPicker, setShowColorPicker] = useState<boolean>(false)
   const [showTextFontPicker, setShowTextFontPicker] = useState<boolean>(false)
   const { pickedElementRoot } = useGlobalContext()
@@ -392,14 +391,15 @@ export const TextElementMenu = ({ elementId, textElements }: PrintedImageMenuPro
   }
 
   const initContentField = () => {
-    const textElement = textElements.find((el) => el.id === elementId)
-    console.log('>>> eeee:', textElement?.content)
+    const textElement = pickedElementRoot?.querySelector<HTMLElement>(
+      '.NAME-displayed-text-content'
+    )
     if (textElement) {
       const contentInput = menuRef.current?.querySelector<HTMLTextAreaElement>(
         '.NAME-form-content textarea'
       )
       if (contentInput) {
-        contentInput.value = textElement.content
+        contentInput.value = textElement.textContent
       }
     }
   }

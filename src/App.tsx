@@ -1,5 +1,5 @@
 import { Routes, Route, BrowserRouter } from 'react-router-dom'
-import EditPage from '@/pages/edit/Page-horizon-ver-1'
+import EditPage from '@/pages/edit/Wrapper'
 import PaymentPage from './pages/payment/Page'
 import NotFound from '@/pages/NotFound'
 import { LocalStorageHelper } from './utils/localstorage'

@@ -32,12 +32,12 @@ type TSelectingType = TElementType | null
 
 interface EditAreaProps {
   editingProductImage: TProductImage
-  textElements: TTextVisualState[]
-  stickerElements: TStickerVisualState[]
+  initialTextElements: TTextVisualState[]
+  initialStickerElements: TStickerVisualState[]
   onUpdateText: (elements: TTextVisualState[]) => void
   onUpdateStickers: (elements: TStickerVisualState[]) => void
   printedImages: TPrintedImage[]
-  printedImageElements: TPrintedImageVisualState[]
+  initialPrintedImageElements: TPrintedImageVisualState[]
   onAddPrintedImages: (elements: TPrintedImage[]) => void
   onRemovePrintedImages: (ids: string[]) => void
   htmlToCanvasEditorRef: React.MutableRefObject<HTMLDivElement | null>
@@ -57,9 +57,9 @@ interface EditAreaProps {
 const EditArea: React.FC<EditAreaProps> = ({
   editingProductImage,
   printedImages,
-  textElements,
-  stickerElements,
-  printedImageElements,
+  initialTextElements,
+  initialStickerElements,
+  initialPrintedImageElements,
   onUpdateText,
   onUpdateStickers,
   onAddPrintedImages,
@@ -89,11 +89,11 @@ const EditArea: React.FC<EditAreaProps> = ({
   } = usePrintArea()
 
   const handleRemoveText = (id: string) => {
-    onUpdateText(textElements.filter((el) => el.id !== id))
+    onUpdateText(initialTextElements.filter((el) => el.id !== id))
   }
 
   const handleRemoveSticker = (id: string) => {
-    onUpdateStickers(stickerElements.filter((el) => el.id !== id))
+    onUpdateStickers(initialStickerElements.filter((el) => el.id !== id))
   }
 
   const handleAddImage = (newImage: TPrintedImage) => {
@@ -284,8 +284,8 @@ const EditArea: React.FC<EditAreaProps> = ({
             />
             <div className="absolute top-0 left-0 w-full h-full z-50">
               {/* Text Elements */}
-              {textElements.length > 0 &&
-                textElements.map((textEl) => (
+              {initialTextElements.length > 0 &&
+                initialTextElements.map((textEl) => (
                   <TextElement
                     key={textEl.id}
                     element={textEl}
@@ -298,8 +298,8 @@ const EditArea: React.FC<EditAreaProps> = ({
                 ))}
 
               {/* Sticker Elements */}
-              {stickerElements.length > 0 &&
-                stickerElements.map((sticker) => (
+              {initialStickerElements.length > 0 &&
+                initialStickerElements.map((sticker) => (
                   <StickerElement
                     key={sticker.id}
                     element={sticker}
@@ -312,8 +312,8 @@ const EditArea: React.FC<EditAreaProps> = ({
                 ))}
 
               {/* Printed Image Elements */}
-              {printedImageElements.length > 0 &&
-                printedImageElements.map((img) => (
+              {initialPrintedImageElements.length > 0 &&
+                initialPrintedImageElements.map((img) => (
                   <PrintedImageElement
                     key={img.id}
                     element={img}
@@ -334,7 +334,7 @@ const EditArea: React.FC<EditAreaProps> = ({
       {selectedElementId && (
         <div className="bg-white rounded p-2 mt-3">
           {selectingType === 'text' ? (
-            <TextElementMenu elementId={selectedElementId} textElements={textElements} />
+            <TextElementMenu elementId={selectedElementId} />
           ) : selectingType === 'sticker' ? (
             <StickerElementMenu elementId={selectedElementId} />
           ) : selectingType === 'printed-image' ? (
