@@ -377,9 +377,11 @@ export const EditPage = ({ products, printedImages }: TEditPageHorizonProps) => 
     if (message) {
       return onError(new Error(message))
     }
-    const imgMimeType: TImgMimeType = 'image/webp'
+    const imgMimeType: TImgMimeType = 'image/png'
+    const editor = document.body.querySelector<HTMLDivElement>('.NAME-canvas-editor')
+    if (!editor) return
     handleSaveHtmlAsImage(
-      editorRef.current,
+      editor,
       imgMimeType,
       (imageData, imageSizeInfo) => {
         const mockupId = LocalStorageHelper.saveMockupImageAtLocal(

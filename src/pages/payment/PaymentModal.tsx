@@ -85,20 +85,18 @@ export const PaymentModal = ({
     return isValid
   }
 
-  const mapProductsInCartToOrderItems = (): TProductInCart[] | null => {
+  const mapProductsInCartToOrderItems = (): TPaymentProductItem[] | null => {
     // Get cart items from LocalStorage
     const savedData = LocalStorageHelper.getSavedMockupData()
     if (!savedData || savedData.productsInCart.length === 0) {
       toast.error('Giỏ hàng trống')
       return null
     }
-    const productsInCart: TProductInCart[] = [...savedData.productsInCart]
-    for (const product of savedData.productsInCart) {
-      for (const mockupData of product.mockupDataList) {
-        mockupData.preSentImageLink = preSentMockupImageLinks.find(
-          (link) => link.mockupId === mockupData.id
-        )?.imageUrl
-      }
+    const productsInCart: TPaymentProductItem[] = [...cartItems]
+    for (const item of cartItems) {
+      item.preSentImageLink = preSentMockupImageLinks.find(
+        (link) => link.mockupId === item.mockupData.id
+      )?.imageUrl
     }
     return productsInCart
   }

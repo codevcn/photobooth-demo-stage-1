@@ -10,9 +10,24 @@ import ScanQRPage from './pages/scan-qr/Page'
 import { AppRootProvider } from './providers/RootProvider'
 import { useEffect } from 'react'
 import { useEditedImageContext } from './context/global-context'
+import { useIdleDetector } from './hooks/use-idle-detector'
+import { IdleWarningModal } from './components/custom/IdleWarningModal'
+import { useNavigate } from 'react-router-dom'
+import IntroPage from './pages/intro/Page'
 
-function App() {
+function AppContent() {
   const { clearAllEditedImages } = useEditedImageContext()
+  const navigate = useNavigate()
+
+  // ==================== Idle Detection - Toàn cục ====================
+  const { showWarning, warningCountdown, confirmActive } = useIdleDetector({
+    idleTimeout: 20000, // 20 giây không hoạt động
+    warningTimeout: 10000, // 10 giây cảnh báo
+    onIdle: () => {
+      // Quay về trang chủ khi hết thời gian
+      navigate('/')
+    },
+  })
 
   useEffect(() => {
     LocalStorageHelper.clearAllMockupImages()
@@ -22,27 +37,39 @@ function App() {
   }, [])
 
   return (
+    <>
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="colored" // "light" | "dark" | "colored"
+        toastStyle={{ color: '#fff', fontWeight: 'bold' }}
+      />
+      <Routes>
+        <Route path="/" element={<IntroPage />} />
+        <Route path="/qr" element={<ScanQRPage />} />
+        {/* <Route path="/" element={<TimelapsePage />} /> */}
+        <Route path="/edit" element={<EditPage />} />
+        <Route path="/payment" element={<PaymentPage />} />
+        <Route path="/temp" element={<Temp />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+
+      {/* Global Idle Warning Modal */}
+      <IdleWarningModal show={showWarning} countdown={warningCountdown} onConfirm={confirmActive} />
+    </>
+  )
+}
+
+function App() {
+  return (
     <AppRootProvider>
       <BrowserRouter>
-        <ToastContainer
-          position="top-center"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          pauseOnHover
-          draggable
-          theme="colored" // "light" | "dark" | "colored"
-          toastStyle={{ color: '#fff', fontWeight: 'bold' }}
-        />
-        <Routes>
-          <Route path="/" element={<ScanQRPage />} />
-          {/* <Route path="/" element={<TimelapsePage />} /> */}
-          <Route path="/edit" element={<EditPage />} />
-          <Route path="/payment" element={<PaymentPage />} />
-          <Route path="/temp" element={<Temp />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AppContent />
       </BrowserRouter>
     </AppRootProvider>
   )
