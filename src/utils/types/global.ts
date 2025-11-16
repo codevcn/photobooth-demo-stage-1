@@ -68,17 +68,10 @@ export type TElementLayerState = {
   index: number
 }
 
-export type TPreSentMockupImageLink = {
-  mockupId: string
-  imageUrl: string
-}
-
 export type TGlobalContextValue = {
   pickedElementRoot: HTMLElement | null
   elementType: TElementType | null
   sessionId: string | null
-  preSentMockupImageLinks: TPreSentMockupImageLink[]
-  addPreSentMockupImageLink: (imageUrl: string, mockupId: string) => void
 }
 
 export type TElementLayerContextValue = {
@@ -197,7 +190,7 @@ export type TProductInCart = TProductCartInfo & {
   mockupDataList: TMockupData[]
 }
 
-export type TSurfaceType = 'front' | 'back'
+export type TSurfaceType = 'front' | 'back' | 'both'
 
 export type TPaymentProductItem = {
   productId: number

@@ -6,10 +6,9 @@ import { TUserInputImage } from '@/utils/types/global'
 
 interface QRScannerProps {
   onScanSuccess: (result: TUserInputImage[]) => void
-  showCropper: boolean
 }
 
-export default function QRScanner({ onScanSuccess, showCropper }: QRScannerProps) {
+export default function QRScanner({ onScanSuccess }: QRScannerProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const scannerRef = useRef<QrScanner | null>(null)
   const [isScanning, setIsScanning] = useState(false)
@@ -85,15 +84,14 @@ export default function QRScanner({ onScanSuccess, showCropper }: QRScannerProps
   }, [])
 
   useEffect(() => {
-    if (showCropper) {
-      stopCamera()
-    } else if (!error) {
-      // initializeScanner()
-    }
+    // initializeScanner()
     if (error) {
       stopCamera()
     }
-  }, [showCropper, error])
+    return () => {
+      stopCamera()
+    }
+  }, [error])
 
   useEffect(() => {
     setTimeout(() => {

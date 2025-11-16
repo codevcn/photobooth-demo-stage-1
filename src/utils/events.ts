@@ -32,6 +32,8 @@ interface IInternalEvents {
   ) => void
   [EInternalEvents.PICK_ELEMENT]: (element: HTMLElement | null, elementType: TElementType) => void
   [EInternalEvents.SYNC_ELEMENT_PROPS]: (elementId: string | null, type: TElementType) => void
+  [EInternalEvents.OPEN_CROP_ELEMENT_MODAL]: (elementId: string) => void
+  [EInternalEvents.REPLACE_ELEMENT_IMAGE_URL]: (elementId: string, newUrl: string) => void
 }
 
 class EventEmitter<IEvents extends IInternalEvents> {

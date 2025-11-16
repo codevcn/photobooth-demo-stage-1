@@ -160,8 +160,8 @@ export const StickerElementMenu = ({ elementId }: Sticker) => {
   }, [])
 
   return (
-    <div ref={menuRef} className="NAME-menu-section grid grid-cols-2 gap-2">
-      <div className="NAME-form-group NAME-form-scale flex items-center bg-pink-cl rounded px-1 py-1 shadow w-full">
+    <div ref={menuRef} className="NAME-menu-section grid grid-cols-2 gap-x-1 gap-y-1">
+      <div className="NAME-form-group NAME-form-scale flex items-center bg-pink-cl rounded px-1 py-0.5 shadow w-full">
         <div className="min-w-[22px]">
           <Fullscreen size={20} className="text-white" strokeWidth={3} />
         </div>
@@ -175,7 +175,7 @@ export const StickerElementMenu = ({ elementId }: Sticker) => {
           <span className="text-white text-base font-bold">%</span>
         </div>
       </div>
-      <div className="NAME-form-group NAME-form-angle flex items-center bg-pink-cl rounded px-1 py-1 shadow w-full">
+      <div className="NAME-form-group NAME-form-angle flex items-center bg-pink-cl rounded px-1 py-0.5 shadow w-full">
         <div className="min-w-[22px]">
           <RefreshCw size={20} className="text-white" strokeWidth={3} />
         </div>
@@ -189,14 +189,14 @@ export const StickerElementMenu = ({ elementId }: Sticker) => {
           <span className="text-white text-base font-bold">độ</span>
         </div>
       </div>
-      <div className="NAME-form-group NAME-form-zindex flex items-center justify-between bg-pink-cl rounded px-1 py-1 shadow w-full">
+      <div className="NAME-form-group NAME-form-zindex flex items-center justify-between bg-pink-cl rounded px-1 py-0.5 shadow w-full">
         <div className="min-w-[22px]">
           <Layers2 size={20} className="text-white" strokeWidth={3} />
         </div>
         <div className="flex gap-1 grow flex-wrap">
           <button
             onClick={() => onClickButton('zindex-up')}
-            className="bg-white border-2 grow text-pink-cl border-pink-cl rounded px-1.5 py-1 flex gap-0.5 items-center justify-center"
+            className="bg-white border-2 grow text-pink-cl border-pink-cl rounded px-1.5 py-0.5 flex gap-0.5 items-center justify-center"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -216,7 +216,7 @@ export const StickerElementMenu = ({ elementId }: Sticker) => {
           </button>
           <button
             onClick={() => onClickButton('zindex-down')}
-            className="bg-white border-2 grow text-pink-cl border-pink-cl rounded px-1.5 py-1 flex gap-0.5 items-center justify-center"
+            className="bg-white border-2 grow text-pink-cl border-pink-cl rounded px-1.5 py-0.5 flex gap-0.5 items-center justify-center"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -236,7 +236,7 @@ export const StickerElementMenu = ({ elementId }: Sticker) => {
           </button>
         </div>
       </div>
-      <div className="NAME-form-group NAME-form-position flex items-center bg-pink-cl rounded px-1 py-1 shadow w-full">
+      <div className="NAME-form-group NAME-form-position flex items-center bg-pink-cl rounded px-1 py-0.5 shadow w-full">
         <div className="min-w-[22px]">
           <Move size={20} className="text-white" strokeWidth={3} />
         </div>
@@ -255,7 +255,7 @@ export const StickerElementMenu = ({ elementId }: Sticker) => {
           />
         </div>
       </div>
-      <div className="NAME-form-group NAME-form-position col-span-2 flex items-center bg-pink-cl rounded px-1 py-1 shadow w-full">
+      <div className="NAME-form-group NAME-form-position col-span-2 flex items-center bg-pink-cl rounded px-1 py-0.5 shadow w-full">
         <button
           onClick={handleClickCheck}
           className="group flex items-center justify-center font-bold w-full gap-1 text-white active:bg-white active:text-green-600 rounded p-1"

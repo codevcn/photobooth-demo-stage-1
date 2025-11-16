@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import {
   TProductImage,
-  TPrintedImage,
   TElementType,
   TElementsVisualState,
   TTextVisualState,
@@ -13,20 +12,21 @@ import {
 } from '@/utils/types/global'
 import { TextElement } from './element/text-element/TextElement'
 import { StickerElement } from './element/sticker-element/StickerElement'
-import { PrintedImagesModal } from './element/printed-image-element/PrintedImages'
 import { PrintedImageElement } from './element/printed-image-element/PrintedImageElement'
 import { PrintedImageElementMenu } from './element/printed-image-element/Menu'
 import { TextElementMenu } from './element/text-element/Menu'
 import { StickerElementMenu } from './element/sticker-element/Menu'
 import { eventEmitter } from '@/utils/events'
 import { EInternalEvents } from '@/utils/enums'
-import { PrintedImagesPreview } from './PrintedImagesPreview'
 import { usePrintArea } from '@/hooks/use-print-area'
 import { PrintAreaOverlay } from '@/components/print-area/PrintAreaOverlay'
 import ActionBar from './ActionBar'
 import { toast } from 'react-toastify'
 import { useVisualStatesCollector } from '@/hooks/use-visual-states-collector'
 import { SurfaceSelector } from './SurfaceSelector'
+import { CropElementModal } from './element/printed-image-element/CropElementModal'
+import { ArrowLeft } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 type TSelectingType = TElementType | null
 
@@ -36,9 +36,7 @@ interface EditAreaProps {
   initialStickerElements: TStickerVisualState[]
   onUpdateText: (elements: TTextVisualState[]) => void
   onUpdateStickers: (elements: TStickerVisualState[]) => void
-  printedImages: TPrintedImage[]
   initialPrintedImageElements: TPrintedImageVisualState[]
-  onAddPrintedImages: (elements: TPrintedImage[]) => void
   onRemovePrintedImages: (ids: string[]) => void
   htmlToCanvasEditorRef: React.MutableRefObject<HTMLDivElement | null>
   cartCount: number
@@ -56,13 +54,11 @@ interface EditAreaProps {
 
 const EditArea: React.FC<EditAreaProps> = ({
   editingProductImage,
-  printedImages,
   initialTextElements,
   initialStickerElements,
   initialPrintedImageElements,
   onUpdateText,
   onUpdateStickers,
-  onAddPrintedImages,
   onRemovePrintedImages,
   htmlToCanvasEditorRef,
   cartCount,
@@ -73,7 +69,9 @@ const EditArea: React.FC<EditAreaProps> = ({
   onSelectSurface,
   activeProduct,
 }) => {
-  const [showPrintedImagesModal, setShowPrintedImagesModal] = useState<boolean>(false)
+  const [showCropModal, setShowCropModal] = useState<boolean>(false)
+  const [cropElementId, setCropElementId] = useState<string | null>(null)
+  const [cropImageUrl, setCropImageUrl] = useState<string>('')
   const editAreaContainerRef = useRef<HTMLDivElement>(null)
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null)
   const [selectingType, setSelectingType] = useState<TSelectingType>(null)
@@ -87,6 +85,7 @@ const EditArea: React.FC<EditAreaProps> = ({
     initializePrintArea,
     checkIfAnyElementOutOfBounds,
   } = usePrintArea()
+  const navigate = useNavigate()
 
   const handleRemoveText = (id: string) => {
     onUpdateText(initialTextElements.filter((el) => el.id !== id))
@@ -96,17 +95,8 @@ const EditArea: React.FC<EditAreaProps> = ({
     onUpdateStickers(initialStickerElements.filter((el) => el.id !== id))
   }
 
-  const handleAddImage = (newImage: TPrintedImage) => {
-    onAddPrintedImages([newImage])
-    setShowPrintedImagesModal(false)
-  }
-
   const handleRemovePrintedImage = (id: string) => {
     onRemovePrintedImages([id])
-  }
-
-  const handleOpenPrintedImagesModal = () => {
-    setShowPrintedImagesModal((pre) => !pre)
   }
 
   const handleUpdateSelectedElementId = (id: string | null, type: TSelectingType) => {
@@ -117,6 +107,22 @@ const EditArea: React.FC<EditAreaProps> = ({
   const cancelSelectingElement = () => {
     setSelectedElementId(null)
     setSelectingType(null)
+  }
+
+  const handleOpenCropModal = (elementId: string) => {
+    // Find the element to get its current image URL
+    const element = initialPrintedImageElements.find((el) => el.id === elementId)
+    if (element) {
+      setCropElementId(elementId)
+      setCropImageUrl(element.url)
+      setShowCropModal(true)
+    }
+  }
+
+  const handleCropComplete = (elementId: string, croppedImageUrl: string) => {
+    // Emit event to update the element's image
+    eventEmitter.emit(EInternalEvents.REPLACE_ELEMENT_IMAGE_URL, elementId, croppedImageUrl)
+    setShowCropModal(false)
   }
 
   const listenClickOnPageEvent = (target: HTMLElement | null) => {
@@ -155,10 +161,12 @@ const EditArea: React.FC<EditAreaProps> = ({
 
   useEffect(() => {
     eventEmitter.on(EInternalEvents.CLICK_ON_PAGE, listenClickOnPageEvent)
+    eventEmitter.on(EInternalEvents.OPEN_CROP_ELEMENT_MODAL, handleOpenCropModal)
     return () => {
       eventEmitter.off(EInternalEvents.CLICK_ON_PAGE, listenClickOnPageEvent)
+      eventEmitter.off(EInternalEvents.OPEN_CROP_ELEMENT_MODAL, handleOpenCropModal)
     }
-  }, [])
+  }, [initialPrintedImageElements])
 
   // Cập nhật vùng in khi sản phẩm thay đổi
   useEffect(() => {
@@ -216,123 +224,114 @@ const EditArea: React.FC<EditAreaProps> = ({
   }, [editingProductImage, initializePrintArea, selectedPrintAreaInfo.area])
 
   return (
-    <div className="rounded-2xl relative" ref={editAreaContainerRef}>
-      <div className="flex items-center justify-between mb-4">
-        <div className="text-left flex-1">
-          <h3 className="text-lg font-bold text-gray-800">Khu vực chỉnh sửa</h3>
-          <p className="text-xs text-gray-500">Chạm vào các phần tử để di chuyển vị trí</p>
-        </div>
-        <div className="h-fit">
-          <PrintedImagesPreview
-            onOpenPrintedImagesModal={handleOpenPrintedImagesModal}
-            printedImages={printedImages}
-          />
-          {showPrintedImagesModal && (
-            <PrintedImagesModal
-              show={showPrintedImagesModal}
-              onAddImage={handleAddImage}
-              onClose={() => setShowPrintedImagesModal(false)}
-              printedImages={printedImages}
-            />
-          )}
+    <div className="flex flex-col rounded-2xl relative max-h-full" ref={editAreaContainerRef}>
+      <div className="flex items-center justify-between mb-2">
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center gap-2 bg-pink-cl hover:bg-dark-pink-cl text-white font-bold py-1 px-4 rounded-xl shadow-md hover:shadow-lg active:scale-95 transition-all duration-200"
+        >
+          <ArrowLeft size={20} />
+          <span className="hidden sm:inline">Quay lại</span>
+        </button>
+        <div className="flex items-center flex-wrap gap-2 text-left flex-1">
+          <h3 className="text-lg font-bold text-gray-800 pl-4">Khu vực chỉnh sửa</h3>
+          <p className="text-sm text-gray-500">Chạm vào các phần tử để di chuyển vị trí</p>
         </div>
       </div>
 
-      <div className="bg-gray-100">
-        <div
-          ref={(node) => {
-            htmlToCanvasEditorRef.current = node
-            containerElementRef.current = node
-          }}
-          className="NAME-canvas-editor relative z-0 w-full h-fit max-h-[500px] overflow-hidden"
-        >
-          {selectedPrintAreaInfo && selectedPrintAreaInfo.imageUrl ? (
-            <img
-              src={selectedPrintAreaInfo.imageUrl}
-              alt={editingProductImage.name}
-              className="NAME-product-image touch-none w-full h-full max-h-[calc(500px-8px)] object-contain"
-            />
-          ) : (
-            <div className="flex items-center justify-center h-full w-full text-gray-600">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="lucide lucide-triangle-alert-icon lucide-triangle-alert"
-              >
-                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
-                <path d="M12 9v4" />
-                <path d="M12 17h.01" />
-              </svg>
-              <p className="text-base mt-3">Không có ảnh sản phẩm</p>
-            </div>
-          )}
+      <div
+        ref={(node) => {
+          htmlToCanvasEditorRef.current = node
+          containerElementRef.current = node
+        }}
+        className="NAME-canvas-editor relative z-0 bg-gray-100 flex flex-1 flex-shrink basis-auto min-h-0 w-full h-full max-h-[500px] overflow-hidden"
+      >
+        {selectedPrintAreaInfo && selectedPrintAreaInfo.imageUrl ? (
+          <img
+            src={selectedPrintAreaInfo.imageUrl}
+            alt={editingProductImage.name}
+            className="NAME-product-image touch-none w-full h-auto max-h-[500px] object-contain"
+          />
+        ) : (
+          <div className="flex items-center justify-center h-full w-full text-gray-600">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="lucide lucide-triangle-alert-icon lucide-triangle-alert"
+            >
+              <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
+              <path d="M12 9v4" />
+              <path d="M12 17h.01" />
+            </svg>
+            <p className="text-base mt-3">Không có ảnh sản phẩm</p>
+          </div>
+        )}
 
-          <div className="absolute z-20 top-0 left-0 w-full h-full">
-            {/* Print Area Overlay */}
-            <PrintAreaOverlay
-              overlayRef={overlayRef}
-              printAreaRef={printAreaRef}
-              isOutOfBounds={isOutOfBounds}
-              selectedColor={selectedColor}
-            />
-            <div className="absolute top-0 left-0 w-full h-full z-50">
-              {/* Text Elements */}
-              {initialTextElements.length > 0 &&
-                initialTextElements.map((textEl) => (
-                  <TextElement
-                    key={textEl.id}
-                    element={textEl}
-                    onRemoveElement={handleRemoveText}
-                    onUpdateSelectedElementId={(id) => handleUpdateSelectedElementId(id, 'text')}
-                    selectedElementId={selectedElementId}
-                    canvasAreaRef={htmlToCanvasEditorRef}
-                    mountType={mockupId ? 'from-saved' : 'new'}
-                  />
-                ))}
+        <div className="NAME-print-area-allowed absolute z-20 top-0 left-0 w-full h-full">
+          {/* Print Area Overlay */}
+          <PrintAreaOverlay
+            overlayRef={overlayRef}
+            printAreaRef={printAreaRef}
+            isOutOfBounds={isOutOfBounds}
+            selectedColor={selectedColor}
+          />
+          <div className="absolute top-0 left-0 w-full h-full z-50">
+            {/* Text Elements */}
+            {initialTextElements.length > 0 &&
+              initialTextElements.map((textEl) => (
+                <TextElement
+                  key={textEl.id}
+                  element={textEl}
+                  onRemoveElement={handleRemoveText}
+                  onUpdateSelectedElementId={(id) => handleUpdateSelectedElementId(id, 'text')}
+                  selectedElementId={selectedElementId}
+                  canvasAreaRef={htmlToCanvasEditorRef}
+                  mountType={mockupId ? 'from-saved' : 'new'}
+                />
+              ))}
 
-              {/* Sticker Elements */}
-              {initialStickerElements.length > 0 &&
-                initialStickerElements.map((sticker) => (
-                  <StickerElement
-                    key={sticker.id}
-                    element={sticker}
-                    onRemoveElement={handleRemoveSticker}
-                    onUpdateSelectedElementId={(id) => handleUpdateSelectedElementId(id, 'sticker')}
-                    selectedElementId={selectedElementId}
-                    canvasAreaRef={htmlToCanvasEditorRef}
-                    mountType={mockupId ? 'from-saved' : 'new'}
-                  />
-                ))}
+            {/* Sticker Elements */}
+            {initialStickerElements.length > 0 &&
+              initialStickerElements.map((sticker) => (
+                <StickerElement
+                  key={sticker.id}
+                  element={sticker}
+                  onRemoveElement={handleRemoveSticker}
+                  onUpdateSelectedElementId={(id) => handleUpdateSelectedElementId(id, 'sticker')}
+                  selectedElementId={selectedElementId}
+                  canvasAreaRef={htmlToCanvasEditorRef}
+                  mountType={mockupId ? 'from-saved' : 'new'}
+                />
+              ))}
 
-              {/* Printed Image Elements */}
-              {initialPrintedImageElements.length > 0 &&
-                initialPrintedImageElements.map((img) => (
-                  <PrintedImageElement
-                    key={img.id}
-                    element={img}
-                    onRemoveElement={handleRemovePrintedImage}
-                    onUpdateSelectedElementId={(id) =>
-                      handleUpdateSelectedElementId(id, 'printed-image')
-                    }
-                    selectedElementId={selectedElementId}
-                    canvasAreaRef={htmlToCanvasEditorRef}
-                    mountType={mockupId ? 'from-saved' : 'new'}
-                  />
-                ))}
-            </div>
+            {/* Printed Image Elements */}
+            {initialPrintedImageElements.length > 0 &&
+              initialPrintedImageElements.map((img) => (
+                <PrintedImageElement
+                  key={img.id}
+                  element={img}
+                  onRemoveElement={handleRemovePrintedImage}
+                  onUpdateSelectedElementId={(id) =>
+                    handleUpdateSelectedElementId(id, 'printed-image')
+                  }
+                  selectedElementId={selectedElementId}
+                  canvasAreaRef={htmlToCanvasEditorRef}
+                  mountType={mockupId ? 'from-saved' : 'new'}
+                />
+              ))}
           </div>
         </div>
       </div>
 
       {selectedElementId && (
-        <div className="bg-white rounded p-2 mt-3">
+        <div className="bg-white rounded p-2 pb-0 mt-1">
           {selectingType === 'text' ? (
             <TextElementMenu elementId={selectedElementId} />
           ) : selectingType === 'sticker' ? (
@@ -352,9 +351,19 @@ const EditArea: React.FC<EditAreaProps> = ({
       />
 
       {/* Action Bar */}
-      <div className="px-4 pb-3 mt-4">
+      <div className="px-4 mt-2">
         <ActionBar cartCount={cartCount} isLoading={isAddingToCart} onAddToCart={beforeAddToCart} />
       </div>
+
+      {/* Crop Modal */}
+      {showCropModal && cropElementId && (
+        <CropElementModal
+          imageUrl={cropImageUrl}
+          elementId={cropElementId}
+          onCropComplete={handleCropComplete}
+          onClose={() => setShowCropModal(false)}
+        />
+      )}
     </div>
   )
 }

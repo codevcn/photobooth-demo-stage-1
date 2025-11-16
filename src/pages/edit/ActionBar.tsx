@@ -1,4 +1,3 @@
-import React, { useState } from 'react'
 import { ShoppingCart, Check } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { createPortal } from 'react-dom'
@@ -26,7 +25,7 @@ const ActionBar: React.FC<ActionBarProps> = ({ cartCount, isLoading, onAddToCart
         )}
       <button
         onClick={onAddToCart}
-        className="flex-1 bg-pink-cl active:bg-pink-hover-cl text-white font-bold py-2 px-4 rounded-xl shadow-lg touch-target flex items-center justify-center gap-2 text-lg"
+        className="flex-1 bg-pink-cl active:bg-pink-hover-cl text-white font-bold py-1 px-4 rounded-xl shadow-lg touch-target flex items-center justify-center gap-2 text-lg"
       >
         <Check size={24} strokeWidth={3} />
         <span>Thêm vào giỏ hàng</span>

@@ -45,7 +45,6 @@ export const PaymentModal = ({
   const [endOfPayment, setEndOfPayment] = useState<TEndOfPaymentData>()
   const formRef = useRef<HTMLFormElement>(null)
   const [errors, setErrors] = useState<TFormErrors>({})
-  const { preSentMockupImageLinks } = useGlobalContext()
 
   const validateForm = (formEle: HTMLFormElement) => {
     let isValid: boolean = true
@@ -92,13 +91,7 @@ export const PaymentModal = ({
       toast.error('Giỏ hàng trống')
       return null
     }
-    const productsInCart: TPaymentProductItem[] = [...cartItems]
-    for (const item of cartItems) {
-      item.preSentImageLink = preSentMockupImageLinks.find(
-        (link) => link.mockupId === item.mockupData.id
-      )?.imageUrl
-    }
-    return productsInCart
+    return [...cartItems]
   }
 
   const handleConfirmPayment = async () => {

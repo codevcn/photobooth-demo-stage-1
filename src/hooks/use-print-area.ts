@@ -111,10 +111,12 @@ export const usePrintArea = (): TUsePrintAreaReturn => {
 
         // Cập nhật CSS cho print area
         if (printAreaRef.current) {
-          printAreaRef.current.style.left = `${x}px`
-          printAreaRef.current.style.top = `${y}px`
-          printAreaRef.current.style.width = `${width}px`
-          printAreaRef.current.style.height = `${height}px`
+          printAreaRef.current.style.cssText = `
+            left: ${x}px;
+            top: ${y}px;
+            width: ${width}px;
+            height: ${height}px;
+          `
         }
 
         return newBounds

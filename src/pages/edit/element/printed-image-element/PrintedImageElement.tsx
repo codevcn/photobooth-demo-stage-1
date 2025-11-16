@@ -1,6 +1,5 @@
 import { TPrintedImageVisualState } from '@/utils/types/global'
-import { X, RotateCw, Scaling } from 'lucide-react'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { eventEmitter } from '@/utils/events'
 import { EInternalEvents } from '@/utils/enums'
 import { useElementControl } from '@/hooks/element/use-element-control'
@@ -29,6 +28,7 @@ export const PrintedImageElement = ({
 }: PrintedImageElementProps) => {
   const { url, id } = element
   const isSelected = selectedElementId === id
+  const [currentImageUrl, setCurrentImageUrl] = useState<string>(url)
   const {
     forPinch: { ref: refForPinch },
     forRotate: { ref: refForRotate, rotateButtonRef },
@@ -77,7 +77,7 @@ export const PrintedImageElement = ({
     const display = root.querySelector<HTMLImageElement>('.NAME-element-display')
     if (!display) return
     getNaturalSizeOfImage(
-      url,
+      currentImageUrl,
       (naturalWidth, naturalHeight) => {
         const editContainerRect = editContainer.getBoundingClientRect()
         const maxWidth = Math.min(editContainerRect.width, 200)
@@ -102,7 +102,7 @@ export const PrintedImageElement = ({
           if (!mainBox) return
           mainBox.style.cssText = `max-width: ${width / 2}px; max-height: ${height / 2}px;`
         }
-        display.src = url
+        display.src = currentImageUrl
       },
       () => {}
     )
@@ -126,6 +126,17 @@ export const PrintedImageElement = ({
     addToElementLayers({ elementId: id, index: zindex })
   }
 
+  const handleCropComplete = (elementId: string, croppedImageUrl: string) => {
+    if (elementId === id) {
+      setCurrentImageUrl(croppedImageUrl)
+      // Update the image element
+      const display = rootRef.current?.querySelector<HTMLImageElement>('.NAME-element-display')
+      if (display) {
+        display.src = croppedImageUrl
+      }
+    }
+  }
+
   useEffect(() => {
     if (selectedElementId !== id) return
     eventEmitter.emit(EInternalEvents.SYNC_ELEMENT_PROPS, id, 'printed-image')
@@ -138,8 +149,10 @@ export const PrintedImageElement = ({
 
   useEffect(() => {
     eventEmitter.on(EInternalEvents.SUBMIT_PRINTED_IMAGE_ELE_PROPS, listenSubmitEleProps)
+    eventEmitter.on(EInternalEvents.REPLACE_ELEMENT_IMAGE_URL, handleCropComplete)
     return () => {
       eventEmitter.off(EInternalEvents.SUBMIT_PRINTED_IMAGE_ELE_PROPS, listenSubmitEleProps)
+      eventEmitter.off(EInternalEvents.REPLACE_ELEMENT_IMAGE_URL, handleCropComplete)
     }
   }, [id])
 
@@ -165,7 +178,7 @@ export const PrintedImageElement = ({
       data-visual-state={JSON.stringify(
         typeToObject<TPrintedImageVisualState>({
           id,
-          url,
+          url: currentImageUrl,
           position: {
             x: position.x || x,
             y: position.y || y,
@@ -180,7 +193,11 @@ export const PrintedImageElement = ({
         className={`NAME-element-main-box select-none relative origin-center max-w-[200px] max-h-[300px]`}
       >
         <div className="h-full w-full">
-          <img src={url} alt="Ảnh in" className="NAME-element-display object-cover" />
+          <img
+            src={url}
+            alt="Ảnh in"
+            className="NAME-element-display object-cover"
+          />
         </div>
         <div
           className={`${

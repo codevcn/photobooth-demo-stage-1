@@ -75,17 +75,19 @@ const ProductGallery: React.FC<ProductGalleryProps> = ({
   }, [])
 
   return (
-    <div className="h-fit">
+    <div className="max-h-[calc(100vh-10px)] pb-3 h-fit flex flex-col bg-white rounded-xl shadow-lg px-1.5 pt-3 border border-gray-200">
       <h2 className="text-base w-full text-center font-bold text-gray-800 mb-2 flex items-center justify-center gap-2">
         Gian hàng sản phẩm
       </h2>
-      <h2 className="lg:inline-block hidden text-sm text-center font-semibold text-gray-700 mb-3 px-1">
+      <h2 className="lg:flex hidden text-sm text-center font-semibold text-gray-700 mb-3 px-1">
         Chọn sản phẩm muốn lưu giữ kỷ niệm
       </h2>
       <div
-        className={`${hasProductsInNewLine ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'} grid`}
+        className={`${
+          hasProductsInNewLine ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'
+        } grid grow overflow-y-auto`}
       >
-        <div className="flex md:flex-col md:items-center gap-3 overflow-x-scroll p-2 pt-3 md:overflow-y-auto md:overflow-x-clip h-fit md:h-[calc(100vh+95px)] spmd:max-h-screen gallery-scroll">
+        <div className="flex md:flex-col md:items-center gap-3 overflow-x-scroll p-2 pt-3 md:overflow-y-auto md:overflow-x-clip h-fit md:max-h-full spmd:max-h-full gallery-scroll">
           {productsToRender &&
             productsToRender.map((product) => {
               const isActive = product.idToRender === selectedProduct?.idToRender
@@ -114,7 +116,7 @@ const ProductGallery: React.FC<ProductGalleryProps> = ({
             })}
         </div>
         {hasProductsInNewLine && (
-          <div className="flex md:flex-col md:items-center gap-3 overflow-x-scroll p-2 pt-3 md:overflow-y-auto md:overflow-x-clip h-fit md:h-[calc(100vh+95px)] spmd:max-h-screen gallery-scroll">
+          <div className="flex md:flex-col md:items-center gap-3 overflow-x-scroll p-2 pt-3 md:overflow-y-auto md:overflow-x-clip h-fit md:max-h-full spmd:max-h-full gallery-scroll">
             {productsToRender.map((product) => {
               const isActive = product.idToRender === selectedProduct?.idToRender
               return (

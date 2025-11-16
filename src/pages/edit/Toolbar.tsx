@@ -1,20 +1,25 @@
 import { useMemo, useState } from 'react'
 import { ProductDetails } from './ProductDetails'
 import { createPortal } from 'react-dom'
-import { TBaseProduct } from '@/utils/types/global'
+import { TBaseProduct, TPrintedImage } from '@/utils/types/global'
+import { PrintedImagesPreview } from './PrintedImagesPreview'
 
 interface BottomMenuProps {
   onAddText: () => void
   onAddSticker: () => void
   onChooseVariant: () => void
   product: TBaseProduct
+  printedImages: TPrintedImage[]
+  onAddPrintedImages: (newImages: TPrintedImage[]) => void
 }
 
-const BottomMenu: React.FC<BottomMenuProps> = ({
+export const Toolbar: React.FC<BottomMenuProps> = ({
   onAddText,
   onAddSticker,
   onChooseVariant,
   product,
+  printedImages,
+  onAddPrintedImages,
 }) => {
   const [showProductDetails, setShowProductDetails] = useState(false)
 
@@ -117,12 +122,18 @@ const BottomMenu: React.FC<BottomMenuProps> = ({
       <h2 className="text-base text-center md:hidden font-bold text-gray-800 mb-2 lg:mb-3 flex items-center justify-center gap-2">
         Công cụ chỉnh sửa
       </h2>
-      <div className="grid grid-cols-4 spmd:grid-cols-1 gap-1">
+      <div className="grid grid-cols-5 spmd:grid-cols-1 gap-1">
+        <button className="w-full py-2 rounded-xl touch-target transition-colors">
+          <PrintedImagesPreview
+            printedImages={printedImages}
+            onAddPrintedImages={onAddPrintedImages}
+          />
+        </button>
         {menuItems.map((item, index) => (
           <button
             key={index}
             onClick={item.onClick}
-            className="flex flex-col items-center gap-2 py-3 px-2 rounded-xl active:bg-light-pink-cl touch-target transition-colors"
+            className="flex flex-col items-center gap-2 py-2 px-2 rounded-xl active:bg-light-pink-cl touch-target transition-colors"
           >
             {item.icon}
             <span className="text-xs font-medium text-gray-700 text-center leading-tight">
@@ -144,5 +155,3 @@ const BottomMenu: React.FC<BottomMenuProps> = ({
     </div>
   )
 }
-
-export default BottomMenu

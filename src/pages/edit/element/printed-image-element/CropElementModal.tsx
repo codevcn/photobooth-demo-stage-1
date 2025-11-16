@@ -1,146 +1,18 @@
-'use client'
-
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import ReactCrop from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
-import { Loader2, X } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { useDebouncedCallback } from '@/hooks/use-debounce'
 import { TUserInputImage } from '@/utils/types/global'
-import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import { CropPreview } from './CropPreview'
 import { SectionLoading } from '@/components/custom/Loading'
-import { getCommonContants } from '@/utils/contants'
 import { useImageCrop } from '@/hooks/use-image-crop'
 
-type TEditedImagesProps = {
-  editedImages: TUserInputImage[]
-  removeFromEditedImages: (image: TUserInputImage) => void
-  onSetAsEditedImage: (image: TUserInputImage) => void
-}
-
-const EditedImages = ({
-  editedImages,
-  removeFromEditedImages,
-  onSetAsEditedImage,
-}: TEditedImagesProps) => {
-  const [pickedImage, setPickedImage] = useState<TUserInputImage>()
-  const [toDelete, setToDelete] = useState<TUserInputImage>()
-  const MAX_PREVIEWS_COUNT = useMemo<number>(() => {
-    return getCommonContants<number>('MAX_CROP_PREVIEWS_COUNT')
-  }, [])
-
-  const pickImage = (image: TUserInputImage) => {
-    setPickedImage(image)
-  }
-
-  const handleSetToDelete = (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-    image: TUserInputImage
-  ) => {
-    e.stopPropagation()
-    setToDelete(image)
-  }
-
-  const confirmDelete = () => {
-    if (toDelete) {
-      removeFromEditedImages(toDelete)
-    }
-    setToDelete(undefined)
-  }
-
-  return (
-    <div className="flex items-center gap-2 flex-wrap justify-center mt-2 pb-1 h-fit w-full overflow-x-auto overflow-y-visible">
-      {editedImages.slice(0, MAX_PREVIEWS_COUNT).map((img, index) => (
-        <div
-          key={img.url}
-          onClick={() => pickImage(img)}
-          className={`${
-            index === MAX_PREVIEWS_COUNT - 1 ? 'bg-gray-50' : ''
-          } relative w-16 h-16 m-0.5 mt-2 flex items-center justify-center aspect-square outline outline-1 outline-gray-300 rounded`}
-        >
-          {index === MAX_PREVIEWS_COUNT - 1 ? (
-            <>
-              <p className="text-2xl font-bold text-gray-400">
-                <span>+</span>
-                <span>{editedImages.length - MAX_PREVIEWS_COUNT + 1}</span>
-              </p>
-            </>
-          ) : (
-            <>
-              <img src={img.url} alt="Ảnh đã cắt" className="h-full w-full object-contain" />
-              <button
-                onClick={(e) => handleSetToDelete(e, img)}
-                className="absolute -top-2 -right-2 p-0.5 rounded-full bg-pink-cl"
-              >
-                <X className="text-white" size={16} />
-              </button>
-            </>
-          )}
-        </div>
-      ))}
-
-      {pickedImage && (
-        <CropPreview
-          editedImages={editedImages}
-          pickedImage={pickedImage}
-          onPickedItem={setPickedImage}
-          onHide={() => setPickedImage(undefined)}
-          setAsEditedImage={onSetAsEditedImage}
-        />
-      )}
-
-      {toDelete && (
-        <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div
-            className="bg-black/50 z-10 absolute inset-0"
-            onClick={() => setToDelete(undefined)}
-          ></div>
-          <div className="relative z-20 bg-white p-4 rounded shadow-lg">
-            <div>
-              <p className="font-bold">Bạn xác nhận sẽ bỏ ảnh?</p>
-            </div>
-            <div className="flex justify-end gap-2 mt-4">
-              <button
-                onClick={() => setToDelete(undefined)}
-                className="py-2 px-4 font-bold rounded bg-gray-600 text-white"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={confirmDelete}
-                className="flex items-center justify-center gap-1.5 py-2 px-4 font-bold rounded bg-pink-cl text-white"
-              >
-                <span>Xác nhận</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="lucide lucide-check-icon lucide-check"
-                >
-                  <path d="M20 6 9 17l-5-5" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
-
-type CropImageProps = {
-  imageData?: TUserInputImage
-  onCropComplete: (croppedImage: TUserInputImage | null, error: Error | null) => void
+type CropElementModalProps = {
+  imageUrl: string
+  elementId: string
+  onCropComplete: (elementId: string, croppedImageUrl: string) => void
   onClose: () => void
-  removeFromEditedImages: (image: TUserInputImage) => void
-  editedImages: TUserInputImage[]
 }
 
 enum EInputNames {
@@ -148,18 +20,25 @@ enum EInputNames {
   CUSTOM_HEIGHT = 'custom-height',
 }
 
-export const CropImage = ({
-  imageData,
+export const CropElementModal = ({
+  imageUrl,
+  elementId,
   onCropComplete,
   onClose,
-  removeFromEditedImages,
-  editedImages,
-}: CropImageProps) => {
+}: CropElementModalProps) => {
   const inputsContainerRef = useRef<HTMLDivElement>(null)
-  const navigate = useNavigate()
-  const cropImageContainerRef = useRef<HTMLDivElement>(null)
+  const cropModalContainerRef = useRef<HTMLDivElement>(null)
   const [rotatedImageUrl, setRotatedImageUrl] = useState<string | null>(null)
   const [maxCropSizeHeight, setMaxCropSizeHeight] = useState<number>(0)
+
+  // Create imageData for the hook
+  const imageData = useMemo<TUserInputImage | undefined>(() => {
+    if (!imageUrl) return undefined
+    return {
+      url: imageUrl,
+      blob: new Blob(), // Dummy blob, not used in crop logic
+    }
+  }, [imageUrl])
 
   // Use the image crop hook
   const {
@@ -177,13 +56,26 @@ export const CropImage = ({
     updateCropWidth,
     updateCropHeight,
     executeCrop,
-  } = useImageCrop({ imageData, onCropComplete })
+  } = useImageCrop({
+    imageData,
+    onCropComplete: (croppedImage, error) => {
+      if (error) {
+        console.error('>>> Crop error:', error)
+        toast.error('Không thể cắt ảnh')
+      } else if (croppedImage) {
+        // Call parent callback with cropped image URL
+        onCropComplete(elementId, croppedImage.url)
+        onClose()
+      }
+    },
+  })
 
   const handleCrop = useCallback(async () => {
     try {
       await executeCrop()
     } catch (error) {
       console.error('>>> Crop error:', error)
+      toast.error('Không thể cắt ảnh')
     }
   }, [executeCrop])
 
@@ -200,18 +92,6 @@ export const CropImage = ({
     if (isNaN(height)) return
     updateCropHeight(height)
   }, 300)
-
-  const navToEditPage = useCallback(() => {
-    if (editedImages.length === 0) {
-      toast.warning('Vui lòng thêm ít nhất một ảnh đã cắt để vào trang chỉnh sửa.')
-      return
-    }
-    navigate('/edit')
-  }, [editedImages])
-
-  const handleSetAsEditedImage = (image: TUserInputImage) => {
-    rotateImageIfNeeded(image.url)
-  }
 
   const rotateImageIfNeeded = useCallback((imageUrl: string) => {
     const img = new Image()
@@ -251,8 +131,7 @@ export const CropImage = ({
   }, [])
 
   const adjustUIBasedOnImage = () => {
-    if (imageData) {
-      const imageUrl = imageData.url
+    if (imageUrl) {
       rotateImageIfNeeded(imageUrl)
     } else {
       setRotatedImageUrl(null)
@@ -269,7 +148,7 @@ export const CropImage = ({
         input.value = `${customHeight}`
       }
     }
-  }, [customWidth, customHeight])
+  }, [customWidth, customHeight, minCropSizeWidth, minCropSizeHeight])
 
   useEffect(() => {
     adjustUIBasedOnImage()
@@ -277,7 +156,7 @@ export const CropImage = ({
     return () => {
       document.body.style.overflow = 'auto'
     }
-  }, [imageData])
+  }, [imageUrl])
 
   useEffect(() => {
     // Cập nhật kích thước crop tối đa khi cửa sổ thay đổi kích thước
@@ -295,14 +174,13 @@ export const CropImage = ({
 
   return (
     <div
-      ref={cropImageContainerRef}
-      style={{ display: imageData ? 'flex' : 'none' }}
+      ref={cropModalContainerRef}
       className="fixed inset-0 flex items-center justify-center z-[90]"
     >
-      <div className="absolute inset-0 bg-black/50 z-10"></div>
-      <div className="relative z-20 w-full">
+      <div className="absolute inset-0 bg-black/50 z-10" onClick={onClose}></div>
+      <div className="relative z-20 w-full max-w-5xl">
         <div className="flex gap-2.5 items-stretch max-h-[90vh] pr-2 bg-gray-100 rounded-lg px-6 py-4 overflow-y-auto overflow-x-hidden w-full">
-          <div className="flex items-center justify-center w-1/2 max-w-1/2 h-[calc(90vh-32px)]">
+          <div className="flex items-center justify-center w-2/3 max-w-2/3 h-[calc(90vh-32px)]">
             <div className="flex items-start justify-center w-full h-full overflow-hidden">
               {rotatedImageUrl ? (
                 <ReactCrop
@@ -333,7 +211,7 @@ export const CropImage = ({
             </div>
           </div>
 
-          <div className="min-w-[200px] flex flex-col items-stretch w-1/2 max-h-[calc(90vh-0px)] overflow-y-auto p-3 bg-white rounded-lg text-gray-600">
+          <div className="min-w-[200px] flex flex-col items-stretch w-1/3 max-h-[calc(90vh-0px)] overflow-y-auto p-3 bg-white rounded-lg text-gray-600">
             <div className="p-2 bg-gray-100 rounded-lg">
               <h3 className="text-sm font-semibold text-gray-800">Kích thước vùng cắt</h3>
               <div ref={inputsContainerRef} className="grid grid-cols-2 gap-3 mt-2">
@@ -362,42 +240,12 @@ export const CropImage = ({
               </div>
             </div>
 
-            <div className="md:py-3">
-              <p className="font-bold text-xs text-center mt-4">Ảnh bạn cắt sẽ xuất hiện ở đây</p>
-              {editedImages.length > 0 ? (
-                <EditedImages
-                  editedImages={editedImages}
-                  removeFromEditedImages={removeFromEditedImages}
-                  onSetAsEditedImage={handleSetAsEditedImage}
-                />
-              ) : (
-                <div className="w-full">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="64"
-                    height="64"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="lucide lucide-image-icon lucide-image"
-                  >
-                    <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-                    <circle cx="9" cy="9" r="2" />
-                    <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
-                  </svg>
-                </div>
-              )}
-            </div>
-
-            <div className="mt-4">
+            <div className="mt-auto pt-4">
               <div className="flex gap-y-2 gap-x-2 flex-col">
                 <button
                   className="w-full h-8 rounded text-white bg-gray-400 font-bold hover:bg-gray-500 transition-colors disabled:opacity-50"
                   onClick={onClose}
-                  disabled={!completedCrop || isCropping}
+                  disabled={isCropping}
                 >
                   Hủy
                 </button>
@@ -436,16 +284,6 @@ export const CropImage = ({
                       <span>Cắt và lưu</span>
                     </>
                   )}
-                </button>
-              </div>
-              <div className="w-full pt-1 mt-2">
-                <button
-                  className="flex items-center justify-center gap-2 w-full h-8 flex-1 px-4 rounded bg-pink-cl text-white font-bold active:scale-90 transition-colors disabled:opacity-50"
-                  onClick={navToEditPage}
-                  disabled={!completedCrop || isCropping}
-                  type="button"
-                >
-                  <span>Lưu giữ kỷ niệm</span>
                 </button>
               </div>
             </div>

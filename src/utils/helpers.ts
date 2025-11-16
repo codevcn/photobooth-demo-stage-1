@@ -124,9 +124,11 @@ export const canvasToBlob = (
 export const labelToSurfaceType = (surfaceType: TSurfaceType): string => {
   switch (surfaceType) {
     case 'front':
-      return 'Mặt trước'
-    default:
-      return 'Mặt sau'
+      return 'mặt trước'
+    case 'back':
+      return 'mặt sau'
+    case 'both':
+      return 'cả hai mặt'
   }
 }
 
@@ -141,4 +143,62 @@ export const convertMimeTypeToExtension = (mimeType: TImgMimeType): string => {
     default:
       return ''
   }
+}
+
+export const resizeImage = (
+  file: File,
+  targetWidth: number,
+  targetHeight: number,
+  quality: number = 0.95
+): Promise<Blob | null> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')
+    if (!ctx) {
+      reject(new Error('Failed to get canvas context'))
+      return
+    }
+    img.onload = () => {
+      // Set canvas size
+      canvas.width = targetWidth
+      canvas.height = targetHeight
+
+      // Draw image lên canvas với kích thước mới
+      ctx.drawImage(img, 0, 0, targetWidth, targetHeight)
+
+      // Convert canvas sang blob
+      canvas.toBlob(
+        (blob) => {
+          resolve(blob)
+        },
+        'image/jpeg',
+        quality
+      ) // 0.95 là quality (95%)
+    }
+
+    img.onerror = reject
+    img.src = URL.createObjectURL(file)
+  })
+}
+
+export const resizeCanvas = (
+  sourceCanvas: HTMLCanvasElement,
+  newWidth: number,
+  newHeight: number
+): HTMLCanvasElement | undefined => {
+  // Tạo canvas mới với kích thước mong muốn
+  const resizedCanvas = document.createElement('canvas')
+  resizedCanvas.width = newWidth
+  resizedCanvas.height = newHeight
+
+  const ctx = resizedCanvas.getContext('2d')
+  if (!ctx) {
+    return undefined
+  }
+
+  // Vẽ canvas cũ lên canvas mới với kích thước mới
+  ctx.drawImage(sourceCanvas, 0, 0, newWidth, newHeight)
+
+  return resizedCanvas
 }

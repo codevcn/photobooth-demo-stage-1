@@ -1,14 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import ProductGallery from './ProductGallery'
 import EditArea from './EditArea'
-import BottomMenu from './BottomMenu'
+import { Toolbar } from './Toolbar'
 import ProductVariantPicker from './product/ProductVariantPicker'
 import TextEditor from './element/text-element/TextEditor'
 import StickerPicker from './element/sticker-element/StickerPicker'
 import {
   TPrintedImage,
   TProductImage,
-  TElementLayerState,
   TElementType,
   TProductSize,
   TElementsVisualState,
@@ -24,20 +23,12 @@ import {
 } from '@/utils/types/global'
 import { eventEmitter } from '@/utils/events'
 import { EInternalEvents } from '@/utils/enums'
-import {
-  ElementLayerContext,
-  useEditedImageContext,
-  useElementLayerContext,
-  useGlobalContext,
-  useProductContext,
-} from '../../context/global-context'
+import { useElementLayerContext, useGlobalContext } from '../../context/global-context'
 import { LocalStorageHelper } from '@/utils/localstorage'
 import { toast } from 'react-toastify'
-import { ArrowLeft, ShoppingCart } from 'lucide-react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { getInitialContants } from '@/utils/contants'
 import { productService } from '@/services/product.service'
-import { PageLoading } from '@/components/custom/Loading'
 import { useHtmlToCanvas } from '@/hooks/use-html-to-canvas'
 import { convertMimeTypeToExtension } from '@/utils/helpers'
 
@@ -163,7 +154,9 @@ const restoreMockupVisualStates = (
     handleSelectSurface: (surfaceType: TSurfaceType) => void
   }
 ) => {
+  console.log('>>> mock:', { mockupId, sessionId })
   const savedMockup = LocalStorageHelper.getSavedMockupData()
+  console.log('>>> savedMockup:', savedMockup)
   if (!savedMockup || savedMockup.sessionId !== sessionId) {
     return
   }
@@ -202,6 +195,7 @@ const restoreMockupVisualStates = (
 
   // Restore printed image elements
   const restoredPrintedImageElements = foundMockup.elementsVisualState.printedImages || []
+  console.log('>>> printed 207:', restoredPrintedImageElements)
   if (restoredPrintedImageElements.length > 0) {
     callbacks.setInitialPrintedImageElements(restoredPrintedImageElements)
   }
@@ -223,10 +217,9 @@ const restoreMockupVisualStates = (
 
 export const EditPage = ({ products, printedImages }: TEditPageHorizonProps) => {
   // ==================== Context & Hooks ====================
-  const { sessionId, addPreSentMockupImageLink } = useGlobalContext()
+  const { sessionId } = useGlobalContext()
   const { removeFromElementLayers } = useElementLayerContext()
-  const { handleSaveHtmlAsImage } = useHtmlToCanvas()
-  const navigate = useNavigate()
+  const { saveHtmlAsImageWithDesiredSize, saveHtmlAsImage } = useHtmlToCanvas()
   const mockupId = useSearchParams()[0].get('mockupId')
   const editorRef = useRef<HTMLDivElement>(null)
 
@@ -367,67 +360,93 @@ export const EditPage = ({ products, printedImages }: TEditPageHorizonProps) => 
   }
 
   // ==================== Event Handlers - Cart Management ====================
-  const handleAddToCart = (
-    elemtnsVisualState: TElementsVisualState,
+  const handleAddToCart = async (
+    elementsVisualState: TElementsVisualState,
     onDoneAdd: () => void,
     onError: (error: Error) => void
   ) => {
-    if (!sessionId || !editorRef.current) return
+    const editorElement = editorRef.current
+    if (!sessionId || !editorElement) return
     const message = validateBeforeAddToCart(selectedColor, selectedSize, products)
     if (message) {
       return onError(new Error(message))
     }
     const imgMimeType: TImgMimeType = 'image/png'
-    const editor = document.body.querySelector<HTMLDivElement>('.NAME-canvas-editor')
-    if (!editor) return
-    handleSaveHtmlAsImage(
-      editor,
-      imgMimeType,
-      (imageData, imageSizeInfo) => {
-        const mockupId = LocalStorageHelper.saveMockupImageAtLocal(
-          elemtnsVisualState,
-          {
-            productId: activeProduct.id,
-            productImageId: activeImageId,
-            color: activeProductImage.color,
-            size: activeProductImage.size,
-          },
-          {
-            dataUrl: URL.createObjectURL(imageData),
-            size: {
-              width: imageSizeInfo.width,
-              height: imageSizeInfo.height,
+    requestIdleCallback(() => {
+      saveHtmlAsImage(
+        editorElement,
+        imgMimeType,
+        (imageData) => {
+          const mockupId = LocalStorageHelper.saveMockupImageAtLocal(
+            elementsVisualState,
+            {
+              productId: activeProduct.id,
+              productImageId: activeImageId,
+              color: activeProductImage.color,
+              size: activeProductImage.size,
             },
-          },
-          sessionId,
-          {
-            id: selectedPrintAreaInfo.id,
-            type: selectedPrintAreaInfo.surfaceType,
-          }
-        )
-        productService
-          .preSendMockupImage(
-            imageData,
-            `mockup-${Date.now()}.${convertMimeTypeToExtension(imgMimeType)}`
+            {
+              dataUrl: URL.createObjectURL(imageData),
+              size: {
+                width: -1,
+                height: -1,
+              },
+            },
+            sessionId,
+            {
+              id: selectedPrintAreaInfo.id,
+              type: selectedPrintAreaInfo.surfaceType,
+            }
           )
-          .then((res) => {
-            addPreSentMockupImageLink(res.url, mockupId)
+          const printArea = editorElement.querySelector<HTMLDivElement>('.NAME-print-area-allowed')
+          if (!printArea) return
+          requestIdleCallback(() => {
+            saveHtmlAsImageWithDesiredSize(
+              printArea,
+              selectedPrintAreaInfo.area.widthRealPx,
+              selectedPrintAreaInfo.area.heightRealPx,
+              imgMimeType,
+              (imageData, canvasWithDesiredSize) => {
+                productService
+                  .preSendMockupImage(
+                    imageData,
+                    `mockup-${Date.now()}.${convertMimeTypeToExtension(imgMimeType)}`
+                  )
+                  .then((res) => {
+                    const result = LocalStorageHelper.updateMockupImagePreSent(mockupId, res.url, {
+                      width: canvasWithDesiredSize.width,
+                      height: canvasWithDesiredSize.height,
+                    })
+                    if (!result) {
+                      toast.error('Không thể cập nhật kích thước mockup')
+                    }
+                  })
+                  .catch((err) => {
+                    console.error('>>> pre-send mockup image error:', err)
+                    toast.error('Không thể lưu mockup lên server')
+                  })
+              },
+              (error) => {
+                console.error('Error saving mockup image:', error)
+                toast.warning(error.message || 'Không thể tạo mockup để lưu lên server')
+                onError(error)
+              }
+            )
           })
-          .catch((err) => {
-            console.error('>>> pre-send mockup image error:', err)
-            toast.error('Không thể gửi trước mockup lên server')
-          })
-        toast.success('Đã thêm vào giỏ hàng')
-        setCartCount(LocalStorageHelper.countSavedMockupImages())
-        onDoneAdd()
-      },
-      (error) => {
-        console.error('Error saving mockup image:', error)
-        toast.warning(error.message || 'Không thể lưu mockup, không thể thêm sản phẩm vào giỏ hàng')
-        setCartCount(LocalStorageHelper.countSavedMockupImages())
-        onError(error)
-      }
-    )
+          toast.success('Đã thêm vào giỏ hàng')
+          setCartCount(LocalStorageHelper.countSavedMockupImages())
+          onDoneAdd()
+        },
+        (error) => {
+          console.error('Error saving mockup image:', error)
+          toast.warning(
+            error.message || 'Không thể lưu mockup, không thể thêm sản phẩm vào giỏ hàng'
+          )
+          setCartCount(LocalStorageHelper.countSavedMockupImages())
+          onError(error)
+        }
+      )
+    })
   }
 
   // ==================== Event Handlers - Product Variant ====================
@@ -499,69 +518,28 @@ export const EditPage = ({ products, printedImages }: TEditPageHorizonProps) => 
   return (
     activeImageId &&
     activeProductImage && (
-      <div className="min-h-screen bg-gradient-to-br from-superlight-pink-cl to-light-pink-cl/30">
-        {/* Top Header Bar */}
-        <header className="bg-white/95 backdrop-blur-sm shadow-md border-b border-pink-cl/10">
-          <div className="mx-auto px-2 lg:px-4 py-2 lg:py-2.5">
-            <div className="flex items-center justify-between">
-              {/* Left: Back Button */}
-              <button
-                onClick={() => navigate('/')}
-                className="flex items-center gap-2 bg-pink-cl hover:bg-dark-pink-cl text-white font-bold py-2 px-4 rounded-xl shadow-md hover:shadow-lg active:scale-95 transition-all duration-200"
-              >
-                <ArrowLeft size={20} />
-                <span className="hidden sm:inline">Quay lại</span>
-              </button>
-
-              {/* Center: Title */}
-              <h1 className="text-xl lg:text-2xl font-bold text-gray-800 flex items-center gap-2">
-                <span className="hidden md:inline">✨</span>
-                Chỉnh sửa sản phẩm
-                <span className="hidden md:inline">✨</span>
-              </h1>
-
-              {/* Right: Cart Button */}
-              <button
-                onClick={() => navigate('/payment')}
-                className="relative flex items-center gap-2 bg-gradient-to-r from-pink-cl to-pink-hover-cl hover:from-dark-pink-cl hover:to-pink-cl text-white font-bold py-2 px-4 rounded-xl shadow-md hover:shadow-lg active:scale-95 transition-all duration-200"
-              >
-                <ShoppingCart size={20} />
-                <span className="hidden sm:inline">Giỏ hàng</span>
-                {cartCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
-                    {cartCount}
-                  </span>
-                )}
-              </button>
-            </div>
-          </div>
-        </header>
-
+      <div className="h-screen bg-gradient-to-br from-superlight-pink-cl to-light-pink-cl/30">
         {/* Main Content - 2 Column Layout */}
-        <div className="mx-auto px-2 lg:px-3 py-2 lg:py-3">
+        <div className="h-full">
           <div className="grid grid-cols-1 md:grid-cols-[minmax(220px,2fr)_8fr] gap-2">
             {/* Left Column: Product Gallery & Info */}
-            <div className="space-y-2 overflow-hidden bg-white rounded-xl shadow-lg px-1.5 py-3 border border-gray-200">
-              {/* Product Gallery Card */}
-              <ProductGallery
-                products={products}
-                activeImageId={activeImageId}
-                activeProduct={activeProduct}
-                onSelectImage={setActiveImageId}
-                printedImages={printedImages}
-              />
-            </div>
+            {/* Product Gallery Card */}
+            <ProductGallery
+              products={products}
+              activeImageId={activeImageId}
+              activeProduct={activeProduct}
+              onSelectImage={setActiveImageId}
+              printedImages={printedImages}
+            />
 
             {/* Right Column: Edit Area */}
             <div className="grid grid-cols-1 spmd:grid-cols-[5fr_minmax(84px,1fr)] xl:grid-cols-[7fr_minmax(84px,1fr)] 2xl:grid-cols-[8fr_1fr] gap-2 h-fit">
-              <div className="bg-white max-w-full w-full rounded-xl shadow-md p-3 lg:p-4 outline outline-1 outline-gray-200">
+              <div className="max-h-screen bg-white max-w-full w-full rounded-xl shadow-md p-2 outline outline-1 outline-gray-200">
                 <EditArea
                   initialTextElements={initialTextElements}
                   initialStickerElements={initialStickerElements}
                   onUpdateText={setInitialTextElements}
                   onUpdateStickers={setInitialStickerElements}
-                  printedImages={printedImages}
-                  onAddPrintedImages={(ele) => handleAddPrintedElement('printed-image', ele)}
                   onRemovePrintedImages={(ids) => handleRemoveELement('printed-image', ids)}
                   initialPrintedImageElements={initialPrintedImageElements}
                   htmlToCanvasEditorRef={editorRef}
@@ -577,11 +555,15 @@ export const EditPage = ({ products, printedImages }: TEditPageHorizonProps) => 
               </div>
 
               {/* Editing Tools Card */}
-              <BottomMenu
+              <Toolbar
                 onAddText={() => setShowTextEditor(true)}
                 onAddSticker={() => setShowStickerPicker(true)}
                 onChooseVariant={() => setShowVariantPicker(true)}
                 product={activeProduct}
+                printedImages={printedImages}
+                onAddPrintedImages={(newImages) =>
+                  handleAddPrintedElement('printed-image', newImages)
+                }
               />
             </div>
           </div>
@@ -606,11 +588,13 @@ export const EditPage = ({ products, printedImages }: TEditPageHorizonProps) => 
           </div>
         )}
 
-        <StickerPicker
-          onAddSticker={handleAddSticker}
-          onClose={() => setShowStickerPicker(false)}
-          show={showStickerPicker}
-        />
+        {showStickerPicker && (
+          <StickerPicker
+            onAddSticker={handleAddSticker}
+            onClose={() => setShowStickerPicker(false)}
+            show={showStickerPicker}
+          />
+        )}
       </div>
     )
   )

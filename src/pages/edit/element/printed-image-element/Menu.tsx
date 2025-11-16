@@ -3,14 +3,7 @@ import { getInitialContants } from '@/utils/contants'
 import { EInternalEvents } from '@/utils/enums'
 import { eventEmitter } from '@/utils/events'
 import { TElementType, TPrintedImageVisualState } from '@/utils/types/global'
-import {
-  RefreshCw,
-  Move,
-  Check,
-  Fullscreen,
-  // ChevronUp, ChevronDown,
-  Layers2,
-} from 'lucide-react'
+import { RefreshCw, Move, Check, Fullscreen, Layers2, Crop } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 
 type TPropertyType = 'scale' | 'angle' | 'posXY' | 'zindex-up' | 'zindex-down'
@@ -102,6 +95,10 @@ export const PrintedImageElementMenu = ({ elementId }: PrintedImageMenuProps) =>
     }
   }
 
+  const handleCropClick = () => {
+    eventEmitter.emit(EInternalEvents.OPEN_CROP_ELEMENT_MODAL, elementId)
+  }
+
   const getAllInputsInForm = () => {
     const menuSection = menuRef.current
     const scaleInput = menuSection?.querySelector<HTMLInputElement>('.NAME-form-scale input')
@@ -160,8 +157,20 @@ export const PrintedImageElementMenu = ({ elementId }: PrintedImageMenuProps) =>
   }, [])
 
   return (
-    <div ref={menuRef} className="NAME-menu-section grid grid-cols-2 gap-y-2 gap-x-1">
-      <div className="NAME-form-group NAME-form-scale flex items-center bg-pink-cl rounded px-1 py-1 shadow w-full">
+    <div
+      ref={menuRef}
+      className="NAME-menu-section grid grid-cols-2 lg:grid-cols-3 gap-y-1 gap-x-1"
+    >
+      <div className="NAME-form-group NAME-form-crop col-span-2 flex items-center justify-center bg-pink-cl rounded px-1 py-0.5 shadow w-full">
+        <button
+          onClick={handleCropClick}
+          className="group flex items-center justify-center font-bold w-full gap-1 text-white hover:bg-white hover:text-pink-cl rounded p-1 transition-colors"
+        >
+          <Crop size={20} className="text-white group-hover:text-pink-cl" strokeWidth={3} />
+          <span>Cắt ảnh</span>
+        </button>
+      </div>
+      <div className="NAME-form-group NAME-form-scale flex items-center bg-pink-cl rounded px-1 py-0.5 shadow w-full">
         <div className="min-w-[22px]">
           <Fullscreen size={20} className="text-white" strokeWidth={3} />
         </div>
@@ -175,7 +184,7 @@ export const PrintedImageElementMenu = ({ elementId }: PrintedImageMenuProps) =>
           <span className="text-white text-base font-bold">%</span>
         </div>
       </div>
-      <div className="NAME-form-group NAME-form-angle flex items-center bg-pink-cl rounded px-1 py-1 shadow w-full">
+      <div className="NAME-form-group NAME-form-angle flex items-center bg-pink-cl rounded px-1 py-0.5 shadow w-full">
         <div className="min-w-[22px]">
           <RefreshCw size={20} className="text-white" strokeWidth={3} />
         </div>
@@ -189,14 +198,14 @@ export const PrintedImageElementMenu = ({ elementId }: PrintedImageMenuProps) =>
           <span className="text-white text-base font-bold">độ</span>
         </div>
       </div>
-      <div className="NAME-form-group NAME-form-zindex flex items-center justify-between bg-pink-cl rounded px-1 py-1 shadow w-full">
+      <div className="NAME-form-group NAME-form-zindex flex items-center justify-between bg-pink-cl rounded px-1 py-0.5 shadow w-full">
         <div className="min-w-[22px]">
           <Layers2 size={20} className="text-white" strokeWidth={3} />
         </div>
         <div className="flex gap-1 grow flex-wrap">
           <button
             onClick={() => onClickButton('zindex-up')}
-            className="bg-white border-2 grow text-pink-cl border-pink-cl rounded px-1.5 py-1 flex gap-0.5 items-center justify-center"
+            className="bg-white border-2 grow text-pink-cl border-pink-cl rounded px-1.5 py-0.5 flex gap-0.5 items-center justify-center"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -216,7 +225,7 @@ export const PrintedImageElementMenu = ({ elementId }: PrintedImageMenuProps) =>
           </button>
           <button
             onClick={() => onClickButton('zindex-down')}
-            className="bg-white border-2 grow text-pink-cl border-pink-cl rounded px-1.5 py-1 flex gap-0.5 items-center justify-center"
+            className="bg-white border-2 grow text-pink-cl border-pink-cl rounded px-1.5 py-0.5 flex gap-0.5 items-center justify-center"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -236,7 +245,7 @@ export const PrintedImageElementMenu = ({ elementId }: PrintedImageMenuProps) =>
           </button>
         </div>
       </div>
-      <div className="NAME-form-group NAME-form-position flex items-center bg-pink-cl rounded px-1 py-1 shadow w-full">
+      <div className="NAME-form-group NAME-form-position flex items-center bg-pink-cl rounded px-1 py-0.5 shadow w-full">
         <div className="min-w-[22px]">
           <Move size={20} className="text-white" strokeWidth={3} />
         </div>
@@ -255,7 +264,7 @@ export const PrintedImageElementMenu = ({ elementId }: PrintedImageMenuProps) =>
           />
         </div>
       </div>
-      <div className="NAME-form-group NAME-form-position col-span-2 flex items-center bg-pink-cl rounded px-1 py-1 shadow w-full">
+      <div className="NAME-form-group NAME-form-position col-span-2 lg:col-span-3 flex items-center bg-pink-cl rounded px-1 py-0.5 shadow w-full">
         <button
           onClick={handleClickCheck}
           className="group flex items-center justify-center font-bold w-full gap-1 text-white active:bg-white active:text-green-600 rounded p-1"

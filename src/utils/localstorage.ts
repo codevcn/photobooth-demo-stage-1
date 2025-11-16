@@ -17,10 +17,11 @@ export class LocalStorageHelper {
   private static createMockupData(
     elementsVisualState: TElementsVisualState,
     imageData: TMockupImageData,
-    surfaceInfo: TMockupData['surfaceInfo']
+    surfaceInfo: TMockupData['surfaceInfo'],
+    mockupId?: TMockupDataId
   ): TMockupData {
     return {
-      id: this.generateMockupId(),
+      id: mockupId || this.generateMockupId(),
       elementsVisualState,
       imageData,
       surfaceInfo,
@@ -32,13 +33,18 @@ export class LocalStorageHelper {
     productInfo: TProductCartInfo,
     imageData: TMockupImageData,
     sessionId: string,
-    surfaceInfo: TMockupData['surfaceInfo']
+    surfaceInfo: TMockupData['surfaceInfo'],
+    mockupId?: TMockupDataId
   ): TMockupDataId {
     let existingData = this.getSavedMockupData()
 
     // Tạo mockup data mới
-    const newMockupData = this.createMockupData(elementsVisualState, imageData, surfaceInfo)
-
+    const newMockupData = this.createMockupData(
+      elementsVisualState,
+      imageData,
+      surfaceInfo,
+      mockupId
+    )
     if (existingData && existingData.sessionId === sessionId) {
       const productId = productInfo.productImageId
       let productFound = false
@@ -145,6 +151,35 @@ export class LocalStorageHelper {
         break
       }
     }
+  }
+
+  static updateMockupImagePreSent(
+    mockupId: TMockupDataId,
+    preSentImageLink: TMockupData['preSentImageLink'],
+    preSentImageSize: TMockupData['imageData']['size']
+  ): boolean {
+    const data = this.getSavedMockupData()
+    if (!data) return false
+
+    for (const product of data.productsInCart) {
+      const mockupIndex = product.mockupDataList.findIndex((m) => m.id === mockupId)
+      if (mockupIndex !== -1) {
+        // Cập nhật mockup với các thuộc tính mới
+        const mockup = product.mockupDataList[mockupIndex]
+        product.mockupDataList[mockupIndex] = {
+          ...mockup,
+          preSentImageLink,
+          imageData: {
+            ...mockup.imageData,
+            size: preSentImageSize,
+          },
+        }
+        localStorage.setItem(LocalStorageHelper.mockupImageName, JSON.stringify(data))
+        return true
+      }
+    }
+
+    return false
   }
 
   static clearAllMockupImages() {

@@ -2,19 +2,13 @@ import { EditedImageContext, GlobalContext, ProductContext } from '@/context/glo
 import { EInternalEvents } from '@/utils/enums'
 import { eventEmitter } from '@/utils/events'
 import { generateSessionId } from '@/utils/helpers'
-import {
-  TBaseProduct,
-  TEditedImage,
-  TElementType,
-  TPreSentMockupImageLink,
-} from '@/utils/types/global'
+import { TBaseProduct, TEditedImage, TElementType } from '@/utils/types/global'
 import { useEffect, useState } from 'react'
 
 type TGlobalState = {
   pickedElementRoot: HTMLElement | null
   elementType: TElementType | null
   sessionId: string | null
-  preSentMockupImageLinks: TPreSentMockupImageLink[]
 }
 
 export const AppRootProvider = ({ children }: { children: React.ReactNode }) => {
@@ -24,15 +18,7 @@ export const AppRootProvider = ({ children }: { children: React.ReactNode }) => 
     pickedElementRoot: null,
     elementType: null,
     sessionId: generateSessionId(),
-    preSentMockupImageLinks: [],
   })
-
-  const addPreSentMockupImageLink = (imageUrl: string, mockupId: string) => {
-    setGlobalState((pre) => ({
-      ...pre,
-      preSentMockupImageLinks: [...pre.preSentMockupImageLinks, { mockupId, imageUrl }],
-    }))
-  }
 
   const clearAllEditedImages = () => {
     setEditedImages([])
@@ -50,7 +36,7 @@ export const AppRootProvider = ({ children }: { children: React.ReactNode }) => 
   }, [])
 
   return (
-    <GlobalContext.Provider value={{ ...globalState, addPreSentMockupImageLink }}>
+    <GlobalContext.Provider value={{ ...globalState }}>
       <EditedImageContext.Provider value={{ editedImages, setEditedImages, clearAllEditedImages }}>
         <ProductContext.Provider value={{ products, setProducts }}>
           {children}

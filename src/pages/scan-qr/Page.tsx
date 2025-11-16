@@ -1,72 +1,36 @@
-import { useEffect, useState } from 'react'
 import { Camera } from 'lucide-react'
 import QRScanner from './QRScanner'
 import ImageSelector from './ImageSelector'
-import { CropImage } from './CropImage'
 import { TUserInputImage } from '@/utils/types/global'
 import { useEditedImageContext } from '@/context/global-context'
-import { toast } from 'react-toastify'
+import { useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
 
 const ScanQRPage = () => {
-  const [data, setData] = useState<TUserInputImage>()
-  const [showCropper, setShowCropper] = useState<boolean>(false)
-  const [editedImages, setEditedImages] = useState<TUserInputImage[]>([])
-  const { setEditedImages: setGlobalEditedImages } = useEditedImageContext()
-
-  const addToEditedImages = (image: TUserInputImage) => {
-    setEditedImages((prevImages) => {
-      if (prevImages.some((prevImg) => prevImg.url === image.url)) {
-        return prevImages
-      }
-      return [...prevImages, image]
-    })
-  }
-
-  const removeFromEditedImages = (image: TUserInputImage) => {
-    setEditedImages((prevImages) => {
-      if (prevImages.length <= 1) {
-        toast.error('Phải có ít nhất một ảnh được giữ lại.')
-        return prevImages
-      }
-      return prevImages.filter(({ url }) => url !== image.url)
-    })
-  }
+  const { setEditedImages, editedImages } = useEditedImageContext()
+  const navigate = useNavigate()
 
   const handleData = (imageDataList: TUserInputImage[]) => {
-    setData(imageDataList[0])
-    for (const img of imageDataList) {
-      addToEditedImages(img)
-    }
-  }
-
-  const handleCropComplete = (croppedImage: TUserInputImage | null, error: Error | null) => {
-    if (error) {
-      console.error('>>> Crop error:', error)
-    } else if (croppedImage) {
-      addToEditedImages(croppedImage)
-    }
-  }
-
-  const handleCloseCropper = () => {
     setEditedImages([])
-    setData(undefined)
+    setEditedImages((prevImages) => {
+      return [
+        ...prevImages,
+        ...imageDataList.map((image) => ({
+          url: image.url,
+          height: -1,
+          width: -1,
+          id: image.url,
+          x: 0,
+          y: 0,
+        })),
+      ]
+    })
   }
 
   useEffect(() => {
-    setShowCropper(!!data)
-  }, [data])
-
-  useEffect(() => {
-    setGlobalEditedImages(
-      editedImages.map(({ url }) => ({
-        url,
-        height: -1,
-        width: -1,
-        id: url,
-        x: 0,
-        y: 0,
-      }))
-    )
+    if (editedImages.length > 0) {
+      navigate('/edit')
+    }
   }, [editedImages])
 
   return (
@@ -80,22 +44,13 @@ const ScanQRPage = () => {
         </div>
 
         <div className="animate-scale-in mt-4" style={{ animationDelay: '0.1s' }}>
-          <QRScanner onScanSuccess={handleData} showCropper={showCropper} />
+          <QRScanner onScanSuccess={handleData} />
         </div>
 
         <div className="animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
           <ImageSelector onImageSelect={handleData} />
         </div>
       </div>
-
-      {/* Crop Image Modal */}
-      <CropImage
-        imageData={data}
-        onCropComplete={handleCropComplete}
-        onClose={handleCloseCropper}
-        removeFromEditedImages={removeFromEditedImages}
-        editedImages={editedImages}
-      />
     </div>
   )
 }

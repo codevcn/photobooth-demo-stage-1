@@ -41,40 +41,35 @@ const Image = ({ img, index, imgsContainerRef, onAddImage }: ImageProps) => {
       <img
         src={url || '/placeholder.svg'}
         alt={`Printed Image ${index + 1}`}
-        className="max-w-full group-hover:scale-105 transition-transform duration-200"
+        className="max-w-full group-hover:scale-105 transition-transform duration-200 object-contain"
       />
     </div>
   )
 }
 
 interface PrintedImagesProps {
-  show: boolean
   onAddImage: (printedImg: TPrintedImage) => void
   onClose: () => void
   printedImages: TPrintedImage[]
 }
 
-export const PrintedImagesModal = ({
-  onAddImage,
-  onClose,
-  printedImages,
-  show,
-}: PrintedImagesProps) => {
+export const PrintedImagesModal = ({ onAddImage, onClose, printedImages }: PrintedImagesProps) => {
   const imgsContainerRef = useRef<HTMLDivElement>(null)
 
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = 'auto'
+    }
+  }, [])
+
   return (
-    <div
-      style={{
-        opacity: show ? 1 : 0,
-        pointerEvents: show ? 'auto' : 'none',
-      }}
-      className="fixed inset-0 z-[999] flex items-center justify-center"
-    >
+    <div className="fixed inset-0 z-[999] flex items-center justify-center">
       <div onClick={onClose} className="bg-black/70 absolute inset-0 z-10"></div>
       <div className="relative z-20 bg-background w-full max-w-[90vw] rounded-lg max-h-[90vh] flex flex-col transition duration-500 ease-in-out">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-2 border-b border-border">
-          <h2 className="text-lg font-semibold">Chọn ảnh bạn đã chụp</h2>
+          <h2 className="text-lg font-bold">Chọn ảnh bạn đã chụp</h2>
           <button
             onClick={onClose}
             className="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center transition-colors"
