@@ -219,7 +219,8 @@ export const EditPage = ({ products, printedImages }: TEditPageHorizonProps) => 
   // ==================== Context & Hooks ====================
   const { sessionId } = useGlobalContext()
   const { removeFromElementLayers } = useElementLayerContext()
-  const { saveHtmlAsImageWithDesiredSize, saveHtmlAsImage } = useHtmlToCanvas()
+  const { saveHtmlAsImageWithDesiredSize, saveHtmlAsImage, saveHtmlAsImageCropped } =
+    useHtmlToCanvas()
   const mockupId = useSearchParams()[0].get('mockupId')
   const editorRef = useRef<HTMLDivElement>(null)
 
@@ -398,11 +399,14 @@ export const EditPage = ({ products, printedImages }: TEditPageHorizonProps) => 
               type: selectedPrintAreaInfo.surfaceType,
             }
           )
-          const printArea = editorElement.querySelector<HTMLDivElement>('.NAME-print-area-allowed')
-          if (!printArea) return
+          const printAreaBounds = editorElement
+            .querySelector<HTMLElement>('.NAME-print-area-allowed')
+            ?.getBoundingClientRect()
+          if (!printAreaBounds) return
           requestIdleCallback(() => {
-            saveHtmlAsImageWithDesiredSize(
-              printArea,
+            saveHtmlAsImageCropped(
+              editorElement,
+              printAreaBounds,
               selectedPrintAreaInfo.area.widthRealPx,
               selectedPrintAreaInfo.area.heightRealPx,
               imgMimeType,

@@ -1,6 +1,32 @@
 import { resizeCanvas } from '@/utils/helpers'
-import { TImageSizeInfo } from '@/utils/types/global'
 import { domToCanvas } from 'modern-screenshot'
+
+/**
+ * Crop canvas to a specific region
+ */
+const cropCanvas = (
+  sourceCanvas: HTMLCanvasElement,
+  x: number,
+  y: number,
+  cropWidth: number,
+  cropHeight: number,
+  outputWidth: number,
+  outputHeight: number
+): HTMLCanvasElement => {
+  const croppedCanvas = document.createElement('canvas')
+  croppedCanvas.width = cropWidth
+  croppedCanvas.height = cropHeight
+
+  const ctx = croppedCanvas.getContext('2d')
+  if (!ctx) {
+    throw new Error('Failed to get canvas context for cropping')
+  }
+
+  // Draw the cropped region
+  ctx.drawImage(sourceCanvas, x, y, cropWidth, cropHeight, 0, 0, outputWidth, outputHeight)
+
+  return croppedCanvas
+}
 
 type TUseHtlmToCanvasReturn = {
   saveHtmlAsImage: (
@@ -11,6 +37,15 @@ type TUseHtlmToCanvasReturn = {
   ) => void
   saveHtmlAsImageWithDesiredSize: (
     htmlContainer: HTMLDivElement,
+    desiredOutputWidth: number,
+    desiredOutputHeight: number,
+    desiredImgMimeType: string | null,
+    onSaved: (imgData: Blob, canvas: HTMLCanvasElement) => void,
+    onError: (error: Error) => void
+  ) => void
+  saveHtmlAsImageCropped: (
+    htmlContainer: HTMLDivElement,
+    cropBounds: DOMRect,
     desiredOutputWidth: number,
     desiredOutputHeight: number,
     desiredImgMimeType: string | null,
@@ -75,5 +110,46 @@ export const useHtmlToCanvas = (): TUseHtlmToCanvasReturn => {
     }
   }
 
-  return { saveHtmlAsImage, saveHtmlAsImageWithDesiredSize }
+  const saveHtmlAsImageCropped = async (
+    htmlContainer: HTMLDivElement,
+    cropBounds: DOMRect,
+    desiredOutputWidth: number,
+    desiredOutputHeight: number,
+    desiredImgMimeType: string | null,
+    onSaved: (imgData: Blob, canvasWithDesiredSize: HTMLCanvasElement) => void,
+    onError: (error: Error) => void
+  ) => {
+    try {
+      const maxImageSizeInPx: number = 5000
+      const scale: number = maxImageSizeInPx / htmlContainer.getBoundingClientRect().width
+
+      // Capture full canvas
+      const fullCanvas = await domToCanvas(htmlContainer, {
+        scale: scale,
+        quality: 1,
+        type: desiredImgMimeType || 'image/webp',
+      })
+
+      // Crop to print area (scaled coordinates)
+      const croppedCanvas = cropCanvas(
+        fullCanvas,
+        cropBounds.x * scale,
+        cropBounds.y * scale,
+        cropBounds.width * scale,
+        cropBounds.height * scale,
+        desiredOutputWidth,
+        desiredOutputHeight
+      )
+
+      croppedCanvas.toBlob((blob) => {
+        if (blob) {
+          onSaved(blob, croppedCanvas)
+        }
+      }, desiredImgMimeType || 'image/webp')
+    } catch (error) {
+      onError(error as Error)
+    }
+  }
+
+  return { saveHtmlAsImage, saveHtmlAsImageWithDesiredSize, saveHtmlAsImageCropped }
 }

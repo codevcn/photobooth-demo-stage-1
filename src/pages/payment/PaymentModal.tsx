@@ -91,7 +91,18 @@ export const PaymentModal = ({
       toast.error('Giỏ hàng trống')
       return null
     }
-    return [...cartItems]
+    const paymentProductItems = [...cartItems]
+    for (const productInCart of savedData.productsInCart) {
+      for (const mockup of productInCart.mockupDataList) {
+        for (const item of paymentProductItems) {
+          if (mockup.id === item.mockupData.id) {
+            item.preSentImageLink = mockup.preSentImageLink
+            break
+          }
+        }
+      }
+    }
+    return paymentProductItems
   }
 
   const handleConfirmPayment = async () => {
@@ -129,6 +140,15 @@ export const PaymentModal = ({
 
       toast.success(`Đơn hàng đã được tạo`)
 
+      // Extract payment details from order
+      const paymentDetails = {
+        subtotal: parseFloat(order.subtotal_amount),
+        shipping: parseFloat(order.shipping_amount),
+        discount: parseFloat(order.discount_amount),
+        total: parseFloat(order.total_amount),
+        voucherCode: voucherCode,
+      }
+
       // Step 2: Handle payment based on method
       if (paymentMethod === 'momo' || paymentMethod === 'zalo') {
         // Use payment instructions from order response
@@ -142,8 +162,8 @@ export const PaymentModal = ({
               method: paymentMethod,
               title: capitalizeFirstLetter(paymentMethod),
             },
-            total,
             orderHashCode: order.hash_code,
+            paymentDetails,
           })
         } else {
           throw new Error('Không nhận được thông tin thanh toán từ server')
@@ -157,8 +177,8 @@ export const PaymentModal = ({
             method: paymentMethod,
             title: capitalizeFirstLetter(paymentMethod),
           },
-          total,
           orderHashCode: order.hash_code,
+          paymentDetails,
         })
       }
     } catch (error) {
@@ -221,16 +241,6 @@ export const PaymentModal = ({
           }}
           className="px-6 pt-6 pb-4 space-y-4 relative z-10 overflow-y-auto grow"
         >
-          {/* Total Summary */}
-          <section className="bg-superlight-pink-cl rounded-2xl p-5 border border-indigo-100">
-            <p className="text-sm text-gray-800 mb-1">Tổng số tiền cần thanh toán</p>
-            <p className="text-3xl font-bold text-red-600 mb-1">
-              <span>{formatNumberWithCommas(total)}</span>
-              <span> VND</span>
-            </p>
-            <p className="text-sm text-gray-800">Đã bao gồm VAT</p>
-          </section>
-
           {/* Shipping Information */}
           <ShippingInfoForm ref={formRef} errors={errors} />
 

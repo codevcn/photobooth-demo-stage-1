@@ -48,8 +48,9 @@ interface EndOfPaymentProps {
 }
 
 export const EndOfPayment: React.FC<EndOfPaymentProps> = ({ data }) => {
-  const { total, countdownInSeconds, QRCode, paymentMethod, orderHashCode } = data
+  const { countdownInSeconds, QRCode, paymentMethod, orderHashCode, paymentDetails } = data
   const { method, title } = paymentMethod
+  const { subtotal, shipping, discount, total, voucherCode } = paymentDetails
   const colorByPaymentMethod = getColorByPaymentMethod(method)
   const containerRef = useRef<HTMLDivElement>(null)
   const [paymentStatus, setPaymentStatus] = useState<TPaymentStatus>({ status: 'pending' })
@@ -124,17 +125,7 @@ export const EndOfPayment: React.FC<EndOfPaymentProps> = ({ data }) => {
 
   return (
     <div ref={containerRef} className="flex flex-col items-center justify-center px-2 py-4">
-      <div className="relative bg-white rounded-2xl shadow flex flex-col items-center w-full p-4 border-2 border-gray-200">
-        <div className="flex gap-2 justify-between items-start w-full min-w-[280px]">
-          <p className="text-base text-gray-800 font-bold mb-4">Tổng tiền</p>
-          <p className="text-3xl font-bold text-red-600 mb-1">
-            <span>{formatNumberWithCommas(total)}</span>
-            <span> VND</span>
-          </p>
-        </div>
-
-        <div className="w-full bg-gray-200 h-[2px] my-2"></div>
-
+      <div className="relative bg-white rounded-2xl shadow flex flex-col items-center w-full p-4 md:p-6 border-2 border-gray-200 max-w-4xl">
         {method === 'momo' || method === 'zalo' ? (
           status === 'completed' ? (
             <div className="flex flex-col items-center pt-4 pb-2 px-4 w-full">
@@ -181,35 +172,169 @@ export const EndOfPayment: React.FC<EndOfPaymentProps> = ({ data }) => {
               </div>
             </div>
           ) : (
-            <>
-              <div
-                className="my-4 p-6 rounded-md"
-                style={{ backgroundColor: colorByPaymentMethod }}
-              >
-                <QRCanvas value={QRCode} size={160} />
-              </div>
-              <div className="text-base text-black font-bold text-center">
-                <p className="mb-1">
-                  <span>Mã QR hết hạn sau </span>
-                  <span className="NAME-countdown">{formatTime(countdownInSeconds)}</span>
-                </p>
-                <p className="text-center">
+            <div className="w-full">
+              {/* Header */}
+              <div className="mb-4 pb-3 border-b border-gray-200">
+                <h3 className="text-xl font-bold text-gray-800">Thông tin thanh toán</h3>
+                <p className="text-sm text-gray-500 mt-1">
                   <span>Quét mã QR để thanh toán với </span>
                   <span className="font-bold" style={{ color: colorByPaymentMethod }}>
                     {title}
                   </span>
                 </p>
               </div>
-            </>
+
+              {/* Main Content: QR + Payment Details */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Left Column: QR Code */}
+                <div className="flex flex-col items-center justify-center">
+                  <div
+                    className="p-6 rounded-xl shadow-lg"
+                    style={{ backgroundColor: colorByPaymentMethod }}
+                  >
+                    <QRCanvas value={QRCode} size={200} />
+                  </div>
+                  <div className="mt-4 text-center">
+                    <p className="text-sm text-gray-600 mb-1">Mã QR hết hạn sau</p>
+                    <p className="text-2xl font-bold text-red-600 NAME-countdown">
+                      {formatTime(countdownInSeconds)}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Right Column: Payment Details */}
+                <div className="flex flex-col justify-center space-y-3">
+                  <div className="bg-gray-50 rounded-xl p-4 space-y-3">
+                    {/* Subtotal */}
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Tạm tính</span>
+                      <span className="font-semibold text-gray-800">
+                        {formatNumberWithCommas(subtotal)} VND
+                      </span>
+                    </div>
+
+                    {/* Shipping */}
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Phí vận chuyển</span>
+                      <span className="font-semibold text-gray-800">
+                        {shipping > 0 ? `${formatNumberWithCommas(shipping)} VND` : 'Miễn phí'}
+                      </span>
+                    </div>
+
+                    {/* Discount */}
+                    {discount > 0 && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-green-600">
+                          Giảm giá {voucherCode && `(${voucherCode})`}
+                        </span>
+                        <span className="font-semibold text-green-600">
+                          -{formatNumberWithCommas(discount)} VND
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="border-t border-gray-300 pt-3 mt-3">
+                      {/* Total */}
+                      <div className="flex justify-between items-center gap-6">
+                        <span className="text-lg font-bold text-gray-800">Tổng cộng</span>
+                        <span className="text-2xl font-bold text-red-600">
+                          {formatNumberWithCommas(total)} VND
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Order Code */}
+                  {orderHashCode && (
+                    <div className="bg-pink-50 border border-pink-200 rounded-lg p-3">
+                      <p className="text-sm text-gray-600 mb-1">Mã đơn hàng</p>
+                      <p className="font-mono font-bold text-pink-600">{orderHashCode}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           )
         ) : (
-          <div className="flex flex-col items-center pt-4 pb-2 px-4 w-full">
-            <div className="flex justify-center items-center h-[100px] w-[100px] rounded-full">
-              <TruckElectric size={50} className="text-pink-cl" strokeWidth={3} />
+          <div className="w-full">
+            {/* Header */}
+            <div className="mb-4 pb-3 border-b border-gray-200">
+              <h3 className="text-xl font-bold text-gray-800">Đặt hàng thành công!</h3>
+              <p className="text-sm text-gray-500 mt-1">Thanh toán khi nhận hàng (COD)</p>
             </div>
-            <div className="text-center text-gray-800 text-base font-medium mt-4">
-              <p>Cám ơn bạn đã sử dụng dịch vụ!</p>
-              <p>Đơn hàng hiện đang được xử lý và sẽ được giao đến bạn trong thời gian sớm nhất.</p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Left: Icon */}
+              <div className="flex flex-col items-center justify-center">
+                <div className="flex justify-center items-center h-[120px] w-[120px] rounded-full bg-green-50 border-4 border-green-200">
+                  <TruckElectric size={60} className="text-green-600" strokeWidth={2.5} />
+                </div>
+                <div className="text-center text-gray-800 text-base font-medium mt-4">
+                  <p className="font-bold text-lg">Cảm ơn bạn đã đặt hàng!</p>
+                  <p className="text-sm text-gray-600 mt-2">
+                    Đơn hàng đang được xử lý và sẽ được giao sớm nhất
+                  </p>
+                </div>
+              </div>
+
+              {/* Right: Payment Details */}
+              <div className="flex flex-col justify-center space-y-3">
+                <div className="bg-gray-50 rounded-xl p-4 space-y-3">
+                  {/* Subtotal */}
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Tạm tính</span>
+                    <span className="font-semibold text-gray-800">
+                      {formatNumberWithCommas(subtotal)} VND
+                    </span>
+                  </div>
+
+                  {/* Shipping */}
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Phí vận chuyển</span>
+                    <span className="font-semibold text-gray-800">
+                      {shipping > 0 ? `${formatNumberWithCommas(shipping)} VND` : 'Miễn phí'}
+                    </span>
+                  </div>
+
+                  {/* Discount */}
+                  {discount > 0 && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-green-600">
+                        Giảm giá {voucherCode && `(${voucherCode})`}
+                      </span>
+                      <span className="font-semibold text-green-600">
+                        -{formatNumberWithCommas(discount)} VND
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="border-t border-gray-300 pt-3 mt-3">
+                    {/* Total */}
+                    <div className="flex justify-between items-center">
+                      <span className="text-lg font-bold text-gray-800">Tổng thanh toán</span>
+                      <span className="text-2xl font-bold text-red-600">
+                        {formatNumberWithCommas(total)} VND
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Order Code */}
+                {orderHashCode && (
+                  <div className="bg-pink-50 border border-pink-200 rounded-lg p-3">
+                    <p className="text-sm text-gray-600 mb-1">Mã đơn hàng</p>
+                    <p className="font-mono font-bold text-pink-600">{orderHashCode}</p>
+                  </div>
+                )}
+
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <p className="text-sm text-blue-800">
+                    💡 Vui lòng chuẩn bị số tiền{' '}
+                    <span className="font-bold">{formatNumberWithCommas(total)} VND</span> khi nhận
+                    hàng
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         )}

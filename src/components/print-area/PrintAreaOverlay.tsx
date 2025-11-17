@@ -55,11 +55,14 @@ export const PrintAreaOverlay: React.FC<TPrintAreaOverlayProps> = ({
       {/* Print Area Indicator */}
       <div
         ref={printAreaRef}
-        className="absolute border-2 border-dashed bg-blue-50/20 pointer-events-none z-[30] transition-all duration-300"
+        className={`${
+          isOutOfBounds
+            ? 'border-2 border-dashed border-red-600'
+            : 'border-2 border-dashed border-[#3b82f6]'
+        } NAME-print-area-allowed absolute bg-blue-50/20 pointer-events-none z-[30] transition-all duration-300`}
         style={{
           opacity: isOutOfBounds ? 0.9 : 0.4,
           backgroundColor: isOutOfBounds ? 'rgba(239, 68, 68, 0.1)' : 'rgba(96, 165, 250, 0.1)',
-          borderColor: isOutOfBounds ? '#ef4444' : initLineColor(selectedColor),
         }}
       >
         <div
@@ -75,7 +78,7 @@ export const PrintAreaOverlay: React.FC<TPrintAreaOverlayProps> = ({
       {/* Overlay for out of bounds warning */}
       <div
         ref={overlayRef}
-        className="absolute inset-0 pointer-events-none z-[20] transition-all duration-500"
+        className="absolute inset-0 pointer-events-none z-[20] transition-all duration-500 overflow-visible"
         style={{
           opacity: 0,
           backgroundColor: isOutOfBounds
@@ -93,6 +96,22 @@ export const PrintAreaOverlay: React.FC<TPrintAreaOverlayProps> = ({
           animation: isOutOfBounds ? 'print-area-warning 3s ease-in-out infinite' : 'none',
         }}
       >
+        <div
+          style={{ display: isOutOfBounds ? 'block' : 'none' }}
+          className="absolute bottom-full left-0 h-[1000px] w-[1000px] bg-gray-600/30"
+        ></div>
+        <div
+          style={{ display: isOutOfBounds ? 'block' : 'none' }}
+          className="absolute top-full left-0 h-[1000px] w-[1000px] bg-gray-600/30"
+        ></div>
+        <div
+          style={{ display: isOutOfBounds ? 'block' : 'none' }}
+          className="absolute left-full top-0 h-[1000px] w-[1000px] bg-gray-600/30"
+        ></div>
+        <div
+          style={{ display: isOutOfBounds ? 'block' : 'none' }}
+          className="absolute right-full top-0 h-[1000px] w-[1000px] bg-gray-600/30"
+        ></div>
         {/* Dimming effect for areas outside print zone */}
         <div
           className="absolute inset-0 transition-opacity duration-300 pointer-events-none"

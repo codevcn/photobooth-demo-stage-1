@@ -244,7 +244,7 @@ const EditArea: React.FC<EditAreaProps> = ({
           htmlToCanvasEditorRef.current = node
           containerElementRef.current = node
         }}
-        className="NAME-canvas-editor relative z-0 bg-gray-100 flex flex-1 flex-shrink basis-auto min-h-0 w-full h-full max-h-[500px] overflow-hidden"
+        className="NAME-canvas-editor relative z-0 flex flex-1 flex-shrink basis-auto min-h-0 w-full h-full max-h-[500px] overflow-hidden"
       >
         {selectedPrintAreaInfo && selectedPrintAreaInfo.imageUrl ? (
           <img
@@ -274,59 +274,58 @@ const EditArea: React.FC<EditAreaProps> = ({
           </div>
         )}
 
-        <div className="NAME-print-area-allowed absolute z-20 top-0 left-0 w-full h-full">
-          {/* Print Area Overlay */}
-          <PrintAreaOverlay
-            overlayRef={overlayRef}
-            printAreaRef={printAreaRef}
-            isOutOfBounds={isOutOfBounds}
-            selectedColor={selectedColor}
-          />
-          <div className="absolute top-0 left-0 w-full h-full z-50">
-            {/* Text Elements */}
-            {initialTextElements.length > 0 &&
-              initialTextElements.map((textEl) => (
-                <TextElement
-                  key={textEl.id}
-                  element={textEl}
-                  onRemoveElement={handleRemoveText}
-                  onUpdateSelectedElementId={(id) => handleUpdateSelectedElementId(id, 'text')}
-                  selectedElementId={selectedElementId}
-                  canvasAreaRef={htmlToCanvasEditorRef}
-                  mountType={mockupId ? 'from-saved' : 'new'}
-                />
-              ))}
+        {/* Print Area Overlay */}
+        <PrintAreaOverlay
+          overlayRef={overlayRef}
+          printAreaRef={printAreaRef}
+          isOutOfBounds={isOutOfBounds}
+          selectedColor={selectedColor}
+        />
 
-            {/* Sticker Elements */}
-            {initialStickerElements.length > 0 &&
-              initialStickerElements.map((sticker) => (
-                <StickerElement
-                  key={sticker.id}
-                  element={sticker}
-                  onRemoveElement={handleRemoveSticker}
-                  onUpdateSelectedElementId={(id) => handleUpdateSelectedElementId(id, 'sticker')}
-                  selectedElementId={selectedElementId}
-                  canvasAreaRef={htmlToCanvasEditorRef}
-                  mountType={mockupId ? 'from-saved' : 'new'}
-                />
-              ))}
+        <div className="absolute top-0 left-0 w-full h-full z-50">
+          {/* Text Elements */}
+          {initialTextElements.length > 0 &&
+            initialTextElements.map((textEl) => (
+              <TextElement
+                key={textEl.id}
+                element={textEl}
+                onRemoveElement={handleRemoveText}
+                onUpdateSelectedElementId={(id) => handleUpdateSelectedElementId(id, 'text')}
+                selectedElementId={selectedElementId}
+                canvasAreaRef={htmlToCanvasEditorRef}
+                mountType={mockupId ? 'from-saved' : 'new'}
+              />
+            ))}
 
-            {/* Printed Image Elements */}
-            {initialPrintedImageElements.length > 0 &&
-              initialPrintedImageElements.map((img) => (
-                <PrintedImageElement
-                  key={img.id}
-                  element={img}
-                  onRemoveElement={handleRemovePrintedImage}
-                  onUpdateSelectedElementId={(id) =>
-                    handleUpdateSelectedElementId(id, 'printed-image')
-                  }
-                  selectedElementId={selectedElementId}
-                  canvasAreaRef={htmlToCanvasEditorRef}
-                  mountType={mockupId ? 'from-saved' : 'new'}
-                />
-              ))}
-          </div>
+          {/* Sticker Elements */}
+          {initialStickerElements.length > 0 &&
+            initialStickerElements.map((sticker) => (
+              <StickerElement
+                key={sticker.id}
+                element={sticker}
+                onRemoveElement={handleRemoveSticker}
+                onUpdateSelectedElementId={(id) => handleUpdateSelectedElementId(id, 'sticker')}
+                selectedElementId={selectedElementId}
+                canvasAreaRef={htmlToCanvasEditorRef}
+                mountType={mockupId ? 'from-saved' : 'new'}
+              />
+            ))}
+
+          {/* Printed Image Elements */}
+          {initialPrintedImageElements.length > 0 &&
+            initialPrintedImageElements.map((img) => (
+              <PrintedImageElement
+                key={img.id}
+                element={img}
+                onRemoveElement={handleRemovePrintedImage}
+                onUpdateSelectedElementId={(id) =>
+                  handleUpdateSelectedElementId(id, 'printed-image')
+                }
+                selectedElementId={selectedElementId}
+                canvasAreaRef={htmlToCanvasEditorRef}
+                mountType={mockupId ? 'from-saved' : 'new'}
+              />
+            ))}
         </div>
       </div>
 

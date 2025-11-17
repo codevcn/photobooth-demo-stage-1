@@ -68,10 +68,17 @@ export type TElementLayerState = {
   index: number
 }
 
+export type TPreSentMockupImageLink = {
+  mockupId: string
+  imageUrl: string
+}
+
 export type TGlobalContextValue = {
   pickedElementRoot: HTMLElement | null
   elementType: TElementType | null
   sessionId: string | null
+  preSentMockupImageLinks: TPreSentMockupImageLink[]
+  addPreSentMockupImageLink: (imageUrl: string, mockupId: string) => void
 }
 
 export type TElementLayerContextValue = {
@@ -250,6 +257,12 @@ export type TEndOfPaymentData = {
     method: TPaymentType
     title: string
   }
-  total: number
   orderHashCode?: string
+  paymentDetails: {
+    subtotal: number
+    shipping: number
+    discount: number
+    total: number
+    voucherCode?: string
+  }
 }

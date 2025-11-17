@@ -14,7 +14,7 @@ class VoucherService {
       description: 'Giảm 20% cho đơn hàng từ 100,000 VND',
       discountType: 'percentage',
       discountValue: 20,
-      minOrderValue: 100000,
+      minOrderValue: 30000,
       maxDiscount: 50000,
     },
     {
@@ -22,7 +22,7 @@ class VoucherService {
       description: 'Giảm 50,000 VND cho đơn hàng từ 200,000 VND',
       discountType: 'fixed',
       discountValue: 50000,
-      minOrderValue: 200000,
+      minOrderValue: 30000,
     },
     {
       code: 'FREESHIP',
@@ -46,7 +46,7 @@ class VoucherService {
     if (!voucher) {
       return {
         success: false,
-        message: '✗ Mã giảm giá không hợp lệ',
+        message: 'Mã giảm giá không hợp lệ',
       }
     }
 
@@ -54,7 +54,7 @@ class VoucherService {
     if (voucher.minOrderValue && orderSubtotal < voucher.minOrderValue) {
       return {
         success: false,
-        message: `✗ Đơn hàng tối thiểu ${this.formatNumber(
+        message: `Đơn hàng tối thiểu ${this.formatNumber(
           voucher.minOrderValue
         )} VND để sử dụng mã này`,
       }
@@ -65,7 +65,7 @@ class VoucherService {
 
     return {
       success: true,
-      message: `✓ Áp dụng thành công! Giảm ${this.formatNumber(discount)} VND - ${
+      message: `Áp dụng thành công! Giảm ${this.formatNumber(discount)} VND - ${
         voucher.description
       }`,
       voucher,

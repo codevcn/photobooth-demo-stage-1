@@ -1,4 +1,3 @@
-import { products as productsDev } from '@/dev/storage'
 import { delay } from '@/utils/helpers'
 import {
   TBaseProduct,
@@ -11,14 +10,6 @@ import { getFetchProductsCatalog, postPreSendMockupImage } from '@/configs/api/p
 import { TPreSentMockupImageRes } from '@/utils/types/api'
 
 class ProductService {
-  /**
-   * Mock data for development/testing
-   */
-  private async fetchProductsMock(page: number, limit: number): Promise<TBaseProduct[]> {
-    await delay(1000)
-    return productsDev
-  }
-
   /**
    * Fetch products from API and convert to TBaseProduct format
    */
@@ -103,7 +94,7 @@ class ProductService {
   }
 
   async preSendMockupImage(image: Blob, filename: string): Promise<TPreSentMockupImageRes> {
-    console.log('>>> image:', {image,filename})
+    console.log('>>> image:', { image, filename })
     const formData = new FormData()
     formData.append('file', image, filename)
     const response = await postPreSendMockupImage(formData)
