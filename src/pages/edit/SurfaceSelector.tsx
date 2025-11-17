@@ -20,13 +20,12 @@ const PickButton = ({
       key={finalSurfaceType}
       onClick={() => onSurfaceChange(finalSurfaceType)}
       className={`
-        flex items-center justify-center gap-2 px-4 py-1 rounded-md font-medium
-        transition-all duration-200 active:scale-95
+        flex items-center justify-center gap-2 px-4 py-1 rounded-md font-medium transition-all duration-200 active:scale-95
         ${
           isSelected
             ? 'bg-pink-cl text-white shadow-md border-2 border-pink-cl'
             : 'bg-gray-50 text-gray-700 border-2 border-gray-200 hover:border-pink-300 hover:bg-pink-50'
-        }
+        }${isBothSides ? 'grid col-span-2 sm:col-span-1' : ''}
       `}
     >
       <svg
@@ -72,12 +71,14 @@ type TSurfaceSelectorProps = {
   selectedSurface: TSurfaceType
   onSurfaceChange: (surfaceType: TSurfaceType) => void
   productPrintAreaList?: TPrintAreaInfo[]
+  onShowBothSidesPreview?: () => void
 }
 
 export const SurfaceSelector = ({
   selectedSurface,
   onSurfaceChange,
   productPrintAreaList,
+  onShowBothSidesPreview,
 }: TSurfaceSelectorProps) => {
   if (!productPrintAreaList || productPrintAreaList.length === 0) {
     return null
@@ -89,29 +90,31 @@ export const SurfaceSelector = ({
   }
 
   const handleClickOnBothSides = () => {
-    onSurfaceChange('both')
+    if (onShowBothSidesPreview) {
+      onShowBothSidesPreview()
+    } else {
+      onSurfaceChange('both')
+    }
   }
 
   return (
     <div className="bg-white rounded-lg p-1 mt-2 border border-gray-200 shadow-sm">
-      <div className="flex gap-2 items-center">
-        <div className="grid grid-cols-3 gap-2 grow">
-          {productPrintAreaList.map((printAreaInfo) => {
-            return (
-              <PickButton
-                key={printAreaInfo.surfaceType}
-                printAreaInfo={printAreaInfo}
-                isSelected={printAreaInfo.surfaceType === selectedSurface}
-                onSurfaceChange={onSurfaceChange}
-              />
-            )
-          })}
-          <PickButton
-            isSelected={selectedSurface === 'both'}
-            onSurfaceChange={handleClickOnBothSides}
-            isBothSides
-          />
-        </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 grow">
+        {productPrintAreaList.map((printAreaInfo) => {
+          return (
+            <PickButton
+              key={printAreaInfo.surfaceType}
+              printAreaInfo={printAreaInfo}
+              isSelected={printAreaInfo.surfaceType === selectedSurface}
+              onSurfaceChange={onSurfaceChange}
+            />
+          )
+        })}
+        <PickButton
+          isSelected={selectedSurface === 'both'}
+          onSurfaceChange={handleClickOnBothSides}
+          isBothSides
+        />
       </div>
     </div>
   )

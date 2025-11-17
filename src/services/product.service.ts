@@ -1,4 +1,3 @@
-import { delay } from '@/utils/helpers'
 import {
   TBaseProduct,
   TPrintAreaInfo,

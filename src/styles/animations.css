@@ -186,3 +186,13 @@
     opacity: 0.8;
   }
 }
+
+/* Fade in animation for modal backdrop */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

@@ -9,17 +9,17 @@ import {
   TSurfaceType,
   TBaseProduct,
   TPrintAreaInfo,
+  TPrintTemplate,
+  TTemplateFrame,
 } from '@/utils/types/global'
 import { TextElement } from './element/text-element/TextElement'
-import { StickerElement } from './element/sticker-element/StickerElement'
-import { PrintedImageElement } from './element/printed-image-element/PrintedImageElement'
 import { PrintedImageElementMenu } from './element/printed-image-element/Menu'
 import { TextElementMenu } from './element/text-element/Menu'
 import { StickerElementMenu } from './element/sticker-element/Menu'
 import { eventEmitter } from '@/utils/events'
 import { EInternalEvents } from '@/utils/enums'
 import { usePrintArea } from '@/hooks/use-print-area'
-import { PrintAreaOverlay } from '@/components/print-area/PrintAreaOverlay'
+import { PrintAreaOverlay } from '@/pages/edit/template/PrintAreaOverlay'
 import ActionBar from './ActionBar'
 import { toast } from 'react-toastify'
 import { useVisualStatesCollector } from '@/hooks/use-visual-states-collector'
@@ -27,6 +27,7 @@ import { SurfaceSelector } from './SurfaceSelector'
 import { CropElementModal } from './element/printed-image-element/CropElementModal'
 import { ArrowLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { BothSidesPreviewModal } from './BothSidesPreviewModal'
 
 type TSelectingType = TElementType | null
 
@@ -50,6 +51,10 @@ interface EditAreaProps {
   selectedPrintAreaInfo: TPrintAreaInfo
   onSelectSurface: (surfaceType: TSurfaceType) => void
   activeProduct: TBaseProduct
+  pickedTemplate: TPrintTemplate
+  pickedFrame?: TTemplateFrame
+  onPickFrame: (frame: TTemplateFrame) => void
+  onShowPrintedImagesModal: (frameId: string) => void
 }
 
 const EditArea: React.FC<EditAreaProps> = ({
@@ -68,10 +73,15 @@ const EditArea: React.FC<EditAreaProps> = ({
   selectedPrintAreaInfo,
   onSelectSurface,
   activeProduct,
+  pickedTemplate,
+  pickedFrame,
+  onPickFrame,
+  onShowPrintedImagesModal,
 }) => {
   const [showCropModal, setShowCropModal] = useState<boolean>(false)
   const [cropElementId, setCropElementId] = useState<string | null>(null)
   const [cropImageUrl, setCropImageUrl] = useState<string>('')
+  const [showBothSidesModal, setShowBothSidesModal] = useState<boolean>(false)
   const editAreaContainerRef = useRef<HTMLDivElement>(null)
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null)
   const [selectingType, setSelectingType] = useState<TSelectingType>(null)
@@ -81,11 +91,19 @@ const EditArea: React.FC<EditAreaProps> = ({
     printAreaRef,
     overlayRef,
     containerElementRef,
-    isOutOfBounds,
     initializePrintArea,
     checkIfAnyElementOutOfBounds,
   } = usePrintArea()
   const navigate = useNavigate()
+
+  const handleSelectFrameOnPrintArea = (frameId: string) => {
+    const foundFrame = pickedTemplate.frames.find((f) => f.id === frameId && f.placedImage)
+    if (foundFrame) {
+      onPickFrame(foundFrame)
+    } else {
+      onShowPrintedImagesModal(frameId)
+    }
+  }
 
   const handleRemoveText = (id: string) => {
     onUpdateText(initialTextElements.filter((el) => el.id !== id))
@@ -275,35 +293,13 @@ const EditArea: React.FC<EditAreaProps> = ({
         )}
 
         {/* Print Area Overlay */}
-        {initialPrintedImageElements.length > 0 && (
-          <PrintAreaOverlay
-            overlayRef={overlayRef}
-            printAreaRef={printAreaRef}
-            name="Print Area Overlay"
-            printTemplate={{
-              id: 'print-area-overlay-template',
-              name: 'Print Area Overlay Template',
-              frames: [
-                {
-                  id: 'frame-1',
-                  index: 0,
-                  placedImage: {
-                    id: 'placed-image-1',
-                    imgURL: initialPrintedImageElements[0].url,
-                    placementState: {
-                      frameIndex: 0,
-                      zoom: 1,
-                      squareRotation: 0,
-                      objectFit: 'contain',
-                    },
-                  },
-                },
-              ],
-              framesCount: 1,
-              type: '1-square',
-            }}
-          />
-        )}
+        <PrintAreaOverlay
+          overlayRef={overlayRef}
+          printAreaRef={printAreaRef}
+          name="Print Area Overlay"
+          printTemplate={pickedTemplate}
+          onClickFrame={handleSelectFrameOnPrintArea}
+        />
 
         <div className="absolute top-0 left-0 w-full h-full z-50">
           {initialTextElements.length > 0 &&
@@ -339,6 +335,7 @@ const EditArea: React.FC<EditAreaProps> = ({
         selectedSurface={selectedPrintAreaInfo.surfaceType}
         onSurfaceChange={onSelectSurface}
         productPrintAreaList={activeProduct.printAreaList}
+        onShowBothSidesPreview={() => setShowBothSidesModal(true)}
       />
 
       {/* Action Bar */}
@@ -355,6 +352,15 @@ const EditArea: React.FC<EditAreaProps> = ({
           onClose={() => setShowCropModal(false)}
         />
       )}
+
+      {/* Both Sides Preview Modal */}
+      <BothSidesPreviewModal
+        show={showBothSidesModal}
+        onClose={() => setShowBothSidesModal(false)}
+        activeProduct={activeProduct}
+        pickedTemplate={pickedTemplate}
+        onClickFrame={handleSelectFrameOnPrintArea}
+      />
     </div>
   )
 }

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { ProductDetails } from './ProductDetails'
 import { createPortal } from 'react-dom'
-import { TBaseProduct, TPrintedImage } from '@/utils/types/global'
+import { TBaseProduct, TPrintedImage, TPrintTemplate } from '@/utils/types/global'
 import { PrintedImagesPreview } from './PrintedImagesPreview'
 
 type TMenuItem = {
@@ -16,8 +16,8 @@ interface BottomMenuProps {
   onChooseVariant: () => void
   product: TBaseProduct
   printedImages: TPrintedImage[]
-  onAddPrintedImages: (newImages: TPrintedImage[]) => void
-  onPickTemplate: () => void
+  onAddPrintedImages: (newImages: TPrintedImage[], frameId?: string) => void
+  onShowTemplatePicker: () => void
 }
 
 export const Toolbar: React.FC<BottomMenuProps> = ({
@@ -27,12 +27,34 @@ export const Toolbar: React.FC<BottomMenuProps> = ({
   product,
   printedImages,
   onAddPrintedImages,
-  onPickTemplate,
+  onShowTemplatePicker,
 }) => {
   const [showProductDetails, setShowProductDetails] = useState(false)
 
   const menuItems = useMemo<TMenuItem[]>(
     () => [
+      {
+        icon: (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="lucide lucide-grid2x2-icon lucide-grid-2x2 text-pink-cl"
+          >
+            <path d="M12 3v18" />
+            <path d="M3 12h18" />
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+          </svg>
+        ),
+        label: 'Khung hình',
+        onClick: () => onShowTemplatePicker(),
+      },
       {
         icon: (
           <svg
@@ -121,30 +143,8 @@ export const Toolbar: React.FC<BottomMenuProps> = ({
         label: 'Chi tiết',
         onClick: () => setShowProductDetails(true),
       },
-      {
-        icon: (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="lucide lucide-grid2x2-icon lucide-grid-2x2 text-pink-cl"
-          >
-            <path d="M12 3v18" />
-            <path d="M3 12h18" />
-            <rect x="3" y="3" width="18" height="18" rx="2" />
-          </svg>
-        ),
-        label: 'Khung hình',
-        onClick: () => onPickTemplate(),
-      },
     ],
-    [onAddSticker, onAddText, onChooseVariant, onPickTemplate()]
+    [onAddSticker, onAddText, onChooseVariant, onShowTemplatePicker]
   )
 
   return (
@@ -152,13 +152,13 @@ export const Toolbar: React.FC<BottomMenuProps> = ({
       <h2 className="text-base text-center md:hidden font-bold text-gray-800 mb-2 lg:mb-3 flex items-center justify-center gap-2">
         Công cụ chỉnh sửa
       </h2>
-      <div className="grid grid-cols-5 spmd:grid-cols-1 gap-1">
-        <button className="w-full py-2 rounded-xl touch-target transition-colors">
+      <div className="grid grid-cols-6 spmd:grid-cols-1 gap-1">
+        <div className="w-full py-2 rounded-xl touch-target transition-colors">
           <PrintedImagesPreview
             printedImages={printedImages}
             onAddPrintedImages={onAddPrintedImages}
           />
-        </button>
+        </div>
         {menuItems.map((item, index) => (
           <button
             key={index}

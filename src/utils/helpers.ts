@@ -1,5 +1,5 @@
 import { getInitialContants } from './contants'
-import { TImgMimeType, TSurfaceType, TTemplateType } from './types/global'
+import { TImgMimeType, TSurfaceType } from './types/global'
 
 export const getNaturalSizeOfImage = (
   imgURL: string,
@@ -205,98 +205,4 @@ export const resizeCanvas = (
 
 export const isHomePage = (): boolean => {
   return window.location.pathname === '/'
-}
-
-/**
- * Chuyển đổi template type sang grid CSS styles
- * @param templateType - Loại template
- * @returns Object chứa các CSS properties cho grid layout
- */
-export const templateTypeToGridStyles = (templateType: TTemplateType): React.CSSProperties => {
-  switch (templateType) {
-    // 1 frame templates
-    case '1-horizon':
-      return {
-        display: 'grid',
-        gridTemplateColumns: '1fr',
-        gridTemplateRows: '1fr',
-        aspectRatio: '16/9',
-      }
-    case '1-vertical':
-      return {
-        display: 'grid',
-        gridTemplateColumns: '1fr',
-        gridTemplateRows: '1fr',
-        aspectRatio: '9/16',
-      }
-    case '1-square':
-      return {
-        display: 'grid',
-        gridTemplateColumns: '1fr',
-        gridTemplateRows: '1fr',
-        aspectRatio: '1/1',
-      }
-
-    // 2 frames templates
-    case '2-horizon':
-      return {
-        display: 'grid',
-        gridTemplateColumns: '1fr',
-        gridTemplateRows: 'repeat(2, 1fr)',
-        aspectRatio: '16/9',
-      }
-    case '2-vertical':
-      return {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
-        gridTemplateRows: '1fr',
-        aspectRatio: '9/16',
-      }
-
-    // 3 frames templates
-    case '3-left':
-      return {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
-        gridTemplateRows: 'repeat(2, 1fr)',
-        aspectRatio: '1/1',
-      }
-    case '3-right':
-      return {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
-        gridTemplateRows: 'repeat(2, 1fr)',
-        aspectRatio: '1/1',
-      }
-    case '3-top':
-      return {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
-        gridTemplateRows: 'repeat(2, 1fr)',
-        aspectRatio: '1/1',
-      }
-    case '3-bottom':
-      return {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
-        gridTemplateRows: 'repeat(2, 1fr)',
-        aspectRatio: '1/1',
-      }
-
-    // 4 frames templates
-    case '4-square':
-      return {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
-        gridTemplateRows: 'repeat(2, 1fr)',
-        aspectRatio: '1/1',
-      }
-
-    default:
-      return {
-        display: 'grid',
-        gridTemplateColumns: '1fr',
-        gridTemplateRows: '1fr',
-      }
-  }
 }

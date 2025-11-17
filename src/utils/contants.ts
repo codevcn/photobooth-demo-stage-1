@@ -15,6 +15,10 @@ type TInitialContentsType =
   | 'PAYMENT_ZALO_COLOR'
   | 'PAYMENT_MOMO_COLOR'
   | 'PAYMENT_COD_COLOR'
+  | 'PLACED_IMG_FRAME_INDEX'
+  | 'PLACED_IMG_OBJECT_FIT'
+  | 'PLACED_IMG_ZOOM'
+  | 'PLACED_IMG_SQUARE_ROTATION'
 
 export const getInitialContants = <R>(type: TInitialContentsType): R => {
   switch (type) {
@@ -48,6 +52,16 @@ export const getInitialContants = <R>(type: TInitialContentsType): R => {
       return '#0144DB' as R
     case 'PAYMENT_MOMO_COLOR':
       return '#A50064' as R
+    case 'PAYMENT_COD_COLOR':
+      return '#008000' as R
+    case 'PLACED_IMG_FRAME_INDEX':
+      return 1 as R
+    case 'PLACED_IMG_OBJECT_FIT':
+      return 'contain' as R
+    case 'PLACED_IMG_ZOOM':
+      return 1 as R
+    case 'PLACED_IMG_SQUARE_ROTATION':
+      return 0 as R
     default:
       return null as R
   }

@@ -280,6 +280,7 @@ export type TTemplateType =
   | '3-top'
   | '3-bottom'
   | '4-square'
+  | '4-horizon'
 
 export type TPrintTemplate = {
   id: string
@@ -292,7 +293,7 @@ export type TPrintTemplate = {
 export type TTemplateFrame = {
   id: string
   index: number
-  placedImage: TPlacedImage
+  placedImage?: TPlacedImage
 }
 
 export type TPlacedImage = {

@@ -157,7 +157,7 @@ export const StickerElement = ({
       }}
       className={`${
         isSelected ? 'shadow-[0_0_0_2px_#d91670]' : ''
-      } NAME-root-element NAME-element-type-sticker absolute h-fit w-fit touch-none bg-pink-400/20`}
+      } NAME-root-element NAME-element-type-sticker absolute h-fit w-fit touch-none`}
       onClick={pickElement}
       data-visual-state={JSON.stringify(
         typeToObject<TStickerVisualState>({

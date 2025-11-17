@@ -36,11 +36,11 @@ type TUseHtlmToCanvasReturn = {
     onError: (error: Error) => void
   ) => void
   saveHtmlAsImageWithDesiredSize: (
-    htmlContainer: HTMLDivElement,
+    htmlContainer: HTMLElement,
     desiredOutputWidth: number,
     desiredOutputHeight: number,
     desiredImgMimeType: string | null,
-    onSaved: (imgData: Blob, canvas: HTMLCanvasElement) => void,
+    onSaved: (imgData: Blob, canvas: HTMLCanvasElement, originalCanvas: HTMLCanvasElement) => void,
     onError: (error: Error) => void
   ) => void
   saveHtmlAsImageCropped: (
@@ -71,6 +71,8 @@ export const useHtmlToCanvas = (): TUseHtlmToCanvasReturn => {
       canvas.toBlob((blob) => {
         if (blob) {
           onSaved(blob, canvas)
+        } else {
+          onError(new Error('Failed to convert resized canvas to Blob'))
         }
       })
     } catch (error) {
@@ -83,26 +85,30 @@ export const useHtmlToCanvas = (): TUseHtlmToCanvasReturn => {
     desiredOutputWidth: number,
     desiredOutputHeight: number,
     desiredImgMimeType: string | null,
-    onSaved: (imgData: Blob, canvasWithDesiredSize: HTMLCanvasElement) => void,
+    onSaved: (
+      imgData: Blob,
+      canvasWithDesiredSize: HTMLCanvasElement,
+      originalCanvas: HTMLCanvasElement
+    ) => void,
     onError: (error: Error) => void
   ) => {
     try {
       const maxImageSizeInPx: number = 5000
-      const scale: number = maxImageSizeInPx / htmlContainer.getBoundingClientRect().width
-
+      const scale: number = maxImageSizeInPx / htmlContainer.clientWidth
       const canvas = await domToCanvas(htmlContainer, {
         scale: scale,
         quality: 1,
         type: desiredImgMimeType || 'image/webp',
       })
-
       const finalCanvas = resizeCanvas(canvas, desiredOutputWidth, desiredOutputHeight)
       if (!finalCanvas) {
         throw new Error('Failed to resize canvas to desired size')
       }
       canvas.toBlob((blob) => {
         if (blob) {
-          onSaved(blob, finalCanvas)
+          onSaved(blob, finalCanvas, canvas)
+        } else {
+          onError(new Error('Failed to convert resized canvas to Blob'))
         }
       })
     } catch (error) {
@@ -144,6 +150,8 @@ export const useHtmlToCanvas = (): TUseHtlmToCanvasReturn => {
       croppedCanvas.toBlob((blob) => {
         if (blob) {
           onSaved(blob, croppedCanvas)
+        } else {
+          onError(new Error('Failed to convert resized canvas to Blob'))
         }
       }, desiredImgMimeType || 'image/webp')
     } catch (error) {

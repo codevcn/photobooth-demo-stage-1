@@ -46,6 +46,10 @@ export default {
         },
         border: 'hsl(var(--border))',
       },
+      animation: {
+        'fade-in': 'fade-in 0.2s ease-out',
+        'pop-in': 'pop-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+      },
     },
   },
   plugins: [require('tailwindcss-animate')],

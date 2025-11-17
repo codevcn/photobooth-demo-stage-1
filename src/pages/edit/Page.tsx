@@ -20,6 +20,9 @@ import {
   TBaseProduct,
   TPrintAreaInfo,
   TImgMimeType,
+  TPrintTemplate,
+  TTemplateFrame,
+  TPlacedImage,
 } from '@/utils/types/global'
 import { eventEmitter } from '@/utils/events'
 import { EInternalEvents } from '@/utils/enums'
@@ -31,6 +34,8 @@ import { getInitialContants } from '@/utils/contants'
 import { productService } from '@/services/product.service'
 import { useHtmlToCanvas } from '@/hooks/use-html-to-canvas'
 import { convertMimeTypeToExtension } from '@/utils/helpers'
+import { TemplatePicker } from './template/TemplatePicker'
+import { hardCodedPrintTemplates } from '../../configs/print-template'
 
 type TEditPageHorizonProps = {
   products: TBaseProduct[]
@@ -213,13 +218,81 @@ const restoreMockupVisualStates = (
   }
 }
 
+/**
+ * Hook quản lý template
+ */
+const useTemplateManager = (templates: TPrintTemplate[]) => {
+  const [pickedTemplate, setPickedTemplate] = useState<TPrintTemplate>(templates[0])
+  const [showTemplatePicker, setShowTemplatePicker] = useState(false)
+  const [pickedFrame, setPickedFrame] = useState<TTemplateFrame>()
+  const [availableTemplates, setAvailableTemplates] = useState<TPrintTemplate[]>(templates)
+
+  const handlePickTemplate = (template: TPrintTemplate) => {
+    if (pickedTemplate && pickedTemplate.id === template.id) return
+    setPickedTemplate(template)
+  }
+
+  const addImageToFrame = (image: TPrintedImage, frameId?: string) => {
+    setAvailableTemplates((pre) => {
+      const templates = [...pre]
+      const pickedTemplateId = pickedTemplate.id
+      for (const template of templates) {
+        if (template.id === pickedTemplateId && !frameId) {
+          const foundFrameIndex = template.frames.findIndex((f) => !f.placedImage)
+          if (foundFrameIndex >= 0) {
+            template.frames[foundFrameIndex].placedImage = {
+              id: image.id,
+              imgURL: image.url,
+              placementState: {
+                frameIndex: foundFrameIndex + 1,
+                zoom: getInitialContants<number>('PLACED_IMG_ZOOM'),
+                objectFit: getInitialContants<'contain'>('PLACED_IMG_OBJECT_FIT'),
+                squareRotation: getInitialContants<number>('PLACED_IMG_SQUARE_ROTATION'),
+              },
+            }
+            break
+          }
+        }
+        let frameIndex: number = getInitialContants<number>('PLACED_IMG_FRAME_INDEX')
+        for (const frame of template.frames) {
+          if (frame.id === frameId) {
+            frame.placedImage = {
+              id: image.id,
+              imgURL: image.url,
+              placementState: {
+                frameIndex,
+                zoom: getInitialContants<number>('PLACED_IMG_ZOOM'),
+                objectFit: getInitialContants<'contain'>('PLACED_IMG_OBJECT_FIT'),
+                squareRotation: getInitialContants<number>('PLACED_IMG_SQUARE_ROTATION'),
+              },
+            }
+          }
+          frameIndex++
+        }
+      }
+      return templates
+    })
+  }
+
+  return {
+    pickedTemplate,
+    handlePickTemplate,
+    showTemplatePicker,
+    setShowTemplatePicker,
+    pickedFrame,
+    setPickedFrame,
+    availableTemplates,
+    addImageToFrame,
+  }
+}
+
 // ==================== Main Component ====================
 
 export const EditPage = ({ products, printedImages }: TEditPageHorizonProps) => {
   // ==================== Context & Hooks ====================
   const { sessionId } = useGlobalContext()
   const { removeFromElementLayers } = useElementLayerContext()
-  const { saveHtmlAsImage, saveHtmlAsImageCropped } = useHtmlToCanvas()
+  const { saveHtmlAsImage, saveHtmlAsImageWithDesiredSize } = useHtmlToCanvas()
   const mockupId = useSearchParams()[0].get('mockupId')
   const editorRef = useRef<HTMLDivElement>(null)
 
@@ -262,6 +335,17 @@ export const EditPage = ({ products, printedImages }: TEditPageHorizonProps) => 
 
   const { cartCount, setCartCount, initCartCount } = useCartCount()
 
+  const {
+    pickedTemplate,
+    handlePickTemplate,
+    setShowTemplatePicker,
+    showTemplatePicker,
+    pickedFrame,
+    setPickedFrame,
+    addImageToFrame,
+    availableTemplates,
+  } = useTemplateManager(hardCodedPrintTemplates)
+
   // ==================== Computed Values - Active Product ====================
   const [activeProduct, activeProductImage] = useMemo<[TBaseProduct, TProductImage]>(() => {
     let activeProductImage: TProductImage | undefined = undefined
@@ -282,32 +366,18 @@ export const EditPage = ({ products, printedImages }: TEditPageHorizonProps) => 
   )
 
   // ==================== Event Handlers - Element Management ====================
+  const handleShowPrintedImagesModal = (frameId: string) => {
+    eventEmitter.emit(EInternalEvents.HIDE_SHOW_PRINTED_IMAGES_MODAL, true, frameId)
+  }
+
   const handleAddPrintedElement = (
-    type: TElementType,
-    initialPrintedImageElements: TPrintedImage[]
+    initialPrintedImageElements: TPrintedImage[],
+    frameId?: string
   ) => {
-    if (type === 'printed-image' && initialPrintedImageElements.length > 0) {
-      setInitialPrintedImageElements((pre) => {
-        const printedElements: TPrintedImageVisualState[] = []
-        for (const ele of initialPrintedImageElements) {
-          const oldEleId = ele.id
-          if (pre.some((e) => e.id === oldEleId)) {
-            ele.id = `${oldEleId}-${crypto.randomUUID()}`
-          }
-          printedElements.push({
-            id: ele.id,
-            url: ele.url,
-            position: {
-              x: getInitialContants<number>('ELEMENT_X'),
-              y: getInitialContants<number>('ELEMENT_Y'),
-            },
-            angle: getInitialContants<number>('ELEMENT_ROTATION'),
-            scale: getInitialContants<number>('ELEMENT_ZOOM'),
-            zindex: getInitialContants<number>('ELEMENT_ZINDEX'),
-          })
-        }
-        return [...pre, ...printedElements]
-      })
+    if (initialPrintedImageElements.length > 0) {
+      for (const img of initialPrintedImageElements) {
+        addImageToFrame(img, frameId)
+      }
     }
   }
 
@@ -343,38 +413,58 @@ export const EditPage = ({ products, printedImages }: TEditPageHorizonProps) => 
   }
 
   const handleAddSticker = (path: string) => {
-    setInitialStickerElements([
-      ...initialStickerElements,
+    addImageToFrame(
       {
         id: crypto.randomUUID(),
-        path,
-        position: {
-          x: getInitialContants<number>('ELEMENT_X'),
-          y: getInitialContants<number>('ELEMENT_Y'),
-        },
-        angle: getInitialContants<number>('ELEMENT_ROTATION'),
-        scale: getInitialContants<number>('ELEMENT_ZOOM'),
-        zindex: getInitialContants<number>('ELEMENT_ZINDEX'),
+        url: path,
       },
-    ])
+      undefined
+    )
   }
 
   // ==================== Event Handlers - Cart Management ====================
+  const cleanPrintAreaBeforeAddToCart = () => {
+    const printArea = editorRef.current
+      ?.querySelector<HTMLElement>('.NAME-print-area-allowed')
+      ?.cloneNode(true) as HTMLElement | null
+    if (printArea) {
+      printArea.style.zIndex = '-1'
+      document.body.prepend(printArea)
+    }
+    printArea?.style.setProperty('border', 'none')
+    const framesDisplayer = printArea?.querySelector<HTMLElement>('.NAME-frames-displayer')
+    framesDisplayer?.style.setProperty('background-color', 'transparent')
+    framesDisplayer?.style.setProperty('border', 'none')
+    for (const frame of printArea?.querySelectorAll<HTMLElement>('.NAME-template-frame') || []) {
+      frame.querySelector<HTMLElement>('.NAME-plus-icon-wrapper')?.remove()
+    }
+    return {
+      editor: editorRef.current,
+      printArea,
+      removeMockPrintArea: () => {
+        printArea?.remove()
+      },
+    }
+  }
+
   const handleAddToCart = async (
     elementsVisualState: TElementsVisualState,
     onDoneAdd: () => void,
     onError: (error: Error) => void
   ) => {
-    const editorElement = editorRef.current
-    if (!sessionId || !editorElement) return
+    if (!sessionId) return
     const message = validateBeforeAddToCart(selectedColor, selectedSize, products)
     if (message) {
       return onError(new Error(message))
     }
+    const { editor, printArea, removeMockPrintArea } = cleanPrintAreaBeforeAddToCart()
+    if (!editor || !printArea) {
+      return onError(new Error('Không tìm thấy khu vực in trên sản phẩm'))
+    }
     const imgMimeType: TImgMimeType = 'image/png'
     requestIdleCallback(() => {
       saveHtmlAsImage(
-        editorElement,
+        editor,
         imgMimeType,
         (imageData) => {
           const mockupId = LocalStorageHelper.saveMockupImageAtLocal(
@@ -398,18 +488,14 @@ export const EditPage = ({ products, printedImages }: TEditPageHorizonProps) => 
               type: selectedPrintAreaInfo.surfaceType,
             }
           )
-          const printAreaBounds = editorElement
-            .querySelector<HTMLElement>('.NAME-print-area-allowed')
-            ?.getBoundingClientRect()
-          if (!printAreaBounds) return
           requestIdleCallback(() => {
-            saveHtmlAsImageCropped(
-              editorElement,
-              printAreaBounds,
+            saveHtmlAsImageWithDesiredSize(
+              printArea,
               selectedPrintAreaInfo.area.widthRealPx,
               selectedPrintAreaInfo.area.heightRealPx,
               imgMimeType,
               (imageData, canvasWithDesiredSize) => {
+                removeMockPrintArea()
                 productService
                   .preSendMockupImage(
                     imageData,
@@ -516,6 +602,7 @@ export const EditPage = ({ products, printedImages }: TEditPageHorizonProps) => 
     initClickOnPageEvent()
     initCartCount()
     initEditElement()
+    addImageToFrame(printedImages[0])
   }, [])
 
   return (
@@ -554,6 +641,10 @@ export const EditPage = ({ products, printedImages }: TEditPageHorizonProps) => 
                   editingProductImage={activeProductImage}
                   selectedPrintAreaInfo={selectedPrintAreaInfo}
                   activeProduct={activeProduct}
+                  pickedTemplate={pickedTemplate}
+                  pickedFrame={pickedFrame}
+                  onPickFrame={setPickedFrame}
+                  onShowPrintedImagesModal={handleShowPrintedImagesModal}
                 />
               </div>
 
@@ -564,9 +655,10 @@ export const EditPage = ({ products, printedImages }: TEditPageHorizonProps) => 
                 onChooseVariant={() => setShowVariantPicker(true)}
                 product={activeProduct}
                 printedImages={printedImages}
-                onAddPrintedImages={(newImages) =>
-                  handleAddPrintedElement('printed-image', newImages)
+                onAddPrintedImages={(newImages, frameId) =>
+                  handleAddPrintedElement(newImages, frameId)
                 }
+                onShowTemplatePicker={() => setShowTemplatePicker(true)}
               />
             </div>
           </div>
@@ -599,7 +691,17 @@ export const EditPage = ({ products, printedImages }: TEditPageHorizonProps) => 
           />
         )}
 
-        
+        {showTemplatePicker && (
+          <TemplatePicker
+            onPickTemplate={(template) => {
+              handlePickTemplate(template)
+              setShowTemplatePicker(false)
+            }}
+            printedImagesCount={printedImages.length}
+            onClose={() => setShowTemplatePicker(false)}
+            templates={availableTemplates}
+          />
+        )}
       </div>
     )
   )

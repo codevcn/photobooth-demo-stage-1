@@ -1,11 +1,13 @@
 import { TPrintedImage } from '@/utils/types/global'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { PrintedImagesModal } from './element/printed-image-element/PrintedImages'
 import { createPortal } from 'react-dom'
+import { eventEmitter } from '@/utils/events'
+import { EInternalEvents } from '@/utils/enums'
 
 interface PrintedImagesPreviewProps {
   printedImages: TPrintedImage[]
-  onAddPrintedImages: (elements: TPrintedImage[]) => void
+  onAddPrintedImages: (elements: TPrintedImage[], frameId?: string) => void
 }
 
 export const PrintedImagesPreview = ({
@@ -13,17 +15,28 @@ export const PrintedImagesPreview = ({
   onAddPrintedImages,
 }: PrintedImagesPreviewProps) => {
   const [showPrintedImagesModal, setShowPrintedImagesModal] = useState<boolean>(false)
+  const [frameIdToAddPrintedImage, setFrameIdToAddPrintedImage] = useState<string>()
 
   const slicedImages = useMemo(() => printedImages.slice(0, 1), [printedImages])
 
   const handleAddImage = (newImage: TPrintedImage) => {
-    onAddPrintedImages([newImage])
+    onAddPrintedImages([newImage], frameIdToAddPrintedImage)
     setShowPrintedImagesModal(false)
   }
 
   const handleOpenPrintedImagesModal = () => {
     setShowPrintedImagesModal((pre) => !pre)
   }
+
+  useEffect(() => {
+    eventEmitter.on(EInternalEvents.HIDE_SHOW_PRINTED_IMAGES_MODAL, (show, frameId) => {
+      setShowPrintedImagesModal(show)
+      setFrameIdToAddPrintedImage(frameId)
+    })
+    return () => {
+      eventEmitter.off(EInternalEvents.HIDE_SHOW_PRINTED_IMAGES_MODAL)
+    }
+  }, [])
 
   return (
     <>

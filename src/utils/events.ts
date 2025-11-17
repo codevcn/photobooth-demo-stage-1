@@ -34,6 +34,10 @@ interface IInternalEvents {
   [EInternalEvents.SYNC_ELEMENT_PROPS]: (elementId: string | null, type: TElementType) => void
   [EInternalEvents.OPEN_CROP_ELEMENT_MODAL]: (elementId: string) => void
   [EInternalEvents.REPLACE_ELEMENT_IMAGE_URL]: (elementId: string, newUrl: string) => void
+  [EInternalEvents.HIDE_SHOW_PRINTED_IMAGES_MODAL]: (
+    show: boolean,
+    frameIdToAddPrintedImage: string
+  ) => void
 }
 
 class EventEmitter<IEvents extends IInternalEvents> {
