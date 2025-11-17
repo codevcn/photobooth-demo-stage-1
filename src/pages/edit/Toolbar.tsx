@@ -4,6 +4,12 @@ import { createPortal } from 'react-dom'
 import { TBaseProduct, TPrintedImage } from '@/utils/types/global'
 import { PrintedImagesPreview } from './PrintedImagesPreview'
 
+type TMenuItem = {
+  icon: JSX.Element
+  label: string
+  onClick: () => void
+}
+
 interface BottomMenuProps {
   onAddText: () => void
   onAddSticker: () => void
@@ -11,6 +17,7 @@ interface BottomMenuProps {
   product: TBaseProduct
   printedImages: TPrintedImage[]
   onAddPrintedImages: (newImages: TPrintedImage[]) => void
+  onPickTemplate: () => void
 }
 
 export const Toolbar: React.FC<BottomMenuProps> = ({
@@ -20,10 +27,11 @@ export const Toolbar: React.FC<BottomMenuProps> = ({
   product,
   printedImages,
   onAddPrintedImages,
+  onPickTemplate,
 }) => {
   const [showProductDetails, setShowProductDetails] = useState(false)
 
-  const menuItems = useMemo(
+  const menuItems = useMemo<TMenuItem[]>(
     () => [
       {
         icon: (
@@ -113,8 +121,30 @@ export const Toolbar: React.FC<BottomMenuProps> = ({
         label: 'Chi tiết',
         onClick: () => setShowProductDetails(true),
       },
+      {
+        icon: (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="lucide lucide-grid2x2-icon lucide-grid-2x2 text-pink-cl"
+          >
+            <path d="M12 3v18" />
+            <path d="M3 12h18" />
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+          </svg>
+        ),
+        label: 'Khung hình',
+        onClick: () => onPickTemplate(),
+      },
     ],
-    [onAddSticker, onAddText, onChooseVariant]
+    [onAddSticker, onAddText, onChooseVariant, onPickTemplate()]
   )
 
   return (

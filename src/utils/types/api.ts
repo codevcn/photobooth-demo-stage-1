@@ -250,3 +250,10 @@ export type TOrderStatusRes = {
   status: TOrderStatus
   is_paid: boolean
 }
+
+export type TAddressProvinceItem = {
+  province_code: string
+  name: string
+}
+
+export type TAddressProvinceList = TAddressProvinceItem[]

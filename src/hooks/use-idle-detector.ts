@@ -1,4 +1,4 @@
-import { LocalStorageHelper } from '@/utils/localstorage'
+import { isHomePage } from '@/utils/helpers'
 import { useEffect, useRef, useState } from 'react'
 
 type TUseIdleDetectorOptions = {
@@ -67,7 +67,6 @@ export const useIdleDetector = ({
       warningTimerRef.current = setTimeout(() => {
         onIdle()
         setShowWarning(false)
-        LocalStorageHelper.clearAllMockupImages()
       }, warningTimeout)
     }, idleTimeout)
   }
@@ -79,6 +78,9 @@ export const useIdleDetector = ({
 
   // Setup event listeners - chỉ chạy 1 lần khi mount
   useEffect(() => {
+    if (isHomePage()) {
+      return
+    }
     const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click']
 
     const handleUserActivity = () => {

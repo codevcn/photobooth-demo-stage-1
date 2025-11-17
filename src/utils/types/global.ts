@@ -266,3 +266,44 @@ export type TEndOfPaymentData = {
     voucherCode?: string
   }
 }
+
+export type TFramesCount = 1 | 2 | 3 | 4
+
+export type TTemplateType =
+  | `1-horizon`
+  | '1-vertical'
+  | '1-square'
+  | '2-horizon'
+  | '2-vertical'
+  | '3-left'
+  | '3-right'
+  | '3-top'
+  | '3-bottom'
+  | '4-square'
+
+export type TPrintTemplate = {
+  id: string
+  name: string
+  frames: TTemplateFrame[]
+  type: TTemplateType
+  framesCount: TFramesCount
+}
+
+export type TTemplateFrame = {
+  id: string
+  index: number
+  placedImage: TPlacedImage
+}
+
+export type TPlacedImage = {
+  id: string
+  placementState: TPlacementState
+  imgURL: string
+}
+
+export type TPlacementState = {
+  frameIndex: number
+  zoom: number
+  objectFit: 'contain' | 'cover'
+  squareRotation: number
+}

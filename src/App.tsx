@@ -14,9 +14,9 @@ import { useIdleDetector } from './hooks/use-idle-detector'
 import { IdleWarningModal } from './components/custom/IdleWarningModal'
 import { useNavigate } from 'react-router-dom'
 import IntroPage from './pages/intro/Page'
+import { isHomePage } from './utils/helpers'
 
-function AppContent() {
-  const { clearAllEditedImages } = useEditedImageContext()
+const IdleCountdown = () => {
   const navigate = useNavigate()
 
   // ==================== Idle Detection - Toàn cục ====================
@@ -26,11 +26,31 @@ function AppContent() {
     onIdle: () => {
       // Quay về trang chủ khi hết thời gian
       navigate('/')
+      LocalStorageHelper.clearAllMockupImages()
     },
   })
 
+  return (
+    !isHomePage() && (
+      <IdleWarningModal show={showWarning} countdown={warningCountdown} onConfirm={confirmActive} />
+    )
+  )
+}
+
+function AppContent() {
+  const { clearAllEditedImages } = useEditedImageContext()
+
+  const handleReturnHome = () => {
+    if (isHomePage()) {
+      LocalStorageHelper.clearAllMockupImages()
+    }
+  }
+
   useEffect(() => {
-    LocalStorageHelper.clearAllMockupImages()
+    handleReturnHome()
+  }, [location.pathname])
+
+  useEffect(() => {
     return () => {
       clearAllEditedImages()
     }
@@ -59,8 +79,7 @@ function AppContent() {
         <Route path="*" element={<NotFound />} />
       </Routes>
 
-      {/* Global Idle Warning Modal */}
-      <IdleWarningModal show={showWarning} countdown={warningCountdown} onConfirm={confirmActive} />
+      <IdleCountdown />
     </>
   )
 }

@@ -219,8 +219,7 @@ export const EditPage = ({ products, printedImages }: TEditPageHorizonProps) => 
   // ==================== Context & Hooks ====================
   const { sessionId } = useGlobalContext()
   const { removeFromElementLayers } = useElementLayerContext()
-  const { saveHtmlAsImageWithDesiredSize, saveHtmlAsImage, saveHtmlAsImageCropped } =
-    useHtmlToCanvas()
+  const { saveHtmlAsImage, saveHtmlAsImageCropped } = useHtmlToCanvas()
   const mockupId = useSearchParams()[0].get('mockupId')
   const editorRef = useRef<HTMLDivElement>(null)
 
@@ -599,6 +598,8 @@ export const EditPage = ({ products, printedImages }: TEditPageHorizonProps) => 
             show={showStickerPicker}
           />
         )}
+
+        
       </div>
     )
   )

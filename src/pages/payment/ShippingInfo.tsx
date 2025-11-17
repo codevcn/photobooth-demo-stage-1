@@ -1,4 +1,6 @@
-import { forwardRef } from 'react'
+import { forwardRef, useEffect, useState } from 'react'
+import { addressService } from '@/services/address.service'
+import { TAddressProvinceItem } from '@/utils/types/api'
 
 type TFormErrors = {
   fullName?: string
@@ -15,6 +17,41 @@ interface ShippingInfoFormProps {
 
 export const ShippingInfoForm = forwardRef<HTMLFormElement, ShippingInfoFormProps>(
   ({ errors }, ref) => {
+    const [provinces, setProvinces] = useState<TAddressProvinceItem[]>([])
+    const [isLoadingProvinces, setIsLoadingProvinces] = useState<boolean>(false)
+    const [hasFetchedOnce, setHasFetchedOnce] = useState<boolean>(false)
+
+    // Fetch provinces function
+    const fetchProvinces = async () => {
+      if (isLoadingProvinces) return // Prevent duplicate fetch while loading
+      setIsLoadingProvinces(true)
+      try {
+        const data = await addressService.fetchProvinces()
+        // Remove duplicates based on province_code
+        const uniqueProvinces = Array.from(
+          new Map(data.map((item) => [item.province_code, item])).values()
+        )
+        setProvinces(uniqueProvinces)
+        setHasFetchedOnce(true)
+      } catch (error) {
+        console.error('Failed to fetch provinces:', error)
+      } finally {
+        setIsLoadingProvinces(false)
+      }
+    }
+
+    // Fetch on mount (ngầm)
+    useEffect(() => {
+      fetchProvinces()
+    }, [])
+
+    // Fetch again when user opens the select
+    const handleProvinceSelectFocus = () => {
+      if (hasFetchedOnce) {
+        fetchProvinces() // Fetch lại cho chắc
+      }
+    }
+
     return (
       <form className="space-y-2" ref={ref}>
         <h3 className="font-semibold text-gray-900 text-lg">Thông tin giao hàng</h3>
@@ -40,10 +77,7 @@ export const ShippingInfoForm = forwardRef<HTMLFormElement, ShippingInfoFormProp
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label
-                htmlFor="phone-input"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
+              <label htmlFor="phone-input" className="block text-sm font-medium text-gray-700 mb-1">
                 Số điện thoại
               </label>
               <input
@@ -82,13 +116,20 @@ export const ShippingInfoForm = forwardRef<HTMLFormElement, ShippingInfoFormProp
               <select
                 id="province-input"
                 name="province"
+                onFocus={handleProvinceSelectFocus}
                 className="w-full min-h-[44px] px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-cl focus:border-transparent transition-all bg-white"
+                disabled={isLoadingProvinces && provinces.length === 0}
               >
-                <option value="">Chọn</option>
-                <option value="hanoi">Hà Nội</option>
-                <option value="hochiminh">Hồ Chí Minh</option>
-                <option value="danang">Đà Nẵng</option>
-                <option value="haiphong">Hải Phòng</option>
+                <option value="">
+                  {isLoadingProvinces && provinces.length === 0
+                    ? 'Đang tải...'
+                    : 'Chọn tỉnh/thành phố'}
+                </option>
+                {provinces.map((province) => (
+                  <option key={province.province_code} value={province.name}>
+                    {province.name}
+                  </option>
+                ))}
               </select>
               {errors.province && (
                 <p className="text-red-600 text-sm mt-0.5 pl-1">{errors.province}</p>
@@ -114,10 +155,7 @@ export const ShippingInfoForm = forwardRef<HTMLFormElement, ShippingInfoFormProp
           </div>
 
           <div>
-            <label
-              htmlFor="address-input"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
+            <label htmlFor="address-input" className="block text-sm font-medium text-gray-700 mb-1">
               Địa chỉ chi tiết
             </label>
             <input
@@ -127,16 +165,11 @@ export const ShippingInfoForm = forwardRef<HTMLFormElement, ShippingInfoFormProp
               placeholder="Số nhà, tên đường, phường/xã..."
               className="w-full min-h-[44px] px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-cl focus:border-transparent transition-all"
             />
-            {errors.address && (
-              <p className="text-red-600 text-sm mt-0.5 pl-1">{errors.address}</p>
-            )}
+            {errors.address && <p className="text-red-600 text-sm mt-0.5 pl-1">{errors.address}</p>}
           </div>
 
           <div>
-            <label
-              htmlFor="message-input"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
+            <label htmlFor="message-input" className="block text-sm font-medium text-gray-700 mb-1">
               Lời nhắn (tùy chọn)
             </label>
             <textarea

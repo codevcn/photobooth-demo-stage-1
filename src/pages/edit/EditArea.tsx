@@ -227,7 +227,7 @@ const EditArea: React.FC<EditAreaProps> = ({
     <div className="flex flex-col rounded-2xl relative max-h-full" ref={editAreaContainerRef}>
       <div className="flex items-center justify-between mb-2">
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/qr')}
           className="flex items-center gap-2 bg-pink-cl hover:bg-dark-pink-cl text-white font-bold py-1 px-4 rounded-xl shadow-md hover:shadow-lg active:scale-95 transition-all duration-200"
         >
           <ArrowLeft size={20} />
@@ -275,15 +275,37 @@ const EditArea: React.FC<EditAreaProps> = ({
         )}
 
         {/* Print Area Overlay */}
-        <PrintAreaOverlay
-          overlayRef={overlayRef}
-          printAreaRef={printAreaRef}
-          isOutOfBounds={isOutOfBounds}
-          selectedColor={selectedColor}
-        />
+        {initialPrintedImageElements.length > 0 && (
+          <PrintAreaOverlay
+            overlayRef={overlayRef}
+            printAreaRef={printAreaRef}
+            name="Print Area Overlay"
+            printTemplate={{
+              id: 'print-area-overlay-template',
+              name: 'Print Area Overlay Template',
+              frames: [
+                {
+                  id: 'frame-1',
+                  index: 0,
+                  placedImage: {
+                    id: 'placed-image-1',
+                    imgURL: initialPrintedImageElements[0].url,
+                    placementState: {
+                      frameIndex: 0,
+                      zoom: 1,
+                      squareRotation: 0,
+                      objectFit: 'contain',
+                    },
+                  },
+                },
+              ],
+              framesCount: 1,
+              type: '1-square',
+            }}
+          />
+        )}
 
         <div className="absolute top-0 left-0 w-full h-full z-50">
-          {/* Text Elements */}
           {initialTextElements.length > 0 &&
             initialTextElements.map((textEl) => (
               <TextElement
@@ -291,36 +313,6 @@ const EditArea: React.FC<EditAreaProps> = ({
                 element={textEl}
                 onRemoveElement={handleRemoveText}
                 onUpdateSelectedElementId={(id) => handleUpdateSelectedElementId(id, 'text')}
-                selectedElementId={selectedElementId}
-                canvasAreaRef={htmlToCanvasEditorRef}
-                mountType={mockupId ? 'from-saved' : 'new'}
-              />
-            ))}
-
-          {/* Sticker Elements */}
-          {initialStickerElements.length > 0 &&
-            initialStickerElements.map((sticker) => (
-              <StickerElement
-                key={sticker.id}
-                element={sticker}
-                onRemoveElement={handleRemoveSticker}
-                onUpdateSelectedElementId={(id) => handleUpdateSelectedElementId(id, 'sticker')}
-                selectedElementId={selectedElementId}
-                canvasAreaRef={htmlToCanvasEditorRef}
-                mountType={mockupId ? 'from-saved' : 'new'}
-              />
-            ))}
-
-          {/* Printed Image Elements */}
-          {initialPrintedImageElements.length > 0 &&
-            initialPrintedImageElements.map((img) => (
-              <PrintedImageElement
-                key={img.id}
-                element={img}
-                onRemoveElement={handleRemovePrintedImage}
-                onUpdateSelectedElementId={(id) =>
-                  handleUpdateSelectedElementId(id, 'printed-image')
-                }
                 selectedElementId={selectedElementId}
                 canvasAreaRef={htmlToCanvasEditorRef}
                 mountType={mockupId ? 'from-saved' : 'new'}
