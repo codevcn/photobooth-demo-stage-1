@@ -1,5 +1,6 @@
 import { labelToSurfaceType } from '@/utils/helpers'
 import { TPrintAreaInfo, TSurfaceType } from '@/utils/types/global'
+import { useMemo } from 'react'
 
 type TPickButtonProps = {
   printAreaInfo?: TPrintAreaInfo
@@ -25,7 +26,7 @@ const PickButton = ({
           isSelected
             ? 'bg-pink-cl text-white shadow-md border-2 border-pink-cl'
             : 'bg-gray-50 text-gray-700 border-2 border-gray-200 hover:border-pink-300 hover:bg-pink-50'
-        }${isBothSides ? 'grid col-span-2 sm:col-span-1' : ''}
+        }${isBothSides ? 'grid col-span-2 smd:col-span-1' : ''}
       `}
     >
       <svg
@@ -44,9 +45,7 @@ const PickButton = ({
         <circle cx="9" cy="9" r="2" />
         <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
       </svg>
-      <span className="text-sm">
-        {(isBothSides ? 'Xem trước ' : 'Edit ') + labelToSurfaceType(finalSurfaceType)}
-      </span>
+      <span className="text-sm">{labelToSurfaceType(finalSurfaceType)}</span>
       {isSelected && (
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -97,10 +96,19 @@ export const SurfaceSelector = ({
     }
   }
 
+  // Sắp xếp danh sách: front trước, back sau
+  const sortedPrintAreaList = useMemo(() => {
+    return [...productPrintAreaList].sort((a, b) => {
+      if (a.surfaceType === 'front') return -1
+      if (b.surfaceType === 'front') return 1
+      return 0
+    })
+  }, [productPrintAreaList])
+
   return (
-    <div className="bg-white rounded-lg p-1 mt-2 border border-gray-200 shadow-sm">
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 grow">
-        {productPrintAreaList.map((printAreaInfo) => {
+    <div className="bg-white rounded-lg p-1 border border-gray-200 shadow-sm">
+      <div className="grid grid-cols-2 smd:grid-cols-3 gap-2 grow">
+        {sortedPrintAreaList.map((printAreaInfo) => {
           return (
             <PickButton
               key={printAreaInfo.surfaceType}

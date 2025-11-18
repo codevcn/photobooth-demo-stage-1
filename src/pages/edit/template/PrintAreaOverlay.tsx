@@ -17,7 +17,7 @@ export const PrintAreaOverlay: React.FC<TPrintAreaOverlayProps> = ({
   return (
     <div
       ref={printAreaRef}
-      className="NAME-print-area-allowed z-[99] border border-white border-dashed flex justify-center items-center absolute transition-all duration-300"
+      className="NAME-print-area-allowed z-[98] border border-white border-dashed flex justify-center items-center absolute transition-all duration-300"
     >
       <FramesDisplayer
         template={printTemplate}

@@ -124,11 +124,11 @@ export const canvasToBlob = (
 export const labelToSurfaceType = (surfaceType: TSurfaceType): string => {
   switch (surfaceType) {
     case 'front':
-      return 'mặt trước'
+      return 'Mặt trước'
     case 'back':
-      return 'mặt sau'
+      return 'Mặt sau'
     case 'both':
-      return 'cả hai mặt'
+      return 'Cả hai mặt'
   }
 }
 

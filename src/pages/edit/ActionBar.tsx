@@ -12,7 +12,7 @@ const ActionBar: React.FC<ActionBarProps> = ({ cartCount, isLoading, onAddToCart
   const navigate = useNavigate()
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-3 mt-2">
       {isLoading &&
         createPortal(
           <div className="fixed inset-0 flex items-center justify-center z-50 animate-pop-in p-4">
@@ -25,7 +25,7 @@ const ActionBar: React.FC<ActionBarProps> = ({ cartCount, isLoading, onAddToCart
         )}
       <button
         onClick={onAddToCart}
-        className="flex-1 bg-pink-cl active:bg-pink-hover-cl text-white font-bold py-1 px-4 rounded-xl shadow-lg touch-target flex items-center justify-center gap-2 text-lg"
+        className="flex-1 bg-pink-cl active:bg-pink-hover-cl text-white font-bold py-1 px-4 rounded shadow-lg touch-target flex items-center justify-center gap-2 text-lg"
       >
         <Check size={24} strokeWidth={3} />
         <span>Thêm vào giỏ hàng</span>

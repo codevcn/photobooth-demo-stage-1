@@ -170,7 +170,11 @@ export const CropElementModal = ({
 
   useEffect(() => {
     adjustUIBasedOnImage()
-    document.body.style.overflow = 'hidden'
+    if (imageUrl) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'auto'
+    }
     return () => {
       document.body.style.overflow = 'auto'
     }

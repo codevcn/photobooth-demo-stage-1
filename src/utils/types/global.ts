@@ -308,3 +308,13 @@ export type TPlacementState = {
   objectFit: 'contain' | 'cover'
   squareRotation: number
 }
+
+export type TFontName = string
+
+export type TFonts = {
+  [fontName: TFontName]: {
+    loadFontURL: string
+  }
+}
+
+export type TLoadFontStatus = 'idle' | 'loading' | 'loaded' | 'error'

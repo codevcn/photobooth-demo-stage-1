@@ -21,7 +21,7 @@ const IdleCountdown = () => {
 
   // ==================== Idle Detection - Toàn cục ====================
   const { showWarning, warningCountdown, confirmActive } = useIdleDetector({
-    idleTimeout: 20000, // 20 giây không hoạt động
+    idleTimeout: 36000, // 36 giây không hoạt động
     warningTimeout: 10000, // 10 giây cảnh báo
     onIdle: () => {
       // Quay về trang chủ khi hết thời gian

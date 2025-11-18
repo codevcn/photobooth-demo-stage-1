@@ -22,7 +22,6 @@ import {
   TImgMimeType,
   TPrintTemplate,
   TTemplateFrame,
-  TPlacedImage,
 } from '@/utils/types/global'
 import { eventEmitter } from '@/utils/events'
 import { EInternalEvents } from '@/utils/enums'
@@ -34,7 +33,7 @@ import { getInitialContants } from '@/utils/contants'
 import { productService } from '@/services/product.service'
 import { useHtmlToCanvas } from '@/hooks/use-html-to-canvas'
 import { convertMimeTypeToExtension } from '@/utils/helpers'
-import { TemplatePicker } from './template/TemplatePicker'
+import { TemplatePickerModal } from './template/TemplatePicker'
 import { hardCodedPrintTemplates } from '../../configs/print-template'
 
 type TEditPageHorizonProps = {
@@ -370,8 +369,6 @@ export const EditPage = ({ products, printedImages }: TEditPageHorizonProps) => 
   const {
     pickedTemplate,
     handlePickTemplate,
-    setShowTemplatePicker,
-    showTemplatePicker,
     pickedFrame,
     setPickedFrame,
     addImageToFrame,
@@ -657,8 +654,8 @@ export const EditPage = ({ products, printedImages }: TEditPageHorizonProps) => 
             />
 
             {/* Right Column: Edit Area */}
-            <div className="grid grid-cols-1 spmd:grid-cols-[5fr_minmax(84px,1fr)] xl:grid-cols-[7fr_minmax(84px,1fr)] 2xl:grid-cols-[8fr_1fr] gap-2 h-fit">
-              <div className="max-h-screen bg-white max-w-full w-full rounded-xl shadow-md p-2 outline outline-1 outline-gray-200">
+            <div className="grid grid-cols-1 md:grid-cols-[5fr_minmax(84px,1fr)] xl:grid-cols-[8fr_1fr] gap-2 h-fit">
+              <div className="max-h-[unset] md:max-h-screen bg-white max-w-full w-full rounded-xl shadow-md p-2 outline outline-1 outline-gray-200">
                 <EditArea
                   initialTextElements={initialTextElements}
                   initialStickerElements={initialStickerElements}
@@ -682,6 +679,11 @@ export const EditPage = ({ products, printedImages }: TEditPageHorizonProps) => 
                   onCropFrameImage={updateFrameImageURL}
                   onRemoveFrameImage={removeFrameImage}
                   onChangeFrameImage={updateFrameImageURL}
+                  printedImagesCount={printedImages.length}
+                  templates={availableTemplates}
+                  onPickTemplate={(template) => {
+                    handlePickTemplate(template)
+                  }}
                 />
               </div>
 
@@ -695,7 +697,7 @@ export const EditPage = ({ products, printedImages }: TEditPageHorizonProps) => 
                 onAddPrintedImages={(newImages, frameId) =>
                   handleAddPrintedElement(newImages, frameId)
                 }
-                onShowTemplatePicker={() => setShowTemplatePicker(true)}
+                pickedTemplate={pickedTemplate}
               />
             </div>
           </div>
@@ -725,18 +727,6 @@ export const EditPage = ({ products, printedImages }: TEditPageHorizonProps) => 
             onAddSticker={handleAddSticker}
             onClose={() => setShowStickerPicker(false)}
             show={showStickerPicker}
-          />
-        )}
-
-        {showTemplatePicker && (
-          <TemplatePicker
-            onPickTemplate={(template) => {
-              handlePickTemplate(template)
-              setShowTemplatePicker(false)
-            }}
-            printedImagesCount={printedImages.length}
-            onClose={() => setShowTemplatePicker(false)}
-            templates={availableTemplates}
           />
         )}
       </div>

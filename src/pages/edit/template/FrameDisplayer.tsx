@@ -1,6 +1,7 @@
 import { TPrintTemplate } from '@/utils/types/global'
 import { TemplateFrame } from './TemplateFrame'
 import { templateTypeToCssStyles } from '../../../configs/print-template'
+import { cn } from '@/lib/utils'
 
 type TFramesDisplayerProps = {
   template: TPrintTemplate
@@ -14,6 +15,7 @@ type TFramesDisplayerProps = {
     container: string
     plusIconWrapper: string
   }>
+  displayerClassName: string
   onClickFrame: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, frameId: string) => void
 }>
 
@@ -22,12 +24,16 @@ export const FramesDisplayer = ({
   plusIconReplacer,
   frameStyles,
   frameClassNames,
+  displayerClassName,
   onClickFrame,
 }: TFramesDisplayerProps) => {
   const { frames, type } = template
   return (
     <div
-      className="NAME-frames-displayer bg-gray-600/30 p-[2px] gap-1 max-h-full max-w-full"
+      className={cn(
+        'NAME-frames-displayer bg-gray-600/30 p-[2px] gap-1 max-h-full max-w-full',
+        displayerClassName
+      )}
       style={{ ...templateTypeToCssStyles(type) }}
     >
       {frames.map((frame) => (

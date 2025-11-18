@@ -17,7 +17,7 @@ interface BottomMenuProps {
   product: TBaseProduct
   printedImages: TPrintedImage[]
   onAddPrintedImages: (newImages: TPrintedImage[], frameId?: string) => void
-  onShowTemplatePicker: () => void
+  pickedTemplate: TPrintTemplate
 }
 
 export const Toolbar: React.FC<BottomMenuProps> = ({
@@ -27,34 +27,12 @@ export const Toolbar: React.FC<BottomMenuProps> = ({
   product,
   printedImages,
   onAddPrintedImages,
-  onShowTemplatePicker,
+  pickedTemplate,
 }) => {
   const [showProductDetails, setShowProductDetails] = useState(false)
 
   const menuItems = useMemo<TMenuItem[]>(
     () => [
-      {
-        icon: (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="lucide lucide-grid2x2-icon lucide-grid-2x2 text-pink-cl"
-          >
-            <path d="M12 3v18" />
-            <path d="M3 12h18" />
-            <rect x="3" y="3" width="18" height="18" rx="2" />
-          </svg>
-        ),
-        label: 'Khung hình',
-        onClick: () => onShowTemplatePicker(),
-      },
       {
         icon: (
           <svg
@@ -144,7 +122,7 @@ export const Toolbar: React.FC<BottomMenuProps> = ({
         onClick: () => setShowProductDetails(true),
       },
     ],
-    [onAddSticker, onAddText, onChooseVariant, onShowTemplatePicker]
+    [onAddSticker, onAddText, onChooseVariant]
   )
 
   return (
@@ -152,11 +130,12 @@ export const Toolbar: React.FC<BottomMenuProps> = ({
       <h2 className="text-base text-center md:hidden font-bold text-gray-800 mb-2 lg:mb-3 flex items-center justify-center gap-2">
         Công cụ chỉnh sửa
       </h2>
-      <div className="grid grid-cols-6 spmd:grid-cols-1 gap-1">
+      <div className="grid grid-cols-5 md:grid-cols-1 gap-1">
         <div className="w-full py-2 rounded-xl touch-target transition-colors">
           <PrintedImagesPreview
             printedImages={printedImages}
             onAddPrintedImages={onAddPrintedImages}
+            pickedTemplate={pickedTemplate}
           />
         </div>
         {menuItems.map((item, index) => (

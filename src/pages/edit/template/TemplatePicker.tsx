@@ -1,24 +1,80 @@
 import { TPrintTemplate } from '@/utils/types/global'
 import { FramesDisplayer } from './FrameDisplayer'
 import { useEffect, useMemo } from 'react'
+import { cn } from '@/lib/utils'
 
 type TTemplatePickerProps = {
+  onPickTemplate: (template: TPrintTemplate) => void
+  printedImagesCount: number
+  templates: TPrintTemplate[]
+} & Partial<{
+  classNames: Partial<{
+    templatesList: string
+    templateItem: string
+  }>
+}>
+
+export const TemplatePicker = ({
+  onPickTemplate,
+  printedImagesCount,
+  templates,
+  classNames,
+}: TTemplatePickerProps) => {
+  const availableTemplates = useMemo<TPrintTemplate[]>(() => {
+    return templates.filter((template) => template.framesCount <= printedImagesCount)
+  }, [printedImagesCount, templates])
+
+  return (
+    <div className={cn('grid gap-2 overflow-y-auto', classNames?.templatesList)}>
+      {availableTemplates.map((template) => (
+        <div
+          key={template.id}
+          onClick={() => onPickTemplate(template)}
+          className="flex items-center justify-center border border-gray-300 rounded p-1 bg-white hover:shadow-lg active:scale-90 transition"
+        >
+          <FramesDisplayer
+            template={template}
+            plusIconReplacer={
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lucide lucide-image-icon lucide-image"
+              >
+                <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                <circle cx="9" cy="9" r="2" />
+                <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+              </svg>
+            }
+            frameStyles={{
+              container: { backgroundColor: 'white' },
+            }}
+          />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+type TTemplatePickerModalProps = {
   onPickTemplate: (template: TPrintTemplate) => void
   onClose: () => void
   printedImagesCount: number
   templates: TPrintTemplate[]
 }
 
-export const TemplatePicker = ({
+export const TemplatePickerModal = ({
   onPickTemplate,
   onClose,
   printedImagesCount,
   templates,
-}: TTemplatePickerProps) => {
-  const availableTemplates = useMemo<TPrintTemplate[]>(() => {
-    return templates.filter((template) => template.framesCount <= printedImagesCount)
-  }, [printedImagesCount, templates])
-
+}: TTemplatePickerModalProps) => {
   useEffect(() => {
     document.body.style.overflow = 'hidden'
     return () => {
@@ -50,43 +106,19 @@ export const TemplatePicker = ({
             </svg>
           </button>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 overflow-y-auto mt-2 w-full max-h-[80vh] px-2">
-          {availableTemplates.map((template) => (
-            <div
-              key={template.id}
-              onClick={() => {
-                onPickTemplate(template)
-                onClose()
-              }}
-              className="flex items-center justify-center border border-gray-300 rounded p-1 m-2 bg-white hover:shadow-lg active:scale-90 transition"
-            >
-              <FramesDisplayer
-                template={template}
-                plusIconReplacer={
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="lucide lucide-image-icon lucide-image"
-                  >
-                    <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-                    <circle cx="9" cy="9" r="2" />
-                    <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
-                  </svg>
-                }
-                frameStyles={{
-                  container: { backgroundColor: 'white' },
-                }}
-              />
-            </div>
-          ))}
-        </div>
+        <TemplatePicker
+          onPickTemplate={(tpl) => {
+            onPickTemplate(tpl)
+            onClose()
+          }}
+          printedImagesCount={printedImagesCount}
+          templates={templates}
+          classNames={{
+            templatesList:
+              'grid-cols-2 mt-2 px-2 sm:grid-cols-3 md:grid-cols-4 w-full max-h-[80vh]',
+            templateItem: 'm-2',
+          }}
+        />
       </div>
     </div>
   )

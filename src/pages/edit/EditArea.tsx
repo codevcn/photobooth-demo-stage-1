@@ -29,6 +29,7 @@ import { ArrowLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { BothSidesPreviewModal } from './BothSidesPreviewModal'
 import { TemplateFrameMenu } from './template/TemplateFrameMenu'
+import { TemplatePicker } from './template/TemplatePicker'
 
 type TSelectingType = TElementType | null
 
@@ -59,6 +60,9 @@ interface EditAreaProps {
   onCropFrameImage: (croppedImageUrl: string, frameId: string) => void
   onRemoveFrameImage: (frameId: string) => void
   onChangeFrameImage: (imgURL: string, frameId: string) => void
+  printedImagesCount: number
+  templates: TPrintTemplate[]
+  onPickTemplate: (template: TPrintTemplate) => void
 }
 
 const EditArea: React.FC<EditAreaProps> = ({
@@ -84,6 +88,9 @@ const EditArea: React.FC<EditAreaProps> = ({
   onCropFrameImage,
   onRemoveFrameImage,
   onChangeFrameImage,
+  printedImagesCount,
+  templates,
+  onPickTemplate,
 }) => {
   const [showCropModal, setShowCropModal] = useState<boolean>(false)
   const [cropElementId, setCropElementId] = useState<string | null>(null)
@@ -146,7 +153,6 @@ const EditArea: React.FC<EditAreaProps> = ({
   }
 
   const handleOpenCropModal = (frameId: string) => {
-    console.log('>>> piced frame:', pickedFrame)
     if (!pickedFrame || pickedFrame.id !== frameId) return
     if (!pickedFrame.placedImage) return
     setCropElementId(frameId)
@@ -262,81 +268,93 @@ const EditArea: React.FC<EditAreaProps> = ({
       <div className="flex items-center justify-between mb-2">
         <button
           onClick={() => navigate('/qr')}
-          className="flex items-center gap-2 bg-pink-cl hover:bg-dark-pink-cl text-white font-bold py-1 px-4 rounded-xl shadow-md hover:shadow-lg active:scale-95 transition-all duration-200"
+          className="flex items-center gap-2 bg-pink-cl text-white font-bold py-1 px-4 rounded-xl shadow-md hover:shadow-lg active:scale-95 transition duration-200"
         >
           <ArrowLeft size={20} />
           <span className="hidden sm:inline">Quay lại</span>
         </button>
         <div className="flex items-center flex-wrap gap-2 text-left flex-1">
           <h3 className="text-lg font-bold text-gray-800 pl-4">Khu vực chỉnh sửa</h3>
-          <p className="text-sm text-gray-500">Chạm vào các phần tử để di chuyển vị trí</p>
         </div>
       </div>
 
-      <div
-        ref={(node) => {
-          htmlToCanvasEditorRef.current = node
-          containerElementRef.current = node
-        }}
-        className="NAME-canvas-editor relative z-0 flex flex-1 flex-shrink basis-auto min-h-0 w-full h-full max-h-[500px] overflow-hidden"
-      >
-        {selectedPrintAreaInfo && selectedPrintAreaInfo.imageUrl ? (
-          <img
-            src={selectedPrintAreaInfo.imageUrl}
-            alt={editingProductImage.name}
-            className="NAME-product-image touch-none w-full h-auto max-h-[500px] object-contain"
-          />
-        ) : (
-          <div className="flex items-center justify-center h-full w-full text-gray-600">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="lucide lucide-triangle-alert-icon lucide-triangle-alert"
-            >
-              <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
-              <path d="M12 9v4" />
-              <path d="M12 17h.01" />
-            </svg>
-            <p className="text-base mt-3">Không có ảnh sản phẩm</p>
-          </div>
-        )}
-
-        {/* Print Area Overlay */}
-        <PrintAreaOverlay
-          overlayRef={overlayRef}
-          printAreaRef={printAreaRef}
-          name="Print Area Overlay"
-          printTemplate={pickedTemplate}
-          onClickFrame={handleSelectFrameOnPrintArea}
+      <div className="flex flex-col md:flex-row gap-2 flex-1 flex-shrink basis-auto min-h-0 w-full md:h-full md:max-h-[500px]">
+        <TemplatePicker
+          classNames={{
+            templatesList:
+              'md:hidden xl:grid grid-cols-2 order-2 md:order-1 shadow-[0_0_10px_1px_rgba(0,0,0,0.25)] w-full md:w-[40%] rounded-[6px] max-h-[350px] px-1 py-4',
+          }}
+          onPickTemplate={onPickTemplate}
+          printedImagesCount={printedImagesCount}
+          templates={templates}
         />
-
-        <div className="absolute top-0 left-0 w-full h-full z-50">
-          {initialTextElements.length > 0 &&
-            initialTextElements.map((textEl) => (
-              <TextElement
-                key={textEl.id}
-                element={textEl}
-                onRemoveElement={handleRemoveText}
-                onUpdateSelectedElementId={(id) => handleUpdateSelectedElementId(id, 'text')}
-                selectedElementId={selectedElementId}
-                canvasAreaRef={htmlToCanvasEditorRef}
-                mountType={mockupId ? 'from-saved' : 'new'}
+        <div className="w-full xl:w-[60%] order-1 md:order-2 relative z-0">
+          <div
+            ref={(node) => {
+              htmlToCanvasEditorRef.current = node
+              containerElementRef.current = node
+            }}
+            className="NAME-canvas-editor h-full"
+          >
+            {selectedPrintAreaInfo && selectedPrintAreaInfo.imageUrl ? (
+              <img
+                src={selectedPrintAreaInfo.imageUrl}
+                alt={editingProductImage.name}
+                className="NAME-product-image touch-none w-full h-full max-h-[500px] object-contain"
               />
-            ))}
+            ) : (
+              <div className="flex items-center justify-center h-full w-full text-gray-600">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="lucide lucide-triangle-alert-icon lucide-triangle-alert"
+                >
+                  <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
+                  <path d="M12 9v4" />
+                  <path d="M12 17h.01" />
+                </svg>
+                <p className="text-base mt-3">Không có ảnh sản phẩm</p>
+              </div>
+            )}
+
+            {/* Print Area Overlay */}
+            <PrintAreaOverlay
+              overlayRef={overlayRef}
+              printAreaRef={printAreaRef}
+              name="Print Area Overlay"
+              printTemplate={pickedTemplate}
+              onClickFrame={handleSelectFrameOnPrintArea}
+            />
+
+            <div className="absolute top-0 left-0 w-full h-full z-50">
+              {initialTextElements.length > 0 &&
+                initialTextElements.map((textEl) => (
+                  <TextElement
+                    key={textEl.id}
+                    element={textEl}
+                    onRemoveElement={handleRemoveText}
+                    onUpdateSelectedElementId={(id) => handleUpdateSelectedElementId(id, 'text')}
+                    selectedElementId={selectedElementId}
+                    canvasAreaRef={htmlToCanvasEditorRef}
+                    mountType={mockupId ? 'from-saved' : 'new'}
+                  />
+                ))}
+            </div>
+          </div>
         </div>
       </div>
 
-      {selectedElementId && (
-        <div className="bg-white rounded py-2 pb-0 mt-1">
-          {selectingType === 'text' ? (
-            <TextElementMenu elementId={selectedElementId} />
+      <div className="bg-white rounded smd:h-[41.5px] mt-2">
+        {selectedElementId ? (
+          selectingType === 'text' ? (
+            <TextElementMenu elementId={selectedElementId} onClose={cancelSelectingElement} />
           ) : selectingType === 'sticker' ? (
             <StickerElementMenu elementId={selectedElementId} />
           ) : selectingType === 'printed-image' ? (
@@ -351,21 +369,19 @@ const EditArea: React.FC<EditAreaProps> = ({
             />
           ) : (
             <></>
-          )}
-        </div>
-      )}
-
-      <SurfaceSelector
-        selectedSurface={selectedPrintAreaInfo.surfaceType}
-        onSurfaceChange={onSelectSurface}
-        productPrintAreaList={activeProduct.printAreaList}
-        onShowBothSidesPreview={() => setShowBothSidesModal(true)}
-      />
+          )
+        ) : (
+          <SurfaceSelector
+            selectedSurface={selectedPrintAreaInfo.surfaceType}
+            onSurfaceChange={onSelectSurface}
+            productPrintAreaList={activeProduct.printAreaList}
+            onShowBothSidesPreview={() => setShowBothSidesModal(true)}
+          />
+        )}
+      </div>
 
       {/* Action Bar */}
-      <div className="px-4 mt-2">
-        <ActionBar cartCount={cartCount} isLoading={isAddingToCart} onAddToCart={beforeAddToCart} />
-      </div>
+      <ActionBar cartCount={cartCount} isLoading={isAddingToCart} onAddToCart={beforeAddToCart} />
 
       {/* Crop Modal */}
       {showCropModal && cropElementId && (

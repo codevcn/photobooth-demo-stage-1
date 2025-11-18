@@ -3,7 +3,7 @@ import { getInitialContants } from '@/utils/contants'
 import { EInternalEvents } from '@/utils/enums'
 import { eventEmitter } from '@/utils/events'
 import { TElementType, TPrintedImageVisualState } from '@/utils/types/global'
-import { Check, Crop, RefreshCw, Trash2 } from 'lucide-react'
+import { Check, Crop, RefreshCw, Trash2, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
 type TPropertyType = 'scale' | 'angle' | 'posXY' | 'zindex-up' | 'zindex-down'
@@ -177,6 +177,15 @@ export const TemplateFrameMenu = ({
       ref={menuRef}
       className="NAME-menu-section relative overflow-x-auto flex flex-nowrap items-stretch justify-center gap-y-1 gap-x-1 p-1 pr-[40px] rounded-md border border-gray-400/30 border-solid"
     >
+      <div className="absolute top-1/2 -translate-y-1/2 left-1 flex items-center">
+        <button
+          onClick={onClose}
+          className="group flex flex-nowrap items-center justify-center font-bold bg-pink-cl gap-1 text-white active:scale-90 transition rounded p-1"
+        >
+          <X size={20} className="text-white" strokeWidth={3} />
+        </button>
+      </div>
+
       <div className="NAME-form-group NAME-form-crop min-w-[100px] col-span-2 flex flex-shrink-0 items-center justify-center bg-pink-cl rounded px-1 py-0.5 shadow">
         <button
           onClick={handleCropImage}
@@ -205,7 +214,7 @@ export const TemplateFrameMenu = ({
         </button>
       </div>
 
-      <div className="NAME-form-group NAME-form-position absolute top-1/2 -translate-y-1/2 right-1 flex items-center">
+      <div className="absolute top-1/2 -translate-y-1/2 right-1 flex items-center">
         <button
           onClick={onClose}
           className="group flex flex-nowrap items-center justify-center font-bold bg-pink-cl gap-1 text-white active:scale-90 transition rounded p-1"

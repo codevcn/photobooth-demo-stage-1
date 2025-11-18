@@ -30,19 +30,20 @@ class ProductService {
       // Get category from attributes or default to 'cup'
       const category = product.attributes_json.category as TProductImage['category']
 
-      // Build printAreaList from surfaces
+      // Build printAreaList from surfaces, sorted with 'front' first
       const printAreaList: TPrintAreaInfo[] = []
-      for (const surface of product.surfaces) {
-        if (surface.code !== 'front' && surface.code !== 'back') continue // Only include 'front' and 'back' surfaces
+      const surfaces = product.surfaces.sort((a, b) =>
+        a.code === 'front' ? -1 : b.code === 'front' ? 1 : 0
+      )
+      for (const surface of surfaces) {
+        if (surface.code !== 'front' && surface.code !== 'back') continue
         printAreaList.push({
           id: surface.id,
           area: {
-            // Keep pixel values from API - will be converted to actual position in hook
             printX: surface.print_areas.x_px,
             printY: surface.print_areas.y_px,
             printW: surface.print_areas.width_px,
             printH: surface.print_areas.height_px,
-            // Store real dimensions for scaling calculation
             widthRealPx: surface.print_areas.width_real_px,
             heightRealPx: surface.print_areas.height_real_px,
           },
