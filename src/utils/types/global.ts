@@ -290,10 +290,13 @@ export type TPrintTemplate = {
   framesCount: TFramesCount
 }
 
+export type TFrameRectType = 'horizontal' | 'vertical' | 'square'
+
 export type TTemplateFrame = {
   id: string
   index: number
   placedImage?: TPlacedImage
+  rectType: TFrameRectType
 }
 
 export type TPlacedImage = {
@@ -318,3 +321,8 @@ export type TFonts = {
 }
 
 export type TLoadFontStatus = 'idle' | 'loading' | 'loaded' | 'error'
+
+export type TFrameToAddPrintedImage = {
+  frameId: string
+  rectType: TFrameRectType
+}

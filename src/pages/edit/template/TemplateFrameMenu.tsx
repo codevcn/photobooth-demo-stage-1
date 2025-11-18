@@ -2,22 +2,30 @@ import { useGlobalContext } from '@/context/global-context'
 import { getInitialContants } from '@/utils/contants'
 import { EInternalEvents } from '@/utils/enums'
 import { eventEmitter } from '@/utils/events'
-import { TElementType, TPrintedImageVisualState } from '@/utils/types/global'
+import {
+  TElementType,
+  TFrameRectType,
+  TPrintedImageVisualState,
+  TPrintTemplate,
+  TTemplateFrame,
+} from '@/utils/types/global'
 import { Check, Crop, RefreshCw, Trash2, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
 type TPropertyType = 'scale' | 'angle' | 'posXY' | 'zindex-up' | 'zindex-down'
 
 interface PrintedImageMenuProps {
+  templateFrames: TTemplateFrame[]
   frameId: string
   onClose: () => void
   onOpenCropModal: (frameId: string) => void
-  onShowPrintedImagesModal: (frameId: string) => void
+  onShowPrintedImagesModal: (frameId: string, rectType: TFrameRectType) => void
   onRemoveFrameImage: (frameId: string) => void
 }
 
 export const TemplateFrameMenu = ({
   frameId,
+  templateFrames,
   onClose,
   onOpenCropModal,
   onShowPrintedImagesModal,
@@ -161,6 +169,12 @@ export const TemplateFrameMenu = ({
     }
   }
 
+  const handleShowPrintedImagesModal = () => {
+    const rectType = templateFrames.find((frame) => frame.id === frameId)?.rectType
+    if (!rectType) return
+    onShowPrintedImagesModal(frameId, rectType)
+  }
+
   useEffect(() => {
     listenElementProps(frameId, 'printed-image')
   }, [frameId])
@@ -206,7 +220,7 @@ export const TemplateFrameMenu = ({
       </div>
       <div className="NAME-form-group NAME-form-crop min-w-[100px] col-span-2 flex flex-shrink-0 items-center justify-center bg-pink-cl rounded px-1 py-0.5 shadow">
         <button
-          onClick={() => onShowPrintedImagesModal(frameId)}
+          onClick={handleShowPrintedImagesModal}
           className="group flex flex-nowrap items-center justify-center font-bold gap-1 text-white hover:bg-white hover:text-pink-cl rounded p-1 transition-colors"
         >
           <RefreshCw size={20} className="text-white group-hover:text-pink-cl" strokeWidth={3} />

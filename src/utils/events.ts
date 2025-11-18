@@ -1,5 +1,5 @@
 import { EInternalEvents } from './enums'
-import { TElementType } from './types/global'
+import { TElementType, TFrameRectType } from './types/global'
 
 interface IInternalEvents {
   [EInternalEvents.CLICK_ON_PAGE]: (target: HTMLElement | null) => void
@@ -36,7 +36,8 @@ interface IInternalEvents {
   [EInternalEvents.REPLACE_ELEMENT_IMAGE_URL]: (elementId: string, newUrl: string) => void
   [EInternalEvents.HIDE_SHOW_PRINTED_IMAGES_MODAL]: (
     show: boolean,
-    frameIdToAddPrintedImage: string
+    frameIdToAddPrintedImage: string,
+    frameRectType: TFrameRectType
   ) => void
 }
 

@@ -14,7 +14,7 @@ interface ProductGalleryProps {
   products: TBaseProduct[]
   activeImageId: number
   activeProduct: TBaseProduct
-  onSelectImage: (productImageId: number) => void
+  onSelectImage: (productImageId: number, printedImage: TPrintedImage) => void
   printedImages: TPrintedImage[]
 }
 
@@ -60,14 +60,14 @@ const ProductGallery: React.FC<ProductGalleryProps> = ({
         }
       }
     }
-    return [firstLineProducts, productsInNewLine]
+    return [firstLineProducts.slice(0, 8), firstLineProducts.slice(8, firstLineProducts.length)]
   }, [products, printedImages])
 
-  const hasProductsInNewLine = productsToRender && productsToRender.length > 0
+  const hasProductsInNewLine = productsInNewLine && productsInNewLine.length > 0
 
-  const handleSelectProduct = (product: TGalleryProduct) => {
+  const handleSelectProduct = (product: TGalleryProduct, printedImage: TPrintedImage) => {
     setSelectedProduct(product)
-    onSelectImage(product.firstImage.id)
+    onSelectImage(product.firstImage.id, printedImage)
   }
 
   useEffect(() => {
@@ -94,7 +94,7 @@ const ProductGallery: React.FC<ProductGalleryProps> = ({
               return (
                 <button
                   key={product.idToRender}
-                  onClick={() => handleSelectProduct(product)}
+                  onClick={() => handleSelectProduct(product, product.printedImage)}
                   className={`w-fit h-fit flex-shrink-0 relative rounded-xl overflow-hidden transition duration-200 ${
                     isActive ? 'ring-4 ring-pink-cl ring-offset-2' : 'ring-2 ring-gray-200'
                   }`}
@@ -117,12 +117,12 @@ const ProductGallery: React.FC<ProductGalleryProps> = ({
         </div>
         {hasProductsInNewLine && (
           <div className="flex md:flex-col md:items-center gap-3 overflow-x-scroll p-2 pt-3 md:overflow-y-auto md:overflow-x-clip h-fit md:max-h-full spmd:max-h-full gallery-scroll">
-            {productsToRender.map((product) => {
+            {productsInNewLine.map((product) => {
               const isActive = product.idToRender === selectedProduct?.idToRender
               return (
                 <button
                   key={product.idToRender}
-                  onClick={() => handleSelectProduct(product)}
+                  onClick={() => handleSelectProduct(product, product.printedImage)}
                   className={`flex-shrink-0 touch-target relative rounded-xl overflow-hidden transition duration-200 ${
                     isActive ? 'ring-4 ring-pink-cl ring-offset-2' : 'ring-2 ring-gray-200'
                   }`}

@@ -1,4 +1,10 @@
-import { TPrintTemplate, TTemplateType } from '@/utils/types/global'
+import {
+  TFrameRectType,
+  TImageSizeInfo,
+  TPrintedImage,
+  TPrintTemplate,
+  TTemplateType,
+} from '@/utils/types/global'
 
 export const hardCodedPrintTemplates: TPrintTemplate[] = [
   {
@@ -8,6 +14,7 @@ export const hardCodedPrintTemplates: TPrintTemplate[] = [
       {
         id: 'frame-1',
         index: 1,
+        rectType: 'horizontal',
       },
     ],
     framesCount: 3,
@@ -20,6 +27,7 @@ export const hardCodedPrintTemplates: TPrintTemplate[] = [
       {
         id: 'frame-2',
         index: 1,
+        rectType: 'vertical',
       },
     ],
     framesCount: 3,
@@ -32,6 +40,7 @@ export const hardCodedPrintTemplates: TPrintTemplate[] = [
       {
         id: 'frame-3',
         index: 1,
+        rectType: 'square',
       },
     ],
     framesCount: 3,
@@ -44,10 +53,12 @@ export const hardCodedPrintTemplates: TPrintTemplate[] = [
       {
         id: 'frame-4',
         index: 1,
+        rectType: 'horizontal',
       },
       {
         id: 'frame-5',
         index: 2,
+        rectType: 'horizontal',
       },
     ],
     framesCount: 3,
@@ -60,10 +71,12 @@ export const hardCodedPrintTemplates: TPrintTemplate[] = [
       {
         id: 'frame-6',
         index: 1,
+        rectType: 'vertical',
       },
       {
         id: 'frame-7',
         index: 2,
+        rectType: 'vertical',
       },
     ],
     framesCount: 3,
@@ -76,14 +89,17 @@ export const hardCodedPrintTemplates: TPrintTemplate[] = [
       {
         id: 'frame-8',
         index: 1,
+        rectType: 'square',
       },
       {
         id: 'frame-9',
         index: 2,
+        rectType: 'vertical',
       },
       {
         id: 'frame-10',
         index: 3,
+        rectType: 'square',
       },
     ],
     framesCount: 3,
@@ -96,14 +112,17 @@ export const hardCodedPrintTemplates: TPrintTemplate[] = [
       {
         id: 'frame-11',
         index: 1,
+        rectType: 'vertical',
       },
       {
         id: 'frame-12',
         index: 2,
+        rectType: 'square',
       },
       {
         id: 'frame-13',
         index: 3,
+        rectType: 'square',
       },
     ],
     framesCount: 3,
@@ -116,14 +135,17 @@ export const hardCodedPrintTemplates: TPrintTemplate[] = [
       {
         id: 'frame-14',
         index: 1,
+        rectType: 'square',
       },
       {
         id: 'frame-15',
         index: 2,
+        rectType: 'square',
       },
       {
         id: 'frame-16',
         index: 3,
+        rectType: 'horizontal',
       },
     ],
     framesCount: 3,
@@ -136,14 +158,17 @@ export const hardCodedPrintTemplates: TPrintTemplate[] = [
       {
         id: 'frame-17',
         index: 1,
+        rectType: 'horizontal',
       },
       {
         id: 'frame-18',
         index: 2,
+        rectType: 'square',
       },
       {
         id: 'frame-19',
         index: 3,
+        rectType: 'square',
       },
     ],
     framesCount: 3,
@@ -156,18 +181,22 @@ export const hardCodedPrintTemplates: TPrintTemplate[] = [
       {
         id: 'frame-20',
         index: 1,
+        rectType: 'square',
       },
       {
         id: 'frame-21',
         index: 2,
+        rectType: 'square',
       },
       {
         id: 'frame-22',
         index: 3,
+        rectType: 'square',
       },
       {
         id: 'frame-23',
         index: 4,
+        rectType: 'square',
       },
     ],
     framesCount: 4,
@@ -180,18 +209,22 @@ export const hardCodedPrintTemplates: TPrintTemplate[] = [
       {
         id: 'frame-24',
         index: 1,
+        rectType: 'horizontal',
       },
       {
         id: 'frame-25',
         index: 2,
+        rectType: 'horizontal',
       },
       {
         id: 'frame-26',
         index: 3,
+        rectType: 'horizontal',
       },
       {
         id: 'frame-27',
         index: 4,
+        rectType: 'horizontal',
       },
     ],
     framesCount: 4,
@@ -335,5 +368,23 @@ export const templateTypeToFrameStyle = (
       return {}
     default:
       return {}
+  }
+}
+
+export const allowPrintedImageOnTemplateType = (
+  frameRectType: TFrameRectType,
+  printedImageSize: TImageSizeInfo
+): boolean => {
+  const imgRatio = printedImageSize.width / printedImageSize.height
+  switch (frameRectType) {
+    case 'horizontal':
+      if (imgRatio < 1) return false
+      return true
+    case 'vertical':
+      if (imgRatio > 1) return false
+      return true
+    case 'square':
+      if (imgRatio < 0.9 || imgRatio > 1.1) return false
+      return true
   }
 }

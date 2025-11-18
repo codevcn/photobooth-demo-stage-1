@@ -1,5 +1,5 @@
 import { getNaturalSizeOfImage } from '@/utils/helpers'
-import { TPrintedImage } from '@/utils/types/global'
+import { TImageSizeInfo, TPrintedImage } from '@/utils/types/global'
 import { X } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 
@@ -7,14 +7,15 @@ interface ImageProps {
   img: TPrintedImage
   index: number
   imgsContainerRef: React.RefObject<HTMLDivElement>
-  onAddImage: (printedImg: TPrintedImage) => void
+  onAddImage: (printedImg: TPrintedImage, imgSize: TImageSizeInfo) => void
 }
 
 const Image = ({ img, index, imgsContainerRef, onAddImage }: ImageProps) => {
   const { url, id } = img
+  const imgDataRef = useRef<TImageSizeInfo>({ width: 0, height: 0 })
 
   const handleAddImage = () => {
-    onAddImage({ ...img, id, url })
+    onAddImage({ ...img, id, url }, imgDataRef.current)
   }
 
   useEffect(() => {
@@ -26,6 +27,7 @@ const Image = ({ img, index, imgsContainerRef, onAddImage }: ImageProps) => {
         )
         if (imgEle) {
           imgEle.style.cssText = `width: ${width}px; aspect-ratio: ${width} / ${height};`
+          imgDataRef.current = { width, height }
         }
       },
       (err) => {}
@@ -48,7 +50,7 @@ const Image = ({ img, index, imgsContainerRef, onAddImage }: ImageProps) => {
 }
 
 interface PrintedImagesProps {
-  onAddImage: (printedImg: TPrintedImage) => void
+  onAddImage: (printedImg: TPrintedImage, imgSize: TImageSizeInfo) => void
   onClose: () => void
   printedImages: TPrintedImage[]
 }

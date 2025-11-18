@@ -11,6 +11,7 @@ import {
   TPrintAreaInfo,
   TPrintTemplate,
   TTemplateFrame,
+  TFrameRectType,
 } from '@/utils/types/global'
 import { TextElement } from './element/text-element/TextElement'
 import { PrintedImageElementMenu } from './element/printed-image-element/Menu'
@@ -30,6 +31,7 @@ import { useNavigate } from 'react-router-dom'
 import { BothSidesPreviewModal } from './BothSidesPreviewModal'
 import { TemplateFrameMenu } from './template/TemplateFrameMenu'
 import { TemplatePicker } from './template/TemplatePicker'
+import { StickerElement } from './element/sticker-element/StickerElement'
 
 type TSelectingType = TElementType | null
 
@@ -56,7 +58,7 @@ interface EditAreaProps {
   pickedTemplate: TPrintTemplate
   pickedFrame?: TTemplateFrame
   onPickFrame: (frame: TTemplateFrame) => void
-  onShowPrintedImagesModal: (frameId: string) => void
+  onShowPrintedImagesModal: (frameId: string, rectType: TFrameRectType) => void
   onCropFrameImage: (croppedImageUrl: string, frameId: string) => void
   onRemoveFrameImage: (frameId: string) => void
   onChangeFrameImage: (imgURL: string, frameId: string) => void
@@ -103,26 +105,30 @@ const EditArea: React.FC<EditAreaProps> = ({
   const [isAddingToCart, setIsAddingToCart] = useState<boolean>(false)
   const {
     printAreaRef,
-    overlayRef,
     containerElementRef,
     initializePrintArea,
     checkIfAnyElementOutOfBounds,
+    isOutOfBounds,
+    overlayRef,
   } = usePrintArea()
   const navigate = useNavigate()
 
   const handleSelectFrameOnPrintArea = (
     e: React.MouseEvent<HTMLDivElement, MouseEvent>,
-    frameId: string
+    frameId: string,
+    rectType: TFrameRectType
   ) => {
+    console.log('>>> frame id:', { frameId, rectType })
     const foundFrame = pickedTemplate.frames.find((f) => f.id === frameId && f.placedImage)
     if (foundFrame) {
       eventEmitter.emit(EInternalEvents.PICK_ELEMENT, e.currentTarget, 'template-frame')
       onPickFrame(foundFrame)
       handleUpdateSelectedElementId(frameId, 'template-frame')
     } else {
-      onShowPrintedImagesModal(frameId)
+      onShowPrintedImagesModal(frameId, rectType)
     }
   }
+  console.log('>>> selectedElementId:', { selectedElementId, selectingType })
 
   const handleRemoveText = (id: string) => {
     onUpdateText(initialTextElements.filter((el) => el.id !== id))
@@ -171,8 +177,10 @@ const EditArea: React.FC<EditAreaProps> = ({
         !target.closest('.NAME-root-element') &&
         !target.closest('.NAME-menu-section') &&
         !target.closest('.NAME-text-font-picker') &&
-        !target.closest('.NAME-color-picker-modal')
+        !target.closest('.NAME-color-picker-modal') &&
+        !target.closest('.NAME-template-frame')
       ) {
+        console.log('>>> run this 182:', { target })
         cancelSelectingElement()
       }
     }
@@ -281,14 +289,32 @@ const EditArea: React.FC<EditAreaProps> = ({
       <div className="flex flex-col md:flex-row gap-2 flex-1 flex-shrink basis-auto min-h-0 w-full md:h-full md:max-h-[500px]">
         <TemplatePicker
           classNames={{
-            templatesList:
-              'md:hidden xl:grid grid-cols-2 order-2 md:order-1 shadow-[0_0_10px_1px_rgba(0,0,0,0.25)] w-full md:w-[40%] rounded-[6px] max-h-[350px] md:max-h-[unset] px-1 py-4',
+            templatesList: `grid 
+              md:hidden 
+              xl:grid
+              grid-rows-2 
+              grid-flow-col 
+              grid-cols-none 
+              gap-2 
+              overflow-x-auto 
+              md:overflow-y-auto
+              order-2 
+              shadow-[0_0_10px_1px_rgba(0,0,0,0.25)] 
+              w-full 
+              md:w-[40%] 
+              rounded-[6px] 
+              px-1 
+              py-4
+              md:grid-flow-row
+              md:grid-cols-2
+              md:grid-rows-none`,
+            templateItem: 'h-[118px] md:h-auto w-[118px] md:w-auto',
           }}
           onPickTemplate={onPickTemplate}
           printedImagesCount={printedImagesCount}
           templates={templates}
         />
-        <div className="w-full xl:w-[60%] order-1 md:order-2 relative z-0">
+        <div className="w-full xl:w-[60%] order-1 relative z-0">
           <div
             ref={(node) => {
               htmlToCanvasEditorRef.current = node
@@ -326,27 +352,41 @@ const EditArea: React.FC<EditAreaProps> = ({
 
             {/* Print Area Overlay */}
             <PrintAreaOverlay
-              overlayRef={overlayRef}
               printAreaRef={printAreaRef}
               name="Print Area Overlay"
               printTemplate={pickedTemplate}
               onClickFrame={handleSelectFrameOnPrintArea}
+              frame={{ classNames: { container: 'active:scale-90 transition' } }}
+              overlayRef={overlayRef}
+              isOutOfBounds={isOutOfBounds}
             />
 
-            <div className="absolute top-0 left-0 w-full h-full z-50">
-              {initialTextElements.length > 0 &&
-                initialTextElements.map((textEl) => (
-                  <TextElement
-                    key={textEl.id}
-                    element={textEl}
-                    onRemoveElement={handleRemoveText}
-                    onUpdateSelectedElementId={(id) => handleUpdateSelectedElementId(id, 'text')}
-                    selectedElementId={selectedElementId}
-                    canvasAreaRef={htmlToCanvasEditorRef}
-                    mountType={mockupId ? 'from-saved' : 'new'}
-                  />
-                ))}
-            </div>
+            {/* Sticker Elements */}
+            {initialStickerElements.length > 0 &&
+              initialStickerElements.map((sticker) => (
+                <StickerElement
+                  key={sticker.id}
+                  element={sticker}
+                  onRemoveElement={handleRemoveSticker}
+                  onUpdateSelectedElementId={(id) => handleUpdateSelectedElementId(id, 'sticker')}
+                  selectedElementId={selectedElementId}
+                  canvasAreaRef={htmlToCanvasEditorRef}
+                  mountType={mockupId ? 'from-saved' : 'new'}
+                />
+              ))}
+
+            {initialTextElements.length > 0 &&
+              initialTextElements.map((textEl) => (
+                <TextElement
+                  key={textEl.id}
+                  element={textEl}
+                  onRemoveElement={handleRemoveText}
+                  onUpdateSelectedElementId={(id) => handleUpdateSelectedElementId(id, 'text')}
+                  selectedElementId={selectedElementId}
+                  canvasAreaRef={htmlToCanvasEditorRef}
+                  mountType={mockupId ? 'from-saved' : 'new'}
+                />
+              ))}
           </div>
         </div>
       </div>
@@ -362,6 +402,7 @@ const EditArea: React.FC<EditAreaProps> = ({
           ) : selectingType === 'template-frame' ? (
             <TemplateFrameMenu
               frameId={selectedElementId}
+              templateFrames={pickedTemplate.frames}
               onOpenCropModal={handleOpenCropModal}
               onClose={cancelSelectingElement}
               onShowPrintedImagesModal={onShowPrintedImagesModal}

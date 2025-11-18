@@ -1,9 +1,16 @@
-import { TPrintedImage, TPrintTemplate } from '@/utils/types/global'
-import { useEffect, useMemo, useState } from 'react'
+import {
+  TFrameToAddPrintedImage,
+  TImageSizeInfo,
+  TPrintedImage,
+  TPrintTemplate,
+} from '@/utils/types/global'
+import { useEffect, useState } from 'react'
 import { PrintedImagesModal } from './element/printed-image-element/PrintedImages'
 import { createPortal } from 'react-dom'
 import { eventEmitter } from '@/utils/events'
 import { EInternalEvents } from '@/utils/enums'
+import { allowPrintedImageOnTemplateType } from '@/configs/print-template'
+import { toast } from 'react-toastify'
 
 interface PrintedImagesPreviewProps {
   printedImages: TPrintedImage[]
@@ -17,11 +24,18 @@ export const PrintedImagesPreview = ({
   pickedTemplate,
 }: PrintedImagesPreviewProps) => {
   const [showPrintedImagesModal, setShowPrintedImagesModal] = useState<boolean>(false)
-  const [frameIdToAddPrintedImage, setFrameIdToAddPrintedImage] = useState<string>()
+  const [frameToAddPrintedImage, setFrameToAddPrintedImage] = useState<TFrameToAddPrintedImage>()
   const [displayedImage, setDisplayedImage] = useState<TPrintedImage | null>(null)
 
-  const handleAddImage = (newImage: TPrintedImage) => {
-    onAddPrintedImages([newImage], frameIdToAddPrintedImage)
+  const handleAddImage = (newImage: TPrintedImage, imgSize: TImageSizeInfo) => {
+    // if (
+    //   frameToAddPrintedImage &&
+    //   !allowPrintedImageOnTemplateType(frameToAddPrintedImage.rectType, imgSize)
+    // ) {
+    //   toast.error('Ảnh không phù hợp với khung hình đã chọn.')
+    //   return
+    // }
+    onAddPrintedImages([newImage], frameToAddPrintedImage?.frameId)
     setShowPrintedImagesModal(false)
   }
 
@@ -35,10 +49,13 @@ export const PrintedImagesPreview = ({
 
   useEffect(() => {
     init()
-    eventEmitter.on(EInternalEvents.HIDE_SHOW_PRINTED_IMAGES_MODAL, (show, frameId) => {
-      setShowPrintedImagesModal(show)
-      setFrameIdToAddPrintedImage(frameId)
-    })
+    eventEmitter.on(
+      EInternalEvents.HIDE_SHOW_PRINTED_IMAGES_MODAL,
+      (show, frameToAddPrintedImage, rectType) => {
+        setShowPrintedImagesModal(show)
+        setFrameToAddPrintedImage({ frameId: frameToAddPrintedImage, rectType })
+      }
+    )
     return () => {
       eventEmitter.off(EInternalEvents.HIDE_SHOW_PRINTED_IMAGES_MODAL)
     }

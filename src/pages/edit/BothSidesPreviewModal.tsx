@@ -1,5 +1,5 @@
 import { X } from 'lucide-react'
-import { TBaseProduct, TPrintTemplate } from '@/utils/types/global'
+import { TBaseProduct, TFrameRectType, TPrintTemplate } from '@/utils/types/global'
 import { PrintAreaOverlay } from './template/PrintAreaOverlay'
 import { useRef } from 'react'
 
@@ -8,7 +8,11 @@ type TBothSidesPreviewModalProps = {
   onClose: () => void
   activeProduct: TBaseProduct
   pickedTemplate: TPrintTemplate
-  onClickFrame: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, frameId: string) => void
+  onClickFrame: (
+    e: React.MouseEvent<HTMLDivElement, MouseEvent>,
+    frameId: string,
+    rectType: TFrameRectType
+  ) => void
 }
 
 export const BothSidesPreviewModal = ({
@@ -22,8 +26,6 @@ export const BothSidesPreviewModal = ({
   const backContainerRef = useRef<HTMLDivElement>(null)
   const frontPrintAreaRef = useRef<HTMLDivElement>(null)
   const backPrintAreaRef = useRef<HTMLDivElement>(null)
-  const frontOverlayRef = useRef<HTMLDivElement>(null)
-  const backOverlayRef = useRef<HTMLDivElement>(null)
 
   if (!show) return null
 
@@ -124,11 +126,21 @@ export const BothSidesPreviewModal = ({
                       }}
                     />
                     <PrintAreaOverlay
-                      overlayRef={frontOverlayRef}
                       printAreaRef={frontPrintAreaRef}
                       name="Front Print Area"
                       printTemplate={pickedTemplate}
                       onClickFrame={onClickFrame}
+                      frame={{
+                        classNames: {
+                          container: 'border-none',
+                          plusIconWrapper: 'hidden',
+                        },
+                      }}
+                      frameDisplayer={{
+                        classNames: { container: 'bg-transparent' },
+                      }}
+                      overlay={{ classNames: { container: 'border-none' } }}
+                      isOutOfBounds={false}
                     />
                   </div>
                 </div>
@@ -210,11 +222,21 @@ export const BothSidesPreviewModal = ({
                       }}
                     />
                     <PrintAreaOverlay
-                      overlayRef={backOverlayRef}
                       printAreaRef={backPrintAreaRef}
                       name="Back Print Area"
                       printTemplate={pickedTemplate}
                       onClickFrame={onClickFrame}
+                      overlay={{ classNames: { container: 'border-none' } }}
+                      frame={{
+                        classNames: {
+                          container: 'border-none',
+                          plusIconWrapper: 'hidden',
+                        },
+                      }}
+                      frameDisplayer={{
+                        classNames: { container: 'bg-transparent' },
+                      }}
+                      isOutOfBounds={false}
                     />
                   </div>
                 </div>

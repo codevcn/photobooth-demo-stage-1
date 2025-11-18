@@ -25,12 +25,15 @@ export const TemplatePicker = ({
   }, [printedImagesCount, templates])
 
   return (
-    <div className={cn('grid gap-2 overflow-y-auto', classNames?.templatesList)}>
+    <div className={classNames?.templatesList}>
       {availableTemplates.map((template) => (
         <div
           key={template.id}
           onClick={() => onPickTemplate(template)}
-          className="flex items-center justify-center border border-gray-300 rounded p-1 bg-white hover:shadow-lg active:scale-90 transition"
+          className={cn(
+            'flex items-center justify-center border border-gray-300 rounded p-1 bg-white hover:shadow-lg active:scale-90 transition',
+            classNames?.templateItem
+          )}
         >
           <FramesDisplayer
             template={template}
@@ -115,7 +118,7 @@ export const TemplatePickerModal = ({
           templates={templates}
           classNames={{
             templatesList:
-              'grid-cols-2 mt-2 px-2 sm:grid-cols-3 md:grid-cols-4 w-full max-h-[80vh]',
+              'grid-cols-2 mt-2 px-2 sm:grid-cols-3 md:grid-cols-4 w-full max-h-[80vh] grid gap-2 overflow-y-auto',
             templateItem: 'm-2',
           }}
         />

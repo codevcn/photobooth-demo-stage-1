@@ -22,6 +22,7 @@ import {
   TImgMimeType,
   TPrintTemplate,
   TTemplateFrame,
+  TFrameRectType,
 } from '@/utils/types/global'
 import { eventEmitter } from '@/utils/events'
 import { EInternalEvents } from '@/utils/enums'
@@ -33,7 +34,6 @@ import { getInitialContants } from '@/utils/contants'
 import { productService } from '@/services/product.service'
 import { useHtmlToCanvas } from '@/hooks/use-html-to-canvas'
 import { convertMimeTypeToExtension } from '@/utils/helpers'
-import { TemplatePickerModal } from './template/TemplatePicker'
 import { hardCodedPrintTemplates } from '../../configs/print-template'
 
 type TEditPageHorizonProps = {
@@ -231,7 +231,7 @@ const useTemplateManager = (templates: TPrintTemplate[]) => {
     setPickedTemplate(template)
   }
 
-  const addImageToFrame = (image: TPrintedImage, frameId?: string) => {
+  const addImageToFrame = (printedImage: TPrintedImage, frameId?: string) => {
     setAvailableTemplates((pre) => {
       const templates = [...pre]
       const pickedTemplateId = pickedTemplate.id
@@ -240,8 +240,8 @@ const useTemplateManager = (templates: TPrintTemplate[]) => {
           const foundFrameIndex = template.frames.findIndex((f) => !f.placedImage)
           if (foundFrameIndex >= 0) {
             template.frames[foundFrameIndex].placedImage = {
-              id: image.id,
-              imgURL: image.url,
+              id: printedImage.id,
+              imgURL: printedImage.url,
               placementState: {
                 frameIndex: foundFrameIndex + 1,
                 zoom: getInitialContants<number>('PLACED_IMG_ZOOM'),
@@ -256,8 +256,8 @@ const useTemplateManager = (templates: TPrintTemplate[]) => {
         for (const frame of template.frames) {
           if (frame.id === frameId) {
             frame.placedImage = {
-              id: image.id,
-              imgURL: image.url,
+              id: printedImage.id,
+              imgURL: printedImage.url,
               placementState: {
                 frameIndex,
                 zoom: getInitialContants<number>('PLACED_IMG_ZOOM'),
@@ -273,7 +273,7 @@ const useTemplateManager = (templates: TPrintTemplate[]) => {
     })
   }
 
-  const updateFrameImageURL = (newURL: string, frameId: string) => {
+  const updateFrameImageURL = (newURL: string, frameId: string, idOfURLImage?: string) => {
     setAvailableTemplates((pre) => {
       const templates = [...pre]
       for (const template of templates) {
@@ -281,6 +281,9 @@ const useTemplateManager = (templates: TPrintTemplate[]) => {
         if (foundFrame) {
           if (foundFrame.placedImage) {
             foundFrame.placedImage.imgURL = newURL
+            if (idOfURLImage) {
+              foundFrame.placedImage.id = idOfURLImage
+            }
           }
           break
         }
@@ -397,8 +400,8 @@ export const EditPage = ({ products, printedImages }: TEditPageHorizonProps) => 
   )
 
   // ==================== Event Handlers - Element Management ====================
-  const handleShowPrintedImagesModal = (frameId: string) => {
-    eventEmitter.emit(EInternalEvents.HIDE_SHOW_PRINTED_IMAGES_MODAL, true, frameId)
+  const handleShowPrintedImagesModal = (frameId: string, rectType: TFrameRectType) => {
+    eventEmitter.emit(EInternalEvents.HIDE_SHOW_PRINTED_IMAGES_MODAL, true, frameId, rectType)
   }
 
   const handleAddPrintedElement = (
@@ -444,13 +447,20 @@ export const EditPage = ({ products, printedImages }: TEditPageHorizonProps) => 
   }
 
   const handleAddSticker = (path: string) => {
-    addImageToFrame(
+    setInitialStickerElements([
+      ...initialStickerElements,
       {
         id: crypto.randomUUID(),
-        url: path,
+        path,
+        position: {
+          x: getInitialContants<number>('ELEMENT_X'),
+          y: getInitialContants<number>('ELEMENT_Y'),
+        },
+        angle: getInitialContants<number>('ELEMENT_ROTATION'),
+        scale: getInitialContants<number>('ELEMENT_ZOOM'),
+        zindex: getInitialContants<number>('ELEMENT_ZINDEX'),
       },
-      undefined
-    )
+    ])
   }
 
   // ==================== Event Handlers - Cart Management ====================
@@ -493,80 +503,75 @@ export const EditPage = ({ products, printedImages }: TEditPageHorizonProps) => 
       return onError(new Error('Không tìm thấy khu vực in trên sản phẩm'))
     }
     const imgMimeType: TImgMimeType = 'image/png'
-    requestIdleCallback(() => {
-      saveHtmlAsImage(
-        editor,
-        imgMimeType,
-        (imageData) => {
-          const mockupId = LocalStorageHelper.saveMockupImageAtLocal(
-            elementsVisualState,
-            {
-              productId: activeProduct.id,
-              productImageId: activeImageId,
-              color: activeProductImage.color,
-              size: activeProductImage.size,
+    console.log('>>> editor:', editor)
+    saveHtmlAsImage(
+      editor,
+      imgMimeType,
+      (imageData) => {
+        const mockupId = LocalStorageHelper.saveMockupImageAtLocal(
+          elementsVisualState,
+          {
+            productId: activeProduct.id,
+            productImageId: activeImageId,
+            color: activeProductImage.color,
+            size: activeProductImage.size,
+          },
+          {
+            dataUrl: URL.createObjectURL(imageData),
+            size: {
+              width: -1,
+              height: -1,
             },
-            {
-              dataUrl: URL.createObjectURL(imageData),
-              size: {
-                width: -1,
-                height: -1,
-              },
-            },
-            sessionId,
-            {
-              id: selectedPrintAreaInfo.id,
-              type: selectedPrintAreaInfo.surfaceType,
-            }
-          )
-          requestIdleCallback(() => {
-            saveHtmlAsImageWithDesiredSize(
-              printArea,
-              selectedPrintAreaInfo.area.widthRealPx,
-              selectedPrintAreaInfo.area.heightRealPx,
-              imgMimeType,
-              (imageData, canvasWithDesiredSize) => {
-                removeMockPrintArea()
-                productService
-                  .preSendMockupImage(
-                    imageData,
-                    `mockup-${Date.now()}.${convertMimeTypeToExtension(imgMimeType)}`
-                  )
-                  .then((res) => {
-                    const result = LocalStorageHelper.updateMockupImagePreSent(mockupId, res.url, {
-                      width: canvasWithDesiredSize.width,
-                      height: canvasWithDesiredSize.height,
-                    })
-                    if (!result) {
-                      toast.error('Không thể cập nhật kích thước mockup')
-                    }
-                  })
-                  .catch((err) => {
-                    console.error('>>> pre-send mockup image error:', err)
-                    toast.error('Không thể lưu mockup lên server')
-                  })
-              },
-              (error) => {
-                console.error('Error saving mockup image:', error)
-                toast.warning(error.message || 'Không thể tạo mockup để lưu lên server')
-                onError(error)
-              }
-            )
-          })
-          toast.success('Đã thêm vào giỏ hàng')
-          setCartCount(LocalStorageHelper.countSavedMockupImages())
-          onDoneAdd()
-        },
-        (error) => {
-          console.error('Error saving mockup image:', error)
-          toast.warning(
-            error.message || 'Không thể lưu mockup, không thể thêm sản phẩm vào giỏ hàng'
-          )
-          setCartCount(LocalStorageHelper.countSavedMockupImages())
-          onError(error)
-        }
-      )
-    })
+          },
+          sessionId,
+          {
+            id: selectedPrintAreaInfo.id,
+            type: selectedPrintAreaInfo.surfaceType,
+          }
+        )
+        saveHtmlAsImageWithDesiredSize(
+          printArea,
+          selectedPrintAreaInfo.area.widthRealPx,
+          selectedPrintAreaInfo.area.heightRealPx,
+          imgMimeType,
+          (imageData, canvasWithDesiredSize) => {
+            removeMockPrintArea()
+            productService
+              .preSendMockupImage(
+                imageData,
+                `mockup-${Date.now()}.${convertMimeTypeToExtension(imgMimeType)}`
+              )
+              .then((res) => {
+                const result = LocalStorageHelper.updateMockupImagePreSent(mockupId, res.url, {
+                  width: canvasWithDesiredSize.width,
+                  height: canvasWithDesiredSize.height,
+                })
+                if (!result) {
+                  toast.error('Không thể cập nhật kích thước mockup')
+                }
+              })
+              .catch((err) => {
+                console.error('>>> pre-send mockup image error:', err)
+                toast.error('Không thể lưu mockup lên server')
+              })
+          },
+          (error) => {
+            console.error('Error saving mockup image:', error)
+            toast.warning(error.message || 'Không thể tạo mockup để lưu lên server')
+            onError(error)
+          }
+        )
+        toast.success('Đã thêm vào giỏ hàng')
+        setCartCount(LocalStorageHelper.countSavedMockupImages())
+        onDoneAdd()
+      },
+      (error) => {
+        console.error('Error saving mockup image:', error)
+        toast.warning(error.message || 'Không thể lưu mockup, không thể thêm sản phẩm vào giỏ hàng')
+        setCartCount(LocalStorageHelper.countSavedMockupImages())
+        onError(error)
+      }
+    )
   }
 
   // ==================== Event Handlers - Product Variant ====================
@@ -600,21 +605,34 @@ export const EditPage = ({ products, printedImages }: TEditPageHorizonProps) => 
     } else if (printedImages.length > 0) {
       const firstImage = printedImages[0]
       if (firstImage) {
-        setInitialPrintedImageElements([
-          {
-            id: firstImage.id,
-            url: firstImage.url,
-            position: {
-              x: getInitialContants<number>('ELEMENT_X'),
-              y: getInitialContants<number>('ELEMENT_Y'),
-            },
-            angle: getInitialContants<number>('ELEMENT_ROTATION'),
-            scale: getInitialContants<number>('ELEMENT_ZOOM'),
-            zindex: getInitialContants<number>('ELEMENT_ZINDEX'),
-          },
-        ])
+        initPrintedImageElment(firstImage)
       }
     }
+  }
+
+  const initPrintedImageElment = (printedImage: TPrintedImage) => {
+    setInitialPrintedImageElements([
+      {
+        id: printedImage.id,
+        url: printedImage.url,
+        position: {
+          x: getInitialContants<number>('ELEMENT_X'),
+          y: getInitialContants<number>('ELEMENT_Y'),
+        },
+        angle: getInitialContants<number>('ELEMENT_ROTATION'),
+        scale: getInitialContants<number>('ELEMENT_ZOOM'),
+        zindex: getInitialContants<number>('ELEMENT_ZINDEX'),
+      },
+    ])
+  }
+
+  const handleSelectImageFromProductGallery = (
+    productImageId: number,
+    printedImage: TPrintedImage
+  ) => {
+    setActiveImageId(productImageId)
+    initPrintedImageElment(printedImage)
+    updateFrameImageURL(printedImage.url, availableTemplates[0].frames[0].id, printedImage.id)
   }
 
   useEffect(() => {
@@ -649,7 +667,7 @@ export const EditPage = ({ products, printedImages }: TEditPageHorizonProps) => 
               products={products}
               activeImageId={activeImageId}
               activeProduct={activeProduct}
-              onSelectImage={setActiveImageId}
+              onSelectImage={handleSelectImageFromProductGallery}
               printedImages={printedImages}
             />
 

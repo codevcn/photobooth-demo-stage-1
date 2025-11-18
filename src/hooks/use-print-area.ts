@@ -191,6 +191,12 @@ export const usePrintArea = (): TUsePrintAreaReturn => {
 
     const checkBounds = () => {
       const editableElements = document.body.querySelectorAll('.NAME-root-element')
+      // Nếu không có element nào thì không out of bounds
+      if (editableElements.length === 0) {
+        updateOverlayVisibility(false)
+        return
+      }
+
       let hasOutOfBounds = false
       const editContainer = containerElementRef.current
       if (editContainer) {

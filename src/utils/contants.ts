@@ -25,7 +25,7 @@ export const getInitialContants = <R>(type: TInitialContentsType): R => {
     case 'ELEMENT_ZINDEX_STEP':
       return 10 as R
     case 'ELEMENT_ZINDEX':
-      return 1 as R
+      return 10 as R
     case 'ELEMENT_WIDTH':
       return 200 as R
     case 'ELEMENT_HEIGHT':

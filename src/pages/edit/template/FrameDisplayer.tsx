@@ -1,4 +1,4 @@
-import { TPrintTemplate } from '@/utils/types/global'
+import { TFrameRectType, TPrintTemplate } from '@/utils/types/global'
 import { TemplateFrame } from './TemplateFrame'
 import { templateTypeToCssStyles } from '../../../configs/print-template'
 import { cn } from '@/lib/utils'
@@ -16,7 +16,11 @@ type TFramesDisplayerProps = {
     plusIconWrapper: string
   }>
   displayerClassName: string
-  onClickFrame: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, frameId: string) => void
+  onClickFrame: (
+    e: React.MouseEvent<HTMLDivElement, MouseEvent>,
+    frameId: string,
+    rectType: TFrameRectType
+  ) => void
 }>
 
 export const FramesDisplayer = ({

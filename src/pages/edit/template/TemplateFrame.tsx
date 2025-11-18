@@ -1,4 +1,4 @@
-import { TTemplateFrame, TTemplateType } from '@/utils/types/global'
+import { TFrameRectType, TTemplateFrame, TTemplateType } from '@/utils/types/global'
 import { PlacedImage } from './PlacedImage'
 import { templateTypeToFrameStyle } from '../../../configs/print-template'
 import { cn } from '@/lib/utils'
@@ -16,7 +16,11 @@ type TemplateFrameProps = {
     container: string
     plusIconWrapper: string
   }>
-  onClickFrame: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, frameId: string) => void
+  onClickFrame: (
+    e: React.MouseEvent<HTMLDivElement, MouseEvent>,
+    frameId: string,
+    rectType: TFrameRectType
+  ) => void
 }>
 
 export const TemplateFrame = ({
@@ -34,10 +38,12 @@ export const TemplateFrame = ({
         ...templateTypeToFrameStyle(templateType, templateFrame.index),
       }}
       className={cn(
-        'NAME-root-element NAME-template-frame flex justify-center items-center overflow-hidden h-full w-full border border-gray-600 border-dashed',
+        'NAME-template-frame flex justify-center items-center overflow-hidden h-full w-full border border-gray-600 border-dashed',
         classNames?.container
       )}
-      onClick={onClickFrame ? (e) => onClickFrame(e, templateFrame.id) : undefined}
+      onClick={
+        onClickFrame ? (e) => onClickFrame(e, templateFrame.id, templateFrame.rectType) : undefined
+      }
     >
       {templateFrame.placedImage ? (
         <PlacedImage placedImage={templateFrame.placedImage} />

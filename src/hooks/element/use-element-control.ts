@@ -128,7 +128,7 @@ export const useElementControl = (
         if (currentIndex === -1) return pre
 
         const isMovingUp = zindex > 0
-        
+
         // Kiểm tra boundary
         if (isMovingUp && currentIndex === pre.length - 1) return pre // Đã ở trên cùng
         if (!isMovingUp && currentIndex === 0) return pre // Đã ở dưới cùng
@@ -136,7 +136,7 @@ export const useElementControl = (
         // Tạo mảng mới và swap vị trí
         const updatedLayers = [...pre]
         const targetIndex = currentIndex + (isMovingUp ? 1 : -1)
-        
+
         // Swap
         const temp = updatedLayers[currentIndex]
         updatedLayers[currentIndex] = updatedLayers[targetIndex]
@@ -145,7 +145,7 @@ export const useElementControl = (
         // Cập nhật lại index cho tất cả layers
         return updatedLayers.map((layer, idx) => ({
           ...layer,
-          index: idx * getInitialContants<number>('ELEMENT_ZINDEX_STEP') + 1,
+          index: (idx + 1) * getInitialContants<number>('ELEMENT_ZINDEX_STEP') + 1,
         }))
       })
     }
@@ -153,7 +153,7 @@ export const useElementControl = (
 
   const onElementLayersChange = () => {
     setZindex(
-      elementLayers.findIndex((layer) => layer.elementId === elementId) *
+      (elementLayers.findIndex((layer) => layer.elementId === elementId) + 1) *
         getInitialContants<number>('ELEMENT_ZINDEX_STEP') +
         1
     )
