@@ -6,7 +6,7 @@ type TPrintAreaOverlayProps = {
   printAreaRef: React.RefObject<HTMLDivElement>
   name: string
   printTemplate: TPrintTemplate
-  onClickFrame: (frameId: string) => void
+  onClickFrame: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, frameId: string) => void
 }
 
 export const PrintAreaOverlay: React.FC<TPrintAreaOverlayProps> = ({

@@ -28,6 +28,7 @@ import { CropElementModal } from './element/printed-image-element/CropElementMod
 import { ArrowLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { BothSidesPreviewModal } from './BothSidesPreviewModal'
+import { TemplateFrameMenu } from './template/TemplateFrameMenu'
 
 type TSelectingType = TElementType | null
 
@@ -55,6 +56,9 @@ interface EditAreaProps {
   pickedFrame?: TTemplateFrame
   onPickFrame: (frame: TTemplateFrame) => void
   onShowPrintedImagesModal: (frameId: string) => void
+  onCropFrameImage: (croppedImageUrl: string, frameId: string) => void
+  onRemoveFrameImage: (frameId: string) => void
+  onChangeFrameImage: (imgURL: string, frameId: string) => void
 }
 
 const EditArea: React.FC<EditAreaProps> = ({
@@ -77,6 +81,9 @@ const EditArea: React.FC<EditAreaProps> = ({
   pickedFrame,
   onPickFrame,
   onShowPrintedImagesModal,
+  onCropFrameImage,
+  onRemoveFrameImage,
+  onChangeFrameImage,
 }) => {
   const [showCropModal, setShowCropModal] = useState<boolean>(false)
   const [cropElementId, setCropElementId] = useState<string | null>(null)
@@ -96,10 +103,15 @@ const EditArea: React.FC<EditAreaProps> = ({
   } = usePrintArea()
   const navigate = useNavigate()
 
-  const handleSelectFrameOnPrintArea = (frameId: string) => {
+  const handleSelectFrameOnPrintArea = (
+    e: React.MouseEvent<HTMLDivElement, MouseEvent>,
+    frameId: string
+  ) => {
     const foundFrame = pickedTemplate.frames.find((f) => f.id === frameId && f.placedImage)
     if (foundFrame) {
+      eventEmitter.emit(EInternalEvents.PICK_ELEMENT, e.currentTarget, 'template-frame')
       onPickFrame(foundFrame)
+      handleUpdateSelectedElementId(frameId, 'template-frame')
     } else {
       onShowPrintedImagesModal(frameId)
     }
@@ -127,19 +139,23 @@ const EditArea: React.FC<EditAreaProps> = ({
     setSelectingType(null)
   }
 
-  const handleOpenCropModal = (elementId: string) => {
-    // Find the element to get its current image URL
-    const element = initialPrintedImageElements.find((el) => el.id === elementId)
-    if (element) {
-      setCropElementId(elementId)
-      setCropImageUrl(element.url)
-      setShowCropModal(true)
-    }
+  const handleChangeFrameImage = (frameId: string) => {
+    if (!pickedFrame || pickedFrame.id !== frameId) return
+    if (!pickedFrame.placedImage) return
+    onChangeFrameImage(pickedFrame.placedImage.imgURL, frameId)
   }
 
-  const handleCropComplete = (elementId: string, croppedImageUrl: string) => {
-    // Emit event to update the element's image
-    eventEmitter.emit(EInternalEvents.REPLACE_ELEMENT_IMAGE_URL, elementId, croppedImageUrl)
+  const handleOpenCropModal = (frameId: string) => {
+    console.log('>>> piced frame:', pickedFrame)
+    if (!pickedFrame || pickedFrame.id !== frameId) return
+    if (!pickedFrame.placedImage) return
+    setCropElementId(frameId)
+    setCropImageUrl(pickedFrame.placedImage.imgURL)
+    setShowCropModal(true)
+  }
+
+  const handleCropComplete = (frameId: string, croppedImageUrl: string) => {
+    onCropFrameImage(croppedImageUrl, frameId)
     setShowCropModal(false)
   }
 
@@ -318,13 +334,21 @@ const EditArea: React.FC<EditAreaProps> = ({
       </div>
 
       {selectedElementId && (
-        <div className="bg-white rounded p-2 pb-0 mt-1">
+        <div className="bg-white rounded py-2 pb-0 mt-1">
           {selectingType === 'text' ? (
             <TextElementMenu elementId={selectedElementId} />
           ) : selectingType === 'sticker' ? (
             <StickerElementMenu elementId={selectedElementId} />
           ) : selectingType === 'printed-image' ? (
             <PrintedImageElementMenu elementId={selectedElementId} />
+          ) : selectingType === 'template-frame' ? (
+            <TemplateFrameMenu
+              frameId={selectedElementId}
+              onOpenCropModal={handleOpenCropModal}
+              onClose={cancelSelectingElement}
+              onShowPrintedImagesModal={onShowPrintedImagesModal}
+              onRemoveFrameImage={onRemoveFrameImage}
+            />
           ) : (
             <></>
           )}

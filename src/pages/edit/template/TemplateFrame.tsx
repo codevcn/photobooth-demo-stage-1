@@ -16,7 +16,7 @@ type TemplateFrameProps = {
     container: string
     plusIconWrapper: string
   }>
-  onClickFrame: (frameId: string) => void
+  onClickFrame: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, frameId: string) => void
 }>
 
 export const TemplateFrame = ({
@@ -34,10 +34,10 @@ export const TemplateFrame = ({
         ...templateTypeToFrameStyle(templateType, templateFrame.index),
       }}
       className={cn(
-        'NAME-template-frame flex justify-center items-center overflow-hidden h-full w-full border border-gray-600 border-dashed',
+        'NAME-root-element NAME-template-frame flex justify-center items-center overflow-hidden h-full w-full border border-gray-600 border-dashed',
         classNames?.container
       )}
-      onClick={onClickFrame ? () => onClickFrame(templateFrame.id) : undefined}
+      onClick={onClickFrame ? (e) => onClickFrame(e, templateFrame.id) : undefined}
     >
       {templateFrame.placedImage ? (
         <PlacedImage placedImage={templateFrame.placedImage} />

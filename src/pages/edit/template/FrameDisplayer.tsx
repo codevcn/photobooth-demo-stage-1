@@ -14,7 +14,7 @@ type TFramesDisplayerProps = {
     container: string
     plusIconWrapper: string
   }>
-  onClickFrame: (frameId: string) => void
+  onClickFrame: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, frameId: string) => void
 }>
 
 export const FramesDisplayer = ({

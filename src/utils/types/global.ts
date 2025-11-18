@@ -61,7 +61,7 @@ export type TPrintedImage = {
   url: string
 }
 
-export type TElementType = 'text' | 'sticker' | 'printed-image'
+export type TElementType = 'text' | 'sticker' | 'printed-image' | 'template-frame'
 
 export type TElementLayerState = {
   elementId: string

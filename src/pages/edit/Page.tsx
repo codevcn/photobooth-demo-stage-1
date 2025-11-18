@@ -274,6 +274,36 @@ const useTemplateManager = (templates: TPrintTemplate[]) => {
     })
   }
 
+  const updateFrameImageURL = (newURL: string, frameId: string) => {
+    setAvailableTemplates((pre) => {
+      const templates = [...pre]
+      for (const template of templates) {
+        const foundFrame = template.frames.find((f) => f.id === frameId)
+        if (foundFrame) {
+          if (foundFrame.placedImage) {
+            foundFrame.placedImage.imgURL = newURL
+          }
+          break
+        }
+      }
+      return templates
+    })
+  }
+
+  const removeFrameImage = (frameId: string) => {
+    setAvailableTemplates((prev) => {
+      const templates = [...prev]
+      for (const template of templates) {
+        const foundFrame = template.frames.find((f) => f.id === frameId)
+        if (foundFrame && foundFrame.placedImage) {
+          foundFrame.placedImage = undefined
+          break
+        }
+      }
+      return templates
+    })
+  }
+
   return {
     pickedTemplate,
     handlePickTemplate,
@@ -283,6 +313,8 @@ const useTemplateManager = (templates: TPrintTemplate[]) => {
     setPickedFrame,
     availableTemplates,
     addImageToFrame,
+    updateFrameImageURL,
+    removeFrameImage,
   }
 }
 
@@ -344,6 +376,8 @@ export const EditPage = ({ products, printedImages }: TEditPageHorizonProps) => 
     setPickedFrame,
     addImageToFrame,
     availableTemplates,
+    updateFrameImageURL,
+    removeFrameImage,
   } = useTemplateManager(hardCodedPrintTemplates)
 
   // ==================== Computed Values - Active Product ====================
@@ -645,6 +679,9 @@ export const EditPage = ({ products, printedImages }: TEditPageHorizonProps) => 
                   pickedFrame={pickedFrame}
                   onPickFrame={setPickedFrame}
                   onShowPrintedImagesModal={handleShowPrintedImagesModal}
+                  onCropFrameImage={updateFrameImageURL}
+                  onRemoveFrameImage={removeFrameImage}
+                  onChangeFrameImage={updateFrameImageURL}
                 />
               </div>
 

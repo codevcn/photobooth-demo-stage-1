@@ -8,7 +8,7 @@ type TBothSidesPreviewModalProps = {
   onClose: () => void
   activeProduct: TBaseProduct
   pickedTemplate: TPrintTemplate
-  onClickFrame: (frameId: string) => void
+  onClickFrame: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, frameId: string) => void
 }
 
 export const BothSidesPreviewModal = ({
@@ -34,9 +34,9 @@ export const BothSidesPreviewModal = ({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 animate-fade-in">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden animate-pop-in">
+      <div className="flex flex-col bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden animate-pop-in">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 bg-gradient-to-r from-pink-50 to-purple-50">
+        <div className="flex items-center justify-between px-4 py-1 border-b border-gray-200 bg-gradient-to-r from-pink-50 to-purple-50">
           <h2 className="text-xl font-bold text-gray-800">Xem trước cả 2 mặt</h2>
           <button
             onClick={onClose}
@@ -47,7 +47,7 @@ export const BothSidesPreviewModal = ({
         </div>
 
         {/* Content */}
-        <div className="p-4 overflow-y-auto max-h-[calc(90vh-80px)]">
+        <div className="p-4 overflow-y-auto grow">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Front Side */}
             {frontSurface && (

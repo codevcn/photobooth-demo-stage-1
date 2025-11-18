@@ -97,7 +97,8 @@ export const CropElementModal = ({
     const img = new Image()
     img.crossOrigin = 'anonymous'
     img.onload = () => {
-      if (img.naturalWidth > img.naturalHeight) {
+      // Chỉ xoay nếu màn hình nhỏ hơn 590px và ảnh ngang
+      if (window.innerWidth < 590 && img.naturalWidth > img.naturalHeight) {
         // Ảnh ngang cần xoay 90 độ
         const canvas = document.createElement('canvas')
         const ctx = canvas.getContext('2d')
@@ -123,7 +124,22 @@ export const CropElementModal = ({
           0.95
         )
       } else {
-        // Ảnh dọc không cần xoay
+        // Không cần xoay
+        const rotateImgContainer = document.body.querySelector<HTMLElement>(
+          '.NAME-rotate-image-container'
+        )
+        rotateImgContainer?.style.setProperty('flex-direction', 'column')
+        rotateImgContainer?.style.setProperty('align-items', 'center')
+        rotateImgContainer
+          ?.querySelector<HTMLElement>('.NAME-sub-rotate-image-container')
+          ?.style.setProperty('height', 'fit-content')
+        setMaxCropSizeHeight(250)
+        rotateImgContainer
+          ?.querySelector<HTMLElement>('.NAME-sub-image-crop')
+          ?.style.setProperty('height', 'fit-content')
+        rotateImgContainer
+          ?.querySelector<HTMLElement>('.NAME-sub-form-image-edit')
+          ?.style.setProperty('width', '100%')
         setRotatedImageUrl(imageUrl)
       }
     }
@@ -131,11 +147,13 @@ export const CropElementModal = ({
   }, [])
 
   const adjustUIBasedOnImage = () => {
-    if (imageUrl) {
-      rotateImageIfNeeded(imageUrl)
-    } else {
-      setRotatedImageUrl(null)
-    }
+    requestAnimationFrame(() => {
+      if (imageUrl) {
+        rotateImageIfNeeded(imageUrl)
+      } else {
+        setRotatedImageUrl(null)
+      }
+    })
   }
 
   useEffect(() => {
@@ -179,9 +197,9 @@ export const CropElementModal = ({
     >
       <div className="absolute inset-0 bg-black/50 z-10" onClick={onClose}></div>
       <div className="relative z-20 w-full max-w-5xl">
-        <div className="flex gap-2.5 items-stretch max-h-[90vh] pr-2 bg-gray-100 rounded-lg px-6 py-4 overflow-y-auto overflow-x-hidden w-full">
-          <div className="flex items-center justify-center w-2/3 max-w-2/3 h-[calc(90vh-32px)]">
-            <div className="flex items-start justify-center w-full h-full overflow-hidden">
+        <div className="NAME-rotate-image-container flex gap-2.5 items-stretch max-h-[90vh] pr-2 bg-gray-100 rounded-lg px-6 py-4 overflow-y-auto overflow-x-hidden w-full">
+          <div className="NAME-sub-rotate-image-container flex items-center justify-center w-2/3 max-w-2/3 h-[calc(90vh-32px)]">
+            <div className="NAME-sub-image-crop flex items-start justify-center w-full h-full overflow-hidden">
               {rotatedImageUrl ? (
                 <ReactCrop
                   crop={crop}
@@ -195,7 +213,7 @@ export const CropElementModal = ({
                     alt="Ảnh để crop"
                     src={rotatedImageUrl}
                     onLoad={onImageLoad}
-                    className="object-contain max-h-full max-w-full"
+                    className="NAME-root-crop-image object-contain max-h-full max-w-full"
                     style={{ maxHeight: maxCropSizeHeight }}
                     crossOrigin="anonymous"
                   />
@@ -211,7 +229,7 @@ export const CropElementModal = ({
             </div>
           </div>
 
-          <div className="min-w-[200px] flex flex-col items-stretch w-1/3 max-h-[calc(90vh-0px)] overflow-y-auto p-3 bg-white rounded-lg text-gray-600">
+          <div className="NAME-sub-form-image-edit min-w-[200px] flex flex-col items-stretch w-1/3 max-h-[calc(90vh-0px)] overflow-y-auto p-3 bg-white rounded-lg text-gray-600">
             <div className="p-2 bg-gray-100 rounded-lg">
               <h3 className="text-sm font-semibold text-gray-800">Kích thước vùng cắt</h3>
               <div ref={inputsContainerRef} className="grid grid-cols-2 gap-3 mt-2">
