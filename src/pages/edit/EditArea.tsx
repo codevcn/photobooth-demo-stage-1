@@ -282,7 +282,7 @@ const EditArea: React.FC<EditAreaProps> = ({
         <TemplatePicker
           classNames={{
             templatesList:
-              'md:hidden xl:grid grid-cols-2 order-2 md:order-1 shadow-[0_0_10px_1px_rgba(0,0,0,0.25)] w-full md:w-[40%] rounded-[6px] max-h-[350px] px-1 py-4',
+              'md:hidden xl:grid grid-cols-2 order-2 md:order-1 shadow-[0_0_10px_1px_rgba(0,0,0,0.25)] w-full md:w-[40%] rounded-[6px] max-h-[350px] md:max-h-[unset] px-1 py-4',
           }}
           onPickTemplate={onPickTemplate}
           printedImagesCount={printedImagesCount}
