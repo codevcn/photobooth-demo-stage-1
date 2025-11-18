@@ -8,7 +8,5 @@ const isDevelopment = import.meta.env.NODE_ENV === 'development'
 export const env = {
   nodeEnv: import.meta.env.NODE_ENV,
   isDevelopment,
-  apiBaseUrl: isDevelopment
-    ? import.meta.env.VITE_DEV_API_BASE_URL
-    : import.meta.env.VITE_API_BASE_URL,
+  apiBaseUrl: 'https://api.encycom.com/api',
 } as const
