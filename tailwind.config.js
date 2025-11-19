@@ -49,6 +49,10 @@ export default {
       animation: {
         'fade-in': 'fade-in 0.2s ease-out',
         'pop-in': 'pop-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+        shimmer: 'shimmer 2s infinite linear',
+        'ping-slow': 'ping-slow 2s cubic-bezier(0, 0, 0.2, 1) infinite',
+        'bounce-slow': 'bounce-slow 1.5s ease-in-out infinite',
+        'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
       },
     },
   },

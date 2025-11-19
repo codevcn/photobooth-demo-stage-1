@@ -1,11 +1,10 @@
-import { AttractiveButton } from '@/components/custom/AttractiveButton'
 import { useNavigate } from 'react-router-dom'
 
 const IntroPage = () => {
   const navigate = useNavigate()
 
   return (
-    <div className="h-screen w-screen">
+    <div className="h-screen w-screen bg-black">
       <div className="relative h-full w-full">
         <div className="relative h-full w-full z-10">
           <video
@@ -22,17 +21,58 @@ const IntroPage = () => {
           </video>
         </div>
       </div>
-      <div className="w-[90%] scale-95 transition z-20 text-base font-bold shadow-md -translate-x-1/2 fixed top-4 left-1/2 bg-pink-cl text-white rounded-md p-2">
-        <AttractiveButton
-          actionText="Thử ngay"
-          classNames={{
-            button: 'text-center w-full',
-            star: 'text-white bg-white fill-white',
-          }}
+
+      {/* Call to Action Button */}
+      <div className="fixed top-6 left-1/2 -translate-x-1/2 z-20">
+        <button
           onClick={() => navigate('/qr')}
-        />
+          className="group relative px-8 py-4 bg-gradient-to-r from-pink-cl to-pink-hover-cl text-white font-bold text-lg rounded-full shadow-2xl hover:shadow-pink-cl/50 transition-all duration-300 hover:scale-105 active:scale-95 overflow-hidden"
+        >
+          {/* Animated background shimmer */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" />
+          
+          {/* Pulsing ring */}
+          <div className="absolute inset-0 rounded-full bg-pink-cl opacity-75 animate-ping-slow" />
+          
+          {/* Button content */}
+          <span className="relative z-10 flex items-center gap-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="animate-bounce-slow"
+            >
+              <path d="M5 12h14" />
+              <path d="m12 5 7 7-7 7" />
+            </svg>
+            Thử ngay
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="animate-bounce-slow"
+            >
+              <path d="M5 12h14" />
+              <path d="m12 5 7 7-7 7" />
+            </svg>
+          </span>
+
+          {/* Glowing border effect */}
+          <div className="absolute inset-0 rounded-full border-2 border-white/50 animate-pulse-glow" />
+        </button>
       </div>
-      {/* <button className="">Thử ngay</button> */}
     </div>
   )
 }

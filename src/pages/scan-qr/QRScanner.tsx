@@ -84,7 +84,7 @@ export default function QRScanner({ onScanSuccess }: QRScannerProps) {
   }, [])
 
   useEffect(() => {
-    // initializeScanner()
+    initializeScanner()
     if (error) {
       stopCamera()
     }
@@ -125,7 +125,7 @@ export default function QRScanner({ onScanSuccess }: QRScannerProps) {
       <div className="relative aspect-square bg-gray-900 rounded-2xl overflow-hidden shadow-lg group">
         <video
           ref={videoRef}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          className="max-w-[300px] w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           playsInline
         />
         {error ? (

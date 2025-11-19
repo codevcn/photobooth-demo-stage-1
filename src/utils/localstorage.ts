@@ -105,11 +105,19 @@ export class LocalStorageHelper {
   static removeSavedMockupImage(sessionId: string, productId: number, mockupDataId: string) {
     const data = this.getSavedMockupData()
     if (data && data.sessionId === sessionId) {
-      for (const product of data.productsInCart) {
+      for (let i = 0; i < data.productsInCart.length; i++) {
+        const product = data.productsInCart[i]
         if (product.productImageId === productId) {
+          // Xóa mockup khỏi danh sách
           product.mockupDataList = product.mockupDataList.filter(
             (mockup) => mockup.id !== mockupDataId
           )
+          
+          // Nếu product không còn mockup nào, xóa luôn product khỏi cart
+          if (product.mockupDataList.length === 0) {
+            data.productsInCart.splice(i, 1)
+          }
+          
           break
         }
       }

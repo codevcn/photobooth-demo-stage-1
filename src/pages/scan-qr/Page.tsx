@@ -29,28 +29,50 @@ const ScanQRPage = () => {
 
   useEffect(() => {
     if (editedImages.length > 0) {
-      navigate('/edit')
+      // navigate('/edit')
     }
   }, [editedImages])
 
   return (
-    <div className="flex flex-col items-center h-screen p-4">
-      <div>
-        <div className="flex items-center justify-center gap-3 mt-4 animate-fade-in-down">
-          <div className="bg-pink-500 p-3 rounded-xl shadow-lg animate-float">
+    <div className="relative flex items-center justify-center h-screen w-screen overflow-hidden">
+      {/* Video Background */}
+      <div className="absolute inset-0 z-0">
+        <video
+          className="w-full h-full object-cover"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          disablePictureInPicture
+          controlsList="nodownload"
+        >
+          <source src="/videos/scan-qr-page-background.mp4" type="video/mp4" />
+        </video>
+        {/* Dark overlay for better contrast */}
+        <div className="absolute inset-0 bg-black/30" />
+      </div>
+
+      {/* Main Content */}
+      <section className="NAME-scan-qr-main-content relative z-10 max-w-2xl bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-6 md:p-8">
+        <div className="flex items-center justify-center gap-3 animate-fade-in-down">
+          <div
+            onClick={() => navigate('/edit')}
+            className="bg-pink-cl p-3 rounded-xl shadow-lg animate-float"
+          >
             <Camera className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-gray-800">Quét mã QR</h1>
         </div>
 
-        <div className="animate-scale-in mt-4" style={{ animationDelay: '0.1s' }}>
+        <div className="animate-scale-in mt-6" style={{ animationDelay: '0.1s' }}>
           <QRScanner onScanSuccess={handleData} />
         </div>
 
-        <div className="animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+        <div className="animate-fade-in-up mt-4" style={{ animationDelay: '0.3s' }}>
           <ImageSelector onImageSelect={handleData} />
         </div>
-      </div>
+      </section>
     </div>
   )
 }
