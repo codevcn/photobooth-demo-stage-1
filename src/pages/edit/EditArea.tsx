@@ -32,6 +32,8 @@ import { BothSidesPreviewModal } from './BothSidesPreviewModal'
 import { TemplateFrameMenu } from './template/TemplateFrameMenu'
 import { TemplatePicker } from './template/TemplatePicker'
 import { StickerElement } from './element/sticker-element/StickerElement'
+import { LocalStorageHelper } from '@/utils/localstorage'
+import { useEditedImageContext } from '@/context/global-context'
 
 type TSelectingType = TElementType | null
 
@@ -112,6 +114,7 @@ const EditArea: React.FC<EditAreaProps> = ({
     overlayRef,
   } = usePrintArea()
   const navigate = useNavigate()
+  const { setEditedImages } = useEditedImageContext()
 
   const handleSelectFrameOnPrintArea = (
     e: React.MouseEvent<HTMLDivElement, MouseEvent>,
@@ -180,7 +183,6 @@ const EditArea: React.FC<EditAreaProps> = ({
         !target.closest('.NAME-color-picker-modal') &&
         !target.closest('.NAME-template-frame')
       ) {
-        console.log('>>> run this 182:', { target })
         cancelSelectingElement()
       }
     }
@@ -205,6 +207,24 @@ const EditArea: React.FC<EditAreaProps> = ({
         }
       )
     }, 0)
+  }
+
+  const getImageURLForSelectedVarintAndSurface = (): string => {
+    for (const mockup of activeProduct.mockups) {
+      if (
+        mockup.variantId === editingProductImage.id &&
+        mockup.surfaceId === selectedPrintAreaInfo.id
+      ) {
+        return mockup.mockupUrl
+      }
+    }
+    return selectedPrintAreaInfo.imageUrl
+  }
+
+  const resetDataAndGoBackToScanQRPage = () => {
+    LocalStorageHelper.clearAllMockupImages()
+    setEditedImages([])
+    navigate('/qr')
   }
 
   useEffect(() => {
@@ -275,7 +295,7 @@ const EditArea: React.FC<EditAreaProps> = ({
     <div className="flex flex-col rounded-2xl relative max-h-full" ref={editAreaContainerRef}>
       <div className="flex items-center justify-between mb-2">
         <button
-          onClick={() => navigate('/qr')}
+          onClick={resetDataAndGoBackToScanQRPage}
           className="flex items-center gap-2 bg-pink-cl text-white font-bold py-1 px-4 rounded-xl shadow-md hover:shadow-lg active:scale-95 transition duration-200"
         >
           <ArrowLeft size={20} />
@@ -324,9 +344,10 @@ const EditArea: React.FC<EditAreaProps> = ({
           >
             {selectedPrintAreaInfo && selectedPrintAreaInfo.imageUrl ? (
               <img
-                src={selectedPrintAreaInfo.imageUrl}
+                src={getImageURLForSelectedVarintAndSurface()}
                 alt={editingProductImage.name}
                 className="NAME-product-image touch-none w-full h-full max-h-[500px] object-contain"
+                crossOrigin="anonymous"
               />
             ) : (
               <div className="flex items-center justify-center h-full w-full text-gray-600">

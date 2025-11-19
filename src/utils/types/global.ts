@@ -24,6 +24,12 @@ export type TPrintAreaInfo = {
   imageUrl: string
 }
 
+export type TProductMockupInfo = {
+  variantId: number
+  surfaceId: number
+  mockupUrl: string
+}
+
 export type TBaseProduct = {
   id: number
   url: string
@@ -33,6 +39,7 @@ export type TBaseProduct = {
   detailImages: string[]
   inNewLine: boolean
   printAreaList: TPrintAreaInfo[] // surfaces
+  mockups: TProductMockupInfo[]
 }
 
 export type TProductCategory =

@@ -59,7 +59,11 @@ const ProductGallery: React.FC<ProductGalleryProps> = ({
         })
       }
     }
-    return [firstLineProducts.slice(0, 8), firstLineProducts.slice(8, firstLineProducts.length)]
+    const threshold = Math.round(products.length / 2)
+    return [
+      firstLineProducts.slice(0, threshold),
+      firstLineProducts.slice(threshold, firstLineProducts.length),
+    ]
   }, [products, printedImages])
 
   const hasProductsInNewLine = productsInNewLine && productsInNewLine.length > 0
@@ -74,7 +78,7 @@ const ProductGallery: React.FC<ProductGalleryProps> = ({
   }, [])
 
   return (
-    <div className="max-h-[calc(100vh-10px)] pb-3 h-fit flex flex-col bg-white rounded-xl shadow-lg px-1.5 pt-3 border border-gray-200">
+    <div className="md:h-screen pb-3 h-fit flex flex-col bg-white rounded-xl shadow-lg px-1.5 pt-3 border border-gray-200">
       <h2 className="text-base w-full text-center font-bold text-gray-800 mb-2 flex items-center justify-center gap-2">
         Gian hàng sản phẩm
       </h2>

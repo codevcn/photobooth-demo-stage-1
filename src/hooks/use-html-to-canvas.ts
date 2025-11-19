@@ -62,6 +62,7 @@ export const useHtmlToCanvas = (): TUseHtlmToCanvasReturn => {
     onError: (error: Error) => void
   ) => {
     requestIdleCallback(async () => {
+      console.log('>>> editor:', htmContainer)
       try {
         const scale: number = 8
         const canvas = await domToCanvas(htmContainer, {
@@ -95,9 +96,12 @@ export const useHtmlToCanvas = (): TUseHtlmToCanvasReturn => {
     onError: (error: Error) => void
   ) => {
     requestIdleCallback(async () => {
+      console.log('>>> print Area:', htmlContainer)
+      console.log('>>> print Area bounding rect:', htmlContainer.getBoundingClientRect())
       try {
         const maxImageSizeInPx: number = 5000
-        const scale: number = maxImageSizeInPx / htmlContainer.clientWidth
+        const scale: number = maxImageSizeInPx / htmlContainer.getBoundingClientRect().width
+        console.log('>>> scale:', scale)
         const canvas = await domToCanvas(htmlContainer, {
           scale: scale,
           quality: 1,

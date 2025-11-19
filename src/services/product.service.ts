@@ -72,6 +72,12 @@ class ProductService {
         }
       )
 
+      const mockups: TBaseProduct['mockups'] = product.mockups.map((mockup) => ({
+        variantId: mockup.variant_id,
+        surfaceId: mockup.surface_id,
+        mockupUrl: mockup.mockup_url,
+      }))
+
       convertedProducts.push({
         id: product.id,
         url: product.base_image_url,
@@ -81,6 +87,7 @@ class ProductService {
         images,
         inNewLine: false,
         printAreaList,
+        mockups: mockups, // Mockups can be populated later if needed
       })
     }
     return convertedProducts

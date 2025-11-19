@@ -22,6 +22,7 @@ export type TProduct = {
   updated_at: string
   variants: TProductVariant[]
   surfaces: TProductSurface[]
+  mockups: TProductMockup[]
 }
 
 export type TProductVariant = {
@@ -258,3 +259,9 @@ export type TAddressProvinceItem = {
 }
 
 export type TAddressProvinceList = TAddressProvinceItem[]
+
+export type TProductMockup = {
+  variant_id: number
+  surface_id: number
+  mockup_url: string
+}

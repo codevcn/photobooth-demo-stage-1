@@ -26,11 +26,7 @@ import {
 } from '@/utils/types/global'
 import { eventEmitter } from '@/utils/events'
 import { EInternalEvents } from '@/utils/enums'
-import {
-  useElementLayerContext,
-  useGlobalContext,
-  useLoadedTextFontContext,
-} from '../../context/global-context'
+import { useElementLayerContext, useGlobalContext } from '../../context/global-context'
 import { LocalStorageHelper } from '@/utils/localstorage'
 import { toast } from 'react-toastify'
 import { useSearchParams } from 'react-router-dom'
@@ -507,7 +503,6 @@ export const EditPage = ({ products, printedImages }: TEditPageHorizonProps) => 
       return onError(new Error('Không tìm thấy khu vực in trên sản phẩm'))
     }
     const imgMimeType: TImgMimeType = 'image/png'
-    console.log('>>> editor:', editor)
     saveHtmlAsImage(
       editor,
       imgMimeType,
@@ -533,38 +528,38 @@ export const EditPage = ({ products, printedImages }: TEditPageHorizonProps) => 
             type: selectedPrintAreaInfo.surfaceType,
           }
         )
-        saveHtmlAsImageWithDesiredSize(
-          printArea,
-          selectedPrintAreaInfo.area.widthRealPx,
-          selectedPrintAreaInfo.area.heightRealPx,
-          imgMimeType,
-          (imageData, canvasWithDesiredSize) => {
-            removeMockPrintArea()
-            productService
-              .preSendMockupImage(
-                imageData,
-                `mockup-${Date.now()}.${convertMimeTypeToExtension(imgMimeType)}`
-              )
-              .then((res) => {
-                const result = LocalStorageHelper.updateMockupImagePreSent(mockupId, res.url, {
-                  width: canvasWithDesiredSize.width,
-                  height: canvasWithDesiredSize.height,
-                })
-                if (!result) {
-                  toast.error('Không thể cập nhật kích thước mockup')
-                }
-              })
-              .catch((err) => {
-                console.error('>>> pre-send mockup image error:', err)
-                toast.error('Không thể lưu mockup lên server')
-              })
-          },
-          (error) => {
-            console.error('Error saving mockup image:', error)
-            toast.warning(error.message || 'Không thể tạo mockup để lưu lên server')
-            onError(error)
-          }
-        )
+        // saveHtmlAsImageWithDesiredSize(
+        //   printArea,
+        //   selectedPrintAreaInfo.area.widthRealPx,
+        //   selectedPrintAreaInfo.area.heightRealPx,
+        //   imgMimeType,
+        //   (imageData, canvasWithDesiredSize) => {
+        //     removeMockPrintArea()
+        //     productService
+        //       .preSendMockupImage(
+        //         imageData,
+        //         `mockup-${Date.now()}.${convertMimeTypeToExtension(imgMimeType)}`
+        //       )
+        //       .then((res) => {
+        //         const result = LocalStorageHelper.updateMockupImagePreSent(mockupId, res.url, {
+        //           width: canvasWithDesiredSize.width,
+        //           height: canvasWithDesiredSize.height,
+        //         })
+        //         if (!result) {
+        //           toast.error('Không thể cập nhật kích thước mockup')
+        //         }
+        //       })
+        //       .catch((err) => {
+        //         console.error('>>> pre-send mockup image error:', err)
+        //         toast.error('Không thể lưu mockup lên server')
+        //       })
+        //   },
+        //   (error) => {
+        //     console.error('Error saving mockup image:', error)
+        //     toast.warning(error.message || 'Không thể tạo mockup để lưu lên server')
+        //     onError(error)
+        //   }
+        // )
         toast.success('Đã thêm vào giỏ hàng')
         setCartCount(LocalStorageHelper.countSavedMockupImages())
         onDoneAdd()

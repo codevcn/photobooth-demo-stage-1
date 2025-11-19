@@ -30,6 +30,7 @@ type TPrintAreaOverlayProps = {
       container: string
     }>
   }>
+  displayWarningOverlay: boolean
 }>
 
 export const PrintAreaOverlay: React.FC<TPrintAreaOverlayProps> = ({
@@ -41,6 +42,7 @@ export const PrintAreaOverlay: React.FC<TPrintAreaOverlayProps> = ({
   frame,
   overlay,
   isOutOfBounds,
+  displayWarningOverlay = true,
 }) => {
   return (
     <>
@@ -49,12 +51,18 @@ export const PrintAreaOverlay: React.FC<TPrintAreaOverlayProps> = ({
         className={cn(
           'NAME-print-area-allowed z-[5] border border-white border-dashed flex justify-center items-center absolute transition-all duration-300',
           overlay?.classNames?.container,
-          isOutOfBounds
-            ? 'border-[1.5px] border-dashed border-red-600'
-            : 'border-[1.5px] border-dashed border-[#3b82f6]'
+          displayWarningOverlay
+            ? isOutOfBounds
+              ? 'border-[1.5px] border-dashed border-red-600'
+              : 'border-[1.5px] border-dashed border-[#3b82f6]'
+            : ''
         )}
         style={{
-          backgroundColor: isOutOfBounds ? 'rgba(239, 68, 68, 0.1)' : 'rgba(96, 165, 250, 0.1)',
+          backgroundColor: displayWarningOverlay
+            ? isOutOfBounds
+              ? 'rgba(239, 68, 68, 0.1)'
+              : 'rgba(96, 165, 250, 0.1)'
+            : 'transparent',
         }}
       >
         <FramesDisplayer

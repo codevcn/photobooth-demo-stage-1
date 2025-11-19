@@ -51,6 +51,7 @@ function AppContent() {
   }, [location.pathname])
 
   useEffect(() => {
+    LocalStorageHelper.clearAllMockupImages()
     return () => {
       clearAllEditedImages()
     }
@@ -79,7 +80,7 @@ function AppContent() {
         <Route path="*" element={<NotFound />} />
       </Routes>
 
-      <IdleCountdown />
+      {/* <IdleCountdown /> */}
     </>
   )
 }

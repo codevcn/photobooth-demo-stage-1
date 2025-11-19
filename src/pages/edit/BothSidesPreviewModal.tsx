@@ -141,6 +141,7 @@ export const BothSidesPreviewModal = ({
                       }}
                       overlay={{ classNames: { container: 'border-none' } }}
                       isOutOfBounds={false}
+                      displayWarningOverlay={false}
                     />
                   </div>
                 </div>
@@ -237,6 +238,7 @@ export const BothSidesPreviewModal = ({
                         classNames: { container: 'bg-transparent' },
                       }}
                       isOutOfBounds={false}
+                      displayWarningOverlay={false}
                     />
                   </div>
                 </div>
