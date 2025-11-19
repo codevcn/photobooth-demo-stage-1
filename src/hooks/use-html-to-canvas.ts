@@ -103,7 +103,7 @@ export const useHtmlToCanvas = (): TUseHtlmToCanvasReturn => {
         const scale: number = maxImageSizeInPx / htmlContainer.getBoundingClientRect().width
         console.log('>>> scale:', scale)
         const canvas = await domToCanvas(htmlContainer, {
-          scale: scale,
+          scale: 8,
           quality: 1,
           type: desiredImgMimeType || 'image/webp',
         })

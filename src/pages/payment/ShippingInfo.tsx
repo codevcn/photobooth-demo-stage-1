@@ -1,6 +1,6 @@
 import { forwardRef, useEffect, useState } from 'react'
 import { addressService } from '@/services/address.service'
-import { TAddressProvinceItem } from '@/utils/types/api'
+import { TAddressProvince, TAddressDistrict } from '@/utils/types/api'
 
 type TFormErrors = {
   fullName?: string
@@ -17,38 +17,66 @@ interface ShippingInfoFormProps {
 
 export const ShippingInfoForm = forwardRef<HTMLFormElement, ShippingInfoFormProps>(
   ({ errors }, ref) => {
-    const [provinces, setProvinces] = useState<TAddressProvinceItem[]>([])
+    const [provinces, setProvinces] = useState<TAddressProvince[]>([])
+    const [districts, setDistricts] = useState<TAddressDistrict[]>([])
+    const [selectedProvinceId, setSelectedProvinceId] = useState<number | null>(null)
     const [isLoadingProvinces, setIsLoadingProvinces] = useState<boolean>(false)
-    const [hasFetchedOnce, setHasFetchedOnce] = useState<boolean>(false)
+    const [isLoadingDistricts, setIsLoadingDistricts] = useState<boolean>(false)
 
-    // Fetch provinces function
-    const fetchProvinces = async () => {
-      if (isLoadingProvinces) return // Prevent duplicate fetch while loading
-      setIsLoadingProvinces(true)
-      try {
-        const data = await addressService.fetchProvinces()
-        // Remove duplicates based on province_code
-        const uniqueProvinces = Array.from(
-          new Map(data.map((item) => [item.province_code, item])).values()
-        )
-        setProvinces(uniqueProvinces)
-        setHasFetchedOnce(true)
-      } catch (error) {
-        console.error('Failed to fetch provinces:', error)
-      } finally {
-        setIsLoadingProvinces(false)
-      }
-    }
-
-    // Fetch on mount (ngầm)
+    // Fetch provinces on mount
     useEffect(() => {
+      const fetchProvinces = async () => {
+        setIsLoadingProvinces(true)
+        try {
+          const data = await addressService.fetchProvinces()
+          setProvinces(data)
+        } catch (error) {
+          console.error('Failed to fetch provinces:', error)
+        } finally {
+          setIsLoadingProvinces(false)
+        }
+      }
+
       fetchProvinces()
     }, [])
 
-    // Fetch again when user opens the select
-    const handleProvinceSelectFocus = () => {
-      if (hasFetchedOnce) {
-        fetchProvinces() // Fetch lại cho chắc
+    // Fetch districts when province changes
+    useEffect(() => {
+      if (!selectedProvinceId) {
+        setDistricts([])
+        return
+      }
+
+      const fetchDistricts = async () => {
+        setIsLoadingDistricts(true)
+        try {
+          const data = await addressService.fetchDistricts(selectedProvinceId)
+          setDistricts(data)
+        } catch (error) {
+          console.error('Failed to fetch districts:', error)
+          setDistricts([])
+        } finally {
+          setIsLoadingDistricts(false)
+        }
+      }
+
+      fetchDistricts()
+    }, [selectedProvinceId])
+
+    const handleProvinceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const selectedOption = e.target.options[e.target.selectedIndex]
+      const provinceId = selectedOption.dataset.provinceId
+      
+      if (provinceId) {
+        setSelectedProvinceId(Number(provinceId))
+      } else {
+        setSelectedProvinceId(null)
+      }
+
+      // Reset district selection
+      const districtSelect = document.getElementById('city-input') as HTMLSelectElement
+      if (districtSelect) {
+        districtSelect.value = ''
       }
     }
 
@@ -116,17 +144,19 @@ export const ShippingInfoForm = forwardRef<HTMLFormElement, ShippingInfoFormProp
               <select
                 id="province-input"
                 name="province"
-                onFocus={handleProvinceSelectFocus}
+                onChange={handleProvinceChange}
                 className="w-full min-h-[44px] px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-cl focus:border-transparent transition-all bg-white"
-                disabled={isLoadingProvinces && provinces.length === 0}
+                disabled={isLoadingProvinces}
               >
                 <option value="">
-                  {isLoadingProvinces && provinces.length === 0
-                    ? 'Đang tải...'
-                    : 'Chọn tỉnh/thành phố'}
+                  {isLoadingProvinces ? 'Đang tải...' : 'Chọn tỉnh/thành phố'}
                 </option>
                 {provinces.map((province) => (
-                  <option key={province.province_code} value={province.name}>
+                  <option
+                    key={province.id}
+                    value={province.name}
+                    data-province-id={province.id}
+                  >
                     {province.name}
                   </option>
                 ))}
@@ -144,11 +174,20 @@ export const ShippingInfoForm = forwardRef<HTMLFormElement, ShippingInfoFormProp
                 id="city-input"
                 name="city"
                 className="w-full min-h-[44px] px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-cl focus:border-transparent transition-all bg-white"
+                disabled={!selectedProvinceId || isLoadingDistricts}
               >
-                <option value="">Chọn</option>
-                <option value="caugiay">Cầu Giấy</option>
-                <option value="thanhxuan">Thanh Xuân</option>
-                <option value="binhthanh">Bình Thạnh</option>
+                <option value="">
+                  {!selectedProvinceId
+                    ? 'Chọn tỉnh/thành phố trước'
+                    : isLoadingDistricts
+                    ? 'Đang tải...'
+                    : 'Chọn quận/huyện'}
+                </option>
+                {districts.map((district) => (
+                  <option key={district.id} value={district.name}>
+                    {district.name}
+                  </option>
+                ))}
               </select>
               {errors.city && <p className="text-red-600 text-sm mt-0.5 pl-1">{errors.city}</p>}
             </div>

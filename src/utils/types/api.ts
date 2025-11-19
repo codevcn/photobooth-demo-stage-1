@@ -258,10 +258,28 @@ export type TAddressProvinceItem = {
   name: string
 }
 
-export type TAddressProvinceList = TAddressProvinceItem[]
-
 export type TProductMockup = {
   variant_id: number
   surface_id: number
   mockup_url: string
+}
+
+export type TAddressProvince = {
+  id: number // ProvinceID (number)
+  name: string // ProvinceName
+  district_count: number
+}
+
+export type TAddressDistrict = {
+  id: number // DistrictID
+  name: string
+  province_id: number
+  ward_count: number
+}
+
+export type TAddressWard = {
+  code: string // WardCode (string)
+  name: string
+  district_id: number
+  province_id: number
 }
