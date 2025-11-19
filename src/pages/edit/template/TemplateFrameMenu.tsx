@@ -187,97 +187,99 @@ export const TemplateFrameMenu = ({
   }, [])
 
   return (
-    <div
-      ref={menuRef}
-      className="NAME-menu-section relative overflow-x-auto flex flex-nowrap items-stretch justify-center gap-y-1 gap-x-1 p-1 pr-[40px] rounded-md border border-gray-400/30 border-solid"
-    >
-      <div className="absolute top-1/2 -translate-y-1/2 left-1 flex items-center">
+    <>
+      <div className="absolute top-1/2 -translate-y-1/2 left-1 flex items-center z-30">
         <button
           onClick={onClose}
-          className="group flex flex-nowrap items-center justify-center font-bold bg-pink-cl gap-1 text-white active:scale-90 transition rounded p-1"
+          className="group flex flex-nowrap items-center justify-center shadow-md outline-2 outline-white outline font-bold bg-pink-cl gap-1 text-white active:scale-90 transition rounded p-1"
         >
           <X size={20} className="text-white" strokeWidth={3} />
         </button>
       </div>
 
-      <div className="NAME-form-group NAME-form-crop min-w-[100px] col-span-2 flex flex-shrink-0 items-center justify-center bg-pink-cl rounded px-1 py-0.5 shadow">
-        <button
-          onClick={handleCropImage}
-          className="group flex flex-nowrap items-center justify-center font-bold gap-1 text-white hover:bg-white hover:text-pink-cl rounded p-1 transition-colors"
-        >
-          <Crop size={20} className="text-white group-hover:text-pink-cl" strokeWidth={3} />
-          <span>Cắt ảnh</span>
-        </button>
-      </div>
-      <div className="NAME-form-group NAME-form-crop min-w-[100px] col-span-2 flex flex-shrink-0 items-center justify-center bg-pink-cl rounded px-1 py-0.5 shadow">
-        <button
-          onClick={() => setShowDeleteConfirm(true)}
-          className="group flex flex-nowrap items-center justify-center font-bold gap-1 text-white hover:bg-white hover:text-pink-cl rounded p-1 transition-colors"
-        >
-          <Trash2 size={20} className="text-white group-hover:text-pink-cl" strokeWidth={3} />
-          <span>Xóa ảnh</span>
-        </button>
-      </div>
-      <div className="NAME-form-group NAME-form-crop min-w-[100px] col-span-2 flex flex-shrink-0 items-center justify-center bg-pink-cl rounded px-1 py-0.5 shadow">
-        <button
-          onClick={handleShowPrintedImagesModal}
-          className="group flex flex-nowrap items-center justify-center font-bold gap-1 text-white hover:bg-white hover:text-pink-cl rounded p-1 transition-colors"
-        >
-          <RefreshCw size={20} className="text-white group-hover:text-pink-cl" strokeWidth={3} />
-          <span>Đổi ảnh</span>
-        </button>
+      <div
+        ref={menuRef}
+        className="NAME-menu-section STYLE-hide-scrollbar z-10 px-[40px] relative overflow-x-auto flex flex-nowrap items-stretch justify-start md:justify-center gap-y-1 gap-x-1 py-1 rounded-md border border-gray-400/30 border-solid"
+      >
+        <div className="NAME-form-group NAME-form-crop min-w-[100px] col-span-2 flex flex-shrink-0 items-center justify-center bg-pink-cl rounded px-1 py-0.5 shadow">
+          <button
+            onClick={handleCropImage}
+            className="group flex flex-nowrap items-center justify-center font-bold gap-1 text-white hover:bg-white hover:text-pink-cl rounded p-1 transition-colors"
+          >
+            <Crop size={20} className="text-white group-hover:text-pink-cl" strokeWidth={3} />
+            <span>Cắt ảnh</span>
+          </button>
+        </div>
+        <div className="NAME-form-group NAME-form-crop min-w-[100px] col-span-2 flex flex-shrink-0 items-center justify-center bg-pink-cl rounded px-1 py-0.5 shadow">
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            className="group flex flex-nowrap items-center justify-center font-bold gap-1 text-white hover:bg-white hover:text-pink-cl rounded p-1 transition-colors"
+          >
+            <Trash2 size={20} className="text-white group-hover:text-pink-cl" strokeWidth={3} />
+            <span>Xóa ảnh</span>
+          </button>
+        </div>
+        <div className="NAME-form-group NAME-form-crop min-w-[100px] col-span-2 flex flex-shrink-0 items-center justify-center bg-pink-cl rounded px-1 py-0.5 shadow">
+          <button
+            onClick={handleShowPrintedImagesModal}
+            className="group flex flex-nowrap items-center justify-center font-bold gap-1 text-white hover:bg-white hover:text-pink-cl rounded p-1 transition-colors"
+          >
+            <RefreshCw size={20} className="text-white group-hover:text-pink-cl" strokeWidth={3} />
+            <span>Đổi ảnh</span>
+          </button>
+        </div>
+
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 flex items-center justify-center z-50">
+            <div
+              className="bg-black/50 z-10 absolute inset-0"
+              onClick={() => setShowDeleteConfirm(false)}
+            ></div>
+            <div className="relative z-20 bg-white p-4 rounded shadow-lg">
+              <div>
+                <p className="font-bold">Bạn xác nhận sẽ xóa ảnh?</p>
+              </div>
+              <div className="flex justify-end gap-2 mt-4">
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="py-2 px-4 font-bold rounded bg-gray-600 text-white"
+                >
+                  Hủy
+                </button>
+                <button
+                  onClick={handleRemoveFrameImage}
+                  className="flex items-center justify-center gap-1.5 py-2 px-4 font-bold rounded bg-pink-cl text-white"
+                >
+                  <span>Xác nhận</span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="lucide lucide-check-icon lucide-check"
+                  >
+                    <path d="M20 6 9 17l-5-5" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
-      <div className="absolute top-1/2 -translate-y-1/2 right-1 flex items-center">
+      <div className="absolute top-1/2 -translate-y-1/2 right-1 flex items-center z-20">
         <button
           onClick={onClose}
-          className="group flex flex-nowrap items-center justify-center font-bold bg-pink-cl gap-1 text-white active:scale-90 transition rounded p-1"
+          className="group flex flex-nowrap items-center justify-center shadow-md outline-2 outline-white outline font-bold bg-pink-cl gap-1 text-white active:scale-90 transition rounded p-1"
         >
           <Check size={20} className="text-white" strokeWidth={3} />
         </button>
       </div>
-
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div
-            className="bg-black/50 z-10 absolute inset-0"
-            onClick={() => setShowDeleteConfirm(false)}
-          ></div>
-          <div className="relative z-20 bg-white p-4 rounded shadow-lg">
-            <div>
-              <p className="font-bold">Bạn xác nhận sẽ xóa ảnh?</p>
-            </div>
-            <div className="flex justify-end gap-2 mt-4">
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                className="py-2 px-4 font-bold rounded bg-gray-600 text-white"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={handleRemoveFrameImage}
-                className="flex items-center justify-center gap-1.5 py-2 px-4 font-bold rounded bg-pink-cl text-white"
-              >
-                <span>Xác nhận</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="lucide lucide-check-icon lucide-check"
-                >
-                  <path d="M20 6 9 17l-5-5" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+    </>
   )
 }

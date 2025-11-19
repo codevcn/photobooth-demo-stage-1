@@ -209,3 +209,18 @@
   left: 50%;
   transform: translateX(-50%) translateY(-50%);
 }
+
+/* Ẩn scrollbar trên Chrome, Edge, Safari */
+.STYLE-hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Ẩn scrollbar trên Firefox */
+.STYLE-hide-scrollbar {
+  scrollbar-width: none;
+}
+
+/* Ẩn scrollbar trên IE, Edge cũ */
+.STYLE-hide-scrollbar {
+  -ms-overflow-style: none;
+}

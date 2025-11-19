@@ -11,6 +11,7 @@ export type TProduct = {
   base_image_url: string
   description: string
   status: TProductStatus
+  detail_img: string[]
   attributes_json: Record<string, unknown> & {
     category?: string
     pages?: number[]

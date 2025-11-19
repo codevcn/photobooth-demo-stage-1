@@ -77,6 +77,7 @@ class ProductService {
         url: product.base_image_url,
         name: product.name,
         description: product.description,
+        detailImages: product.detail_img,
         images,
         inNewLine: false,
         printAreaList,

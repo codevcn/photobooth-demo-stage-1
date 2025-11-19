@@ -36,28 +36,27 @@ const ProductGallery: React.FC<ProductGalleryProps> = ({
   >(() => {
     const firstLineProducts: TGalleryProduct[] = []
     const productsInNewLine: TGalleryProduct[] = []
-    for (const printedImage of printedImages) {
-      for (const product of products) {
-        const firstImage = product.images[0]
-        if (product.inNewLine) {
-          productsInNewLine.push({
-            idToRender: generateIdToRender(product.id, printedImage.id),
-            productId: product.id,
-            name: product.name,
-            productImageUrl: product.url,
-            printedImage,
-            firstImage,
-          })
-        } else {
-          firstLineProducts.push({
-            idToRender: generateIdToRender(product.id, printedImage.id),
-            productId: product.id,
-            name: product.name,
-            productImageUrl: product.url,
-            printedImage,
-            firstImage,
-          })
-        }
+    const printedImage = printedImages[0]
+    for (const product of products) {
+      const firstImage = product.images[0]
+      if (product.inNewLine) {
+        productsInNewLine.push({
+          idToRender: generateIdToRender(product.id, printedImage.id),
+          productId: product.id,
+          name: product.name,
+          productImageUrl: product.url,
+          printedImage,
+          firstImage,
+        })
+      } else {
+        firstLineProducts.push({
+          idToRender: generateIdToRender(product.id, printedImage.id),
+          productId: product.id,
+          name: product.name,
+          productImageUrl: product.url,
+          printedImage,
+          firstImage,
+        })
       }
     }
     return [firstLineProducts.slice(0, 8), firstLineProducts.slice(8, firstLineProducts.length)]

@@ -1,4 +1,9 @@
-import { EditedImageContext, GlobalContext, ProductContext } from '@/context/global-context'
+import {
+  EditedImageContext,
+  GlobalContext,
+  LoadedTextFontContext,
+  ProductContext,
+} from '@/context/global-context'
 import { EInternalEvents } from '@/utils/enums'
 import { eventEmitter } from '@/utils/events'
 import { generateSessionId } from '@/utils/helpers'
@@ -26,6 +31,7 @@ export const AppRootProvider = ({ children }: { children: React.ReactNode }) => 
     sessionId: generateSessionId(),
     preSentMockupImageLinks: [],
   })
+  const [availableFonts, setAvailableFonts] = useState<string[]>([])
 
   const addPreSentMockupImageLink = (imageUrl: string, mockupId: string) => {
     setGlobalState((pre) => ({
@@ -51,11 +57,15 @@ export const AppRootProvider = ({ children }: { children: React.ReactNode }) => 
 
   return (
     <GlobalContext.Provider value={{ ...globalState, addPreSentMockupImageLink }}>
-      <EditedImageContext.Provider value={{ editedImages, setEditedImages, clearAllEditedImages }}>
-        <ProductContext.Provider value={{ products, setProducts }}>
-          {children}
-        </ProductContext.Provider>
-      </EditedImageContext.Provider>
+      <LoadedTextFontContext.Provider value={{ availableFonts, setAvailableFonts }}>
+        <EditedImageContext.Provider
+          value={{ editedImages, setEditedImages, clearAllEditedImages }}
+        >
+          <ProductContext.Provider value={{ products, setProducts }}>
+            {children}
+          </ProductContext.Provider>
+        </EditedImageContext.Provider>
+      </LoadedTextFontContext.Provider>
     </GlobalContext.Provider>
   )
 }

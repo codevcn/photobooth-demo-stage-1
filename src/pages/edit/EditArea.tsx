@@ -391,12 +391,12 @@ const EditArea: React.FC<EditAreaProps> = ({
         </div>
       </div>
 
-      <div className="bg-white rounded smd:h-[41.5px] mt-2">
+      <div className="bg-white rounded smd:h-[41.5px] mt-2 relative">
         {selectedElementId ? (
           selectingType === 'text' ? (
             <TextElementMenu elementId={selectedElementId} onClose={cancelSelectingElement} />
           ) : selectingType === 'sticker' ? (
-            <StickerElementMenu elementId={selectedElementId} />
+            <StickerElementMenu elementId={selectedElementId} onClose={cancelSelectingElement} />
           ) : selectingType === 'printed-image' ? (
             <PrintedImageElementMenu elementId={selectedElementId} />
           ) : selectingType === 'template-frame' ? (

@@ -1,13 +1,15 @@
-import { TFonts, TLoadFontStatus } from '@/utils/types/global'
 import { useState, useCallback } from 'react'
+import { TFonts, TLoadFontStatus } from '@/utils/types/global'
+import { useLoadedTextFontContext } from '@/context/global-context'
 
 export const useFontLoader = (initFonts?: TFonts) => {
   const [status, setStatus] = useState<TLoadFontStatus>('idle')
+  const { availableFonts, setAvailableFonts } = useLoadedTextFontContext()
 
   const loadFont = useCallback(async (fontName: string, url: string) => {
-    // Nếu font đã tồn tại thì không cần load lại
-    if (document.fonts.check(`1em ${fontName}`)) {
-      setStatus('loaded')
+    // Chặn load trùng
+    if (availableFonts.includes(fontName)) {
+      console.log('>>> font already loaded:', fontName)
       return
     }
 
@@ -15,8 +17,17 @@ export const useFontLoader = (initFonts?: TFonts) => {
 
     try {
       const fontFace = new FontFace(fontName, `url(${url})`)
+
+      // Load file font
       const loaded = await fontFace.load()
+
+      // Add vào document.fonts
       document.fonts.add(loaded)
+
+      // Đánh dấu đã load
+      setAvailableFonts([...availableFonts, fontName])
+
+      console.log('>>> font loaded:', fontName)
       setStatus('loaded')
     } catch (err) {
       console.error('Failed to load font:', err)
@@ -26,31 +37,22 @@ export const useFontLoader = (initFonts?: TFonts) => {
   }, [])
 
   const loadAllAvailableFonts = useCallback(async () => {
-    const fontURLs = initFonts || {
-      'Amatic SC': { loadFontURL: 'url-to-amatic-sc.woff2' },
-      Bitcount: { loadFontURL: 'url-to-bitcount.woff2' },
-      'Bungee Outline': { loadFontURL: 'url-to-bungee-outline.woff2' },
-      'Bungee Spice': { loadFontURL: 'url-to-bungee-spice.woff2' },
-      Creepster: { loadFontURL: 'url-to-creepster.woff2' },
-      'Emilys Candy': { loadFontURL: 'url-to-emilys-candy.woff2' },
-      Honk: { loadFontURL: 'url-to-honk.woff2' },
-      'Jersey 25 Charted': { loadFontURL: 'url-to-jersey-25-charted.woff2' },
-      Nosifer: { loadFontURL: 'url-to-nosifer.woff2' },
-    }
+    if (!initFonts) return
     setStatus('loading')
+
     try {
       await Promise.allSettled(
-        Object.entries(fontURLs).map(([fontName, { loadFontURL }]) =>
+        Object.entries(initFonts).map(([fontName, { loadFontURL }]) =>
           loadFont(fontName, loadFontURL)
         )
       )
+
       setStatus('loaded')
     } catch (err) {
       console.error('Failed to load all fonts:', err)
       setStatus('error')
-      throw err
     }
-  }, [loadFont])
+  }, [initFonts, loadFont])
 
   return { status, loadFont, loadAllAvailableFonts }
 }

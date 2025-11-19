@@ -26,7 +26,11 @@ import {
 } from '@/utils/types/global'
 import { eventEmitter } from '@/utils/events'
 import { EInternalEvents } from '@/utils/enums'
-import { useElementLayerContext, useGlobalContext } from '../../context/global-context'
+import {
+  useElementLayerContext,
+  useGlobalContext,
+  useLoadedTextFontContext,
+} from '../../context/global-context'
 import { LocalStorageHelper } from '@/utils/localstorage'
 import { toast } from 'react-toastify'
 import { useSearchParams } from 'react-router-dom'

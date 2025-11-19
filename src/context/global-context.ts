@@ -3,6 +3,7 @@ import {
   TGlobalContextValue,
   TEditedImageContextValue,
   TProductContextValue,
+  TLoadedTextFontContextValue,
 } from '@/utils/types/global'
 import { createContext, useContext } from 'react'
 
@@ -39,3 +40,10 @@ export const ProductContext = createContext<TProductContextValue>({
 })
 
 export const useProductContext = () => useContext(ProductContext)
+
+export const LoadedTextFontContext = createContext<TLoadedTextFontContextValue>({
+  availableFonts: [],
+  setAvailableFonts: () => {},
+})
+
+export const useLoadedTextFontContext = () => useContext(LoadedTextFontContext)

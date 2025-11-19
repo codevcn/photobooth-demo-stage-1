@@ -30,6 +30,7 @@ export type TBaseProduct = {
   name: string
   description: string
   images: TProductImage[] // variants
+  detailImages: string[]
   inNewLine: boolean
   printAreaList: TPrintAreaInfo[] // surfaces
 }
@@ -325,4 +326,9 @@ export type TLoadFontStatus = 'idle' | 'loading' | 'loaded' | 'error'
 export type TFrameToAddPrintedImage = {
   frameId: string
   rectType: TFrameRectType
+}
+
+export type TLoadedTextFontContextValue = {
+  availableFonts: string[]
+  setAvailableFonts: (fonts: string[]) => void
 }
